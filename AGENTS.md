@@ -20,6 +20,7 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/data/words.ts` is the vocabulary source. Each word has its Greek spelling, Russian meaning, approximate transliteration, category, and an `examples` array.
 - `src/data/readingRules.ts` contains the pronunciation guide content.
 - `src/style.css` contains global layout, responsive styles, and visual tokens.
+- `.github/workflows/deploy.yml` builds the app and deploys `dist/` to GitHub Pages on pushes to `main`.
 
 ## Change rules
 
@@ -31,4 +32,5 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - Keep the app usable on narrow screens, keyboard accessible, and respectful of reduced-motion preferences.
 - The vocabulary deck starts shuffled and is reshuffled after a complete pass; manual shuffle starts a fresh order. Avoid showing the same card twice at the shuffle boundary.
 - When changing card navigation, preserve the behavior that a newly selected word always starts on its first side.
+- The Vite base path is `/greek-app/` for the project Pages URL; keep it aligned with the repository name.
 - Update this file when the app structure or development workflow changes.
