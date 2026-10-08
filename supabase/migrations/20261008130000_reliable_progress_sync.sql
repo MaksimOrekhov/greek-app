@@ -1,63 +1,30 @@
--- Per-user spaced-repetition progress for Greek flashcards.
-create table public.word_progress (
-  user_id uuid not null references auth.users (id) on delete cascade,
-  word_id text not null,
-  due_at timestamptz not null,
-  interval_days integer not null default 0 check (interval_days >= 0),
-  repetitions integer not null default 0 check (repetitions >= 0),
-  lapses integer not null default 0 check (lapses >= 0),
-  last_reviewed_at timestamptz not null default now(),
-  introduced_at timestamptz,
-  review_id uuid not null default gen_random_uuid(),
-  primary key (user_id, word_id)
-);
+-- Reliable per-account first-seen tracking and conflict-safe progress writes.
+-- Existing word_progress rows and timestamps are preserved.
+alter table public.word_progress
+  add column if not exists introduced_at timestamptz,
+  add column if not exists review_id uuid not null default gen_random_uuid();
 
-create table public.word_introductions (
+create table if not exists public.word_introductions (
   user_id uuid not null references auth.users (id) on delete cascade,
   word_id text not null,
   first_introduced_at timestamptz not null,
   primary key (user_id, word_id)
 );
-
-alter table public.word_progress enable row level security;
-
--- The API roles need explicit table access; RLS policies below still limit rows
--- to the signed-in user who owns them.
-grant usage on schema public to authenticated;
-grant select, insert, update, delete on table public.word_progress to authenticated;
+alter table public.word_introductions enable row level security;
 grant select, insert, update, delete on table public.word_introductions to authenticated;
 
-create policy "Users can read their own word progress"
-  on public.word_progress for select to authenticated
-  using ((select auth.uid()) = user_id);
+drop policy if exists "Users can read their own word introductions" on public.word_introductions;
+drop policy if exists "Users can create their own word introductions" on public.word_introductions;
+drop policy if exists "Users can update their own word introductions" on public.word_introductions;
+drop policy if exists "Users can delete their own word introductions" on public.word_introductions;
+create policy "Users can read their own word introductions" on public.word_introductions for select to authenticated using ((select auth.uid()) = user_id);
+create policy "Users can create their own word introductions" on public.word_introductions for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "Users can update their own word introductions" on public.word_introductions for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+create policy "Users can delete their own word introductions" on public.word_introductions for delete to authenticated using ((select auth.uid()) = user_id);
 
-create policy "Users can create their own word progress"
-  on public.word_progress for insert to authenticated
-  with check ((select auth.uid()) = user_id);
-
-create policy "Users can update their own word progress"
-  on public.word_progress for update to authenticated
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
-
-create policy "Users can delete their own word progress"
-  on public.word_progress for delete to authenticated
-  using ((select auth.uid()) = user_id);
-
-alter table public.word_introductions enable row level security;
-create policy "Users can read their own word introductions"
-  on public.word_introductions for select to authenticated
-  using ((select auth.uid()) = user_id);
-create policy "Users can create their own word introductions"
-  on public.word_introductions for insert to authenticated
-  with check ((select auth.uid()) = user_id);
-create policy "Users can update their own word introductions"
-  on public.word_introductions for update to authenticated
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
-create policy "Users can delete their own word introductions"
-  on public.word_introductions for delete to authenticated
-  using ((select auth.uid()) = user_id);
+insert into public.word_introductions(user_id, word_id, first_introduced_at)
+select user_id, word_id, introduced_at from public.word_progress where introduced_at is not null
+on conflict (user_id, word_id) do update set first_introduced_at = least(public.word_introductions.first_introduced_at, excluded.first_introduced_at);
 
 create or replace function public.merge_word_progress(p_rows jsonb)
 returns void language plpgsql security invoker set search_path = public

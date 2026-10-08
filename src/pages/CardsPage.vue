@@ -4,17 +4,19 @@ import Flashcard from '../components/Flashcard.vue'
 import ReviewRatings from '../components/ReviewRatings.vue'
 import StudyModeToggle, { type StudyLanguage } from '../components/StudyModeToggle.vue'
 import WordExamples from '../components/WordExamples.vue'
+import { nextPosition, sessionProgress } from '../lib/studySession'
 import { NEW_WORDS_PER_DAY, useSpacedRepetition, type ReviewRating, type StudyMode } from '../composables/useSpacedRepetition'
 import { PART_OF_SPEECH_LABELS, words, type PartOfSpeech } from '../data/words'
 
 const props = defineProps<{
   readyUserId: string | null
   syncRatedWord: (wordId: string) => Promise<void>
+  syncIntroducedWord: (wordId: string) => Promise<void>
 }>()
 
 const currentPosition = shallowRef(0)
 const wordIds = words.map((word) => word.greek)
-const { getSessionWords, getAvailableNewWordCount, getNewWordCount, getNextIntervalDays, rateWord, nextDueDate } = useSpacedRepetition()
+const { getSessionWords, getAvailableNewWordCount, getNewWordCount, getNextIntervalDays, rateWord, nextDueDate, introductions, markWordIntroduced } = useSpacedRepetition()
 const partOfSpeechOptions = Object.entries(PART_OF_SPEECH_LABELS) as [PartOfSpeech, string][]
 const selectedPartOfSpeech = shallowRef(readPartOfSpeechFilter())
 const studyMode = shallowRef<StudyMode>('today')
@@ -45,10 +47,9 @@ const emptySessionMessage = computed(() => {
 const currentWordIndex = computed(() => cardOrder.value[currentPosition.value])
 const currentWord = computed(() => words[currentWordIndex.value])
 const sessionComplete = computed(() => currentPosition.value >= cardOrder.value.length)
-const progress = computed(() => `${String(Math.min(currentPosition.value + 1, cardOrder.value.length)).padStart(2, '0')} / ${String(cardOrder.value.length).padStart(2, '0')}`)
-const progressPercent = computed(() => cardOrder.value.length
-  ? (Math.min(currentPosition.value + 1, cardOrder.value.length) / cardOrder.value.length) * 100
-  : 100)
+const sessionMetrics = computed(() => sessionProgress(reviewedWordCount.value, cardOrder.value.length))
+const progress = computed(() => `${String(sessionMetrics.value.completed).padStart(2, '0')} / ${String(sessionMetrics.value.total).padStart(2, '0')}`)
+const progressPercent = computed(() => sessionMetrics.value.percent)
 const reviewedWordCount = computed(() => new Set([...ratedPositions.value].map((position) => cardOrder.value[position]).filter((index) => index !== undefined)).size)
 const remainingWordCount = computed(() => new Set(cardOrder.value).size - reviewedWordCount.value)
 const nextReviewLabel = computed(() => {
@@ -127,8 +128,18 @@ function resumeUnratedCards() {
 }
 
 function nextCard() {
-  if (currentPosition.value < cardOrder.value.length - 1) currentPosition.value += 1
+  currentPosition.value = nextPosition(currentPosition.value, cardOrder.value.length)
   flipped.value = false
+}
+
+function flipCurrentCard() {
+  flipped.value = !flipped.value
+  if (flipped.value && currentWord.value) {
+    const wordId = currentWord.value.greek
+    const wasIntroduced = introductions.value[wordId] !== undefined
+    markWordIntroduced(wordId)
+    if (!wasIntroduced) void props.syncIntroducedWord(wordId)
+  }
 }
 
 function previousCard() {
@@ -201,10 +212,10 @@ watch(() => props.readyUserId, (userId, previousUserId) => {
         >{{ label }}</button>
       </fieldset>
 
-      <div class="study-mode-tabs" role="tablist" aria-label="Режим занятий">
-        <button type="button" role="tab" :aria-selected="studyMode === 'today'" :class="{ 'is-active': studyMode === 'today' }" @click="startSession('today')">План на сегодня <span>{{ todayWordCount }}</span></button>
-        <button type="button" role="tab" :aria-selected="studyMode === 'review'" :class="{ 'is-active': studyMode === 'review' }" @click="startSession('review')">Повторить <span>{{ dueWordCount }}</span></button>
-        <button type="button" role="tab" :aria-selected="studyMode === 'new'" :class="{ 'is-active': studyMode === 'new' }" @click="startSession('new')">Новые слова <span>{{ availableNewWordCount }}</span></button>
+      <div class="study-mode-tabs" role="group" aria-label="Режим занятий">
+        <button type="button" :aria-pressed="studyMode === 'today'" :class="{ 'is-active': studyMode === 'today' }" @click="startSession('today')">План на сегодня <span>{{ todayWordCount }}</span></button>
+        <button type="button" :aria-pressed="studyMode === 'review'" :class="{ 'is-active': studyMode === 'review' }" @click="startSession('review')">Повторить <span>{{ dueWordCount }}</span></button>
+        <button type="button" :aria-pressed="studyMode === 'new'" :class="{ 'is-active': studyMode === 'new' }" @click="startSession('new')">Новые слова <span>{{ availableNewWordCount }}</span></button>
       </div>
       <p class="study-mode-hint">В плане сначала идут слова к повторению, затем — до {{ NEW_WORDS_PER_DAY }} новых слов в день.</p>
 
@@ -225,7 +236,7 @@ watch(() => props.readyUserId, (userId, previousUserId) => {
         :word="currentWord"
         :front-language="frontLanguage"
         :flipped="flipped"
-        @flip="flipped = !flipped"
+        @flip="flipCurrentCard"
       />
 
       <div v-if="!sessionComplete" class="card-navigation">
@@ -236,7 +247,7 @@ watch(() => props.readyUserId, (userId, previousUserId) => {
           <div class="progress-count">{{ progress }}</div>
           <div class="progress-track"><span :style="{ width: `${progressPercent}%` }"></span></div>
         </div>
-        <button class="nav-button nav-next" aria-label="Пропустить слово" @click="nextCard" :disabled="currentPosition >= cardOrder.length - 1">
+        <button class="nav-button nav-next" aria-label="Пропустить слово" @click="nextCard">
           <span>Пропустить</span><span aria-hidden="true">→</span>
         </button>
       </div>

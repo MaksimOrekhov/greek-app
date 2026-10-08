@@ -9,6 +9,7 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - Vue 3, Composition API, `<script setup lang="ts">`, TypeScript, and Vite.
 - `npm run dev` starts the local development server.
 - `npm run build` runs Vue/TypeScript checks and creates the production build.
+- `npm test` runs focused core-logic tests with Node.js 22's TypeScript stripping.
 
 ## App structure
 
@@ -47,10 +48,10 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - Russian transliterations are learning aids, not precise phonetic transcriptions. Preserve that distinction in labels and copy.
 - Keep the app usable on narrow screens, keyboard accessible, and respectful of reduced-motion preferences.
 - Use Vue Router pages for major app sections; keep the hash history mode compatible with GitHub Pages hosting.
-- The review session starts with new and due words in shuffled order; manual shuffle starts a fresh pass through the full deck.
+- The Today session contains due reviews, already introduced but unrated words, and up to 10 never-before-seen words per local calendar day. Due reviews appear before new words; each segment is shuffled. Manual shuffle starts a fresh pass through the currently eligible session words.
 - The dictionary classifies a word as learned once its current interval reaches 21 days; overdue words are shown as due even if they previously reached that interval.
 - After revealing a card, collect one of four ratings. Schedule "Again" for about 10 minutes, "Hard" for at least 1 day, "Good" for at least 3 days, and "Easy" for at least 7 days; grow successful intervals gradually and cap them at 365 days.
-- Persist review progress in localStorage keyed by the Greek word and, when signed in, sync it per user with Supabase. Never put Supabase secret keys in frontend code.
+- Persist review progress and first-introduction timestamps in localStorage keyed by the Greek word and, when signed in, sync them per user with Supabase. Server RPCs merge review progress by review timestamp and preserve the earliest introduction. Never put Supabase secret keys in frontend code.
 - When changing card navigation, preserve the behavior that a newly selected word always starts on its first side.
 - The Vite base path is `/greek-app/` for the project Pages URL; keep it aligned with the repository name.
 - Update this file when the app structure or development workflow changes.

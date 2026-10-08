@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run core logic tests
+        run: npm test
+
       - name: Build app
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}

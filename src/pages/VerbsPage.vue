@@ -114,25 +114,23 @@ async function clearVerbSearch() {
           <span class="verb-meaning">{{ selectedVerb.meaning }}</span>
         </header>
 
-        <div class="tense-tabs" role="tablist" aria-label="Время глагола">
+        <div class="tense-tabs" role="group" aria-label="Время глагола">
           <button
             v-for="[key, label] in tenseOptions"
             :key="key"
             type="button"
-            role="tab"
-            :aria-selected="tense === key"
+            :aria-pressed="tense === key"
             :class="{ 'is-active': tense === key }"
             @click="tense = key"
           >{{ label }}</button>
         </div>
 
-        <div v-if="tense === 'future' && selectedVerb.future.length > 1" class="future-tabs" role="tablist" aria-label="Вид будущего времени">
+        <div v-if="tense === 'future' && selectedVerb.future.length > 1" class="future-tabs" role="group" aria-label="Вид будущего времени">
           <button
             v-for="form in selectedVerb.future"
             :key="form.aspect"
             type="button"
-            role="tab"
-            :aria-selected="selectedFuture.aspect === form.aspect"
+            :aria-pressed="selectedFuture.aspect === form.aspect"
             :class="{ 'is-active': selectedFuture.aspect === form.aspect }"
             @click="futureAspect = form.aspect"
           >{{ form.label }}</button>

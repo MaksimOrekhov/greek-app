@@ -1,4 +1,5 @@
 export type VerbTense = 'present' | 'past' | 'future'
+export { approximateReading } from './approximateReading.ts'
 export type FutureAspect = 'continuous' | 'simple' | 'single'
 
 export interface FutureForm {
@@ -308,37 +309,24 @@ export const verbs: VerbEntry[] = [
   },
 ]
 
-const readingMap: Record<string, string> = {
-  αι: 'э', αί: 'э́', ει: 'и', εί: 'и́', οι: 'и', οί: 'и́', ου: 'у', ού: 'у́',
-  αυ: 'ав', αύ: 'а́в', ευ: 'эв', εύ: 'э́в',
-  μπ: 'б', ντ: 'д', γκ: 'г', γγ: 'нг', τζ: 'дз', τσ: 'ц',
-  α: 'а', ά: 'а́', β: 'в', γ: 'г', δ: 'з', ε: 'э', έ: 'э́', ζ: 'з',
-  η: 'и', ή: 'и́', θ: 'с', ι: 'и', ί: 'и́', κ: 'к', λ: 'л', μ: 'м',
-  ν: 'н', ξ: 'кс', ο: 'о', ό: 'о́', π: 'п', ρ: 'р', σ: 'с', ς: 'с',
-  τ: 'т', υ: 'и', ύ: 'и́', φ: 'ф', χ: 'х', ψ: 'пс', ω: 'о', ώ: 'о́',
-}
-
-export function approximateReading(text: string): string {
-  const normalized = text.normalize('NFC').toLocaleLowerCase('el')
-  let result = ''
-
-  for (let index = 0; index < normalized.length;) {
-    const pair = normalized.slice(index, index + 2)
-    if (readingMap[pair]) {
-      const isVoiceless = /[κπτφθχσξψ]/u.test(normalized[index + 2] ?? '')
-      if ((pair === 'αυ' || pair === 'ευ') && isVoiceless) {
-        result += pair === 'αυ' ? 'аф' : 'эф'
-      } else {
-        result += readingMap[pair]
-      }
-      index += 2
-      continue
+export function validateVerbData(items: VerbEntry[] = verbs): string[] {
+  const errors: string[] = []
+  const seen = new Set<string>()
+  const aspects = new Set<FutureAspect>(['continuous', 'simple', 'single'])
+  for (const verb of items) {
+    if (!verb.lemma.trim() || !verb.meaning.trim()) errors.push(`Missing required verb field: ${verb.lemma || '(empty)'}`)
+    if (seen.has(verb.lemma)) errors.push(`Duplicate verb: ${verb.lemma}`)
+    seen.add(verb.lemma)
+    for (const tense of ['present', 'past'] as const) {
+      const forms = verb.forms?.[tense]
+      if (!Array.isArray(forms) || forms.length !== VERB_PERSONS.length || forms.some((form) => typeof form !== 'string' || !form.trim())) errors.push(`Invalid ${tense} forms: ${verb.lemma}`)
     }
-
-    const letter = normalized[index]
-    result += readingMap[letter] ?? letter
-    index += 1
+    if (!Array.isArray(verb.future) || verb.future.length === 0) errors.push(`Missing future forms: ${verb.lemma}`)
+    for (const future of verb.future ?? []) {
+      const forms = future?.forms
+      if (!future || !aspects.has(future.aspect) || !future.label?.trim()
+        || !Array.isArray(forms) || forms.length !== VERB_PERSONS.length || forms.some((form) => typeof form !== 'string' || !form.trim())) errors.push(`Invalid future form: ${verb.lemma}`)
+    }
   }
-
-  return result
+  return errors
 }

@@ -12,6 +12,7 @@ const {
   sendSignInLink,
   signOut,
   syncRatedWord,
+  syncIntroducedWord,
 } = useCloudProgressSync()
 const accountEmail = computed(() => cloudUser.value?.email ?? null)
 </script>
@@ -50,6 +51,7 @@ const accountEmail = computed(() => cloudUser.value?.email ?? null)
         v-if="route.name === 'cards'"
         :ready-user-id="cloudReadyUserId"
         :sync-rated-word="syncRatedWord"
+        :sync-introduced-word="syncIntroducedWord"
       />
       <component :is="Component" v-else />
     </RouterView>

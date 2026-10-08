@@ -199,3 +199,28 @@ export const words: WordCard[] = wordList.map((word) => ({
   partOfSpeech: partOfSpeechByWord[word.greek],
   examples: examplesByWord[word.greek] ?? [],
 }))
+
+export function validateVocabularyData(items: WordCard[] = words): string[] {
+  const errors: string[] = []
+  const seen = new Set<string>()
+  for (const [index, word] of items.entries()) {
+    if (!word.greek.trim() || !word.russian.trim() || !word.transliteration.trim() || !word.category.trim()) errors.push(`Word ${index} has a missing required field`)
+    if (seen.has(word.greek)) errors.push(`Duplicate word: ${word.greek}`)
+    seen.add(word.greek)
+    if (!Array.isArray(word.partOfSpeech) || !word.partOfSpeech.length || word.partOfSpeech.some((type) => typeof type !== 'string' || !(type in PART_OF_SPEECH_LABELS))) errors.push(`Invalid part of speech: ${word.greek}`)
+    if (!Array.isArray(word.examples) || word.examples.some((example) => !example
+      || typeof example.greek !== 'string' || !example.greek.trim()
+      || typeof example.transliteration !== 'string' || !example.transliteration.trim()
+      || typeof example.russian !== 'string' || !example.russian.trim())) errors.push(`Invalid example: ${word.greek}`)
+  }
+  for (const word of wordList) {
+    if (!(word.greek in partOfSpeechByWord)) errors.push(`Missing part of speech reference: ${word.greek}`)
+  }
+  for (const wordId of Object.keys(partOfSpeechByWord)) {
+    if (!wordList.some((word) => word.greek === wordId)) errors.push(`Orphan part of speech reference: ${wordId}`)
+  }
+  for (const wordId of Object.keys(examplesByWord)) {
+    if (!wordList.some((word) => word.greek === wordId)) errors.push(`Orphan example reference: ${wordId}`)
+  }
+  return errors
+}
