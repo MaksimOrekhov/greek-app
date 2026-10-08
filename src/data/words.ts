@@ -3,7 +3,33 @@ export interface WordCard {
   russian: string
   transliteration: string
   category: string
+  partOfSpeech: PartOfSpeech[]
   examples: WordExample[]
+}
+
+export type PartOfSpeech =
+  | 'noun'
+  | 'verb'
+  | 'adjective'
+  | 'adverb'
+  | 'pronoun'
+  | 'numeral'
+  | 'particle'
+  | 'conjunction'
+  | 'preposition'
+  | 'expression'
+
+export const PART_OF_SPEECH_LABELS: Record<PartOfSpeech, string> = {
+  noun: 'Существительное',
+  verb: 'Глагол',
+  adjective: 'Прилагательное',
+  adverb: 'Наречие',
+  pronoun: 'Местоимение',
+  numeral: 'Числительное',
+  particle: 'Частица',
+  conjunction: 'Союз',
+  preposition: 'Предлог',
+  expression: 'Выражение',
 }
 
 export interface WordExample {
@@ -12,7 +38,7 @@ export interface WordExample {
   russian: string
 }
 
-const wordList: Omit<WordCard, 'examples'>[] = [
+const wordList: Omit<WordCard, 'examples' | 'partOfSpeech'>[] = [
   { greek: 'ναι', russian: 'да', transliteration: 'нэ', category: 'Общение' },
   { greek: 'όχι', russian: 'нет', transliteration: 'о́хи', category: 'Общение' },
   { greek: 'καλά', russian: 'хорошо', transliteration: 'кала́', category: 'Общение' },
@@ -63,6 +89,58 @@ const wordList: Omit<WordCard, 'examples'>[] = [
   { greek: 'στο', russian: 'в / на', transliteration: 'сто', category: 'Полезные слова' },
   { greek: 'με λένε…', russian: 'меня зовут…', transliteration: 'ме ле́нэ…', category: 'Знакомство' },
 ]
+
+const partOfSpeechByWord: Record<string, PartOfSpeech[]> = {
+  'ναι': ['particle'],
+  'όχι': ['particle'],
+  'καλά': ['adjective', 'adverb'],
+  'ευχαριστώ': ['verb'],
+  'παρακαλώ': ['verb'],
+  'γεια σου': ['expression'],
+  'καλημέρα': ['expression'],
+  'καλησπέρα': ['expression'],
+  'καληνύχτα': ['expression'],
+  'μαμά': ['noun'],
+  'γάλα': ['noun'],
+  'νερό': ['noun'],
+  'καφέ': ['noun'],
+  'μπίρα': ['noun'],
+  'κρασί': ['noun'],
+  'σαλάτα': ['noun'],
+  'σοκολάτα': ['noun'],
+  'ντομάτα': ['noun'],
+  'τζατζίκι': ['noun'],
+  'ταξί': ['noun'],
+  'αεροπλάνο': ['noun'],
+  'αυτοκίνητο': ['noun'],
+  'τηλέφωνο': ['noun'],
+  'διαβατήριο': ['noun'],
+  'πρόβλημα': ['noun'],
+  'Ελλάδα': ['noun'],
+  'αγγλικά': ['noun', 'adverb'],
+  'ελληνικά': ['noun', 'adverb'],
+  'μένω': ['verb'],
+  'ξέρω': ['verb'],
+  'θέλω': ['verb'],
+  'κάνω': ['verb'],
+  'περιμένω': ['verb'],
+  'καταλαβαίνω': ['verb'],
+  'έχω': ['verb'],
+  'δουλεύω': ['verb'],
+  'είμαι': ['verb'],
+  'είσαι': ['verb'],
+  'είναι': ['verb'],
+  'εσύ': ['pronoun'],
+  'λίγο': ['adjective', 'adverb'],
+  'τώρα': ['adverb'],
+  'αύριο': ['adverb'],
+  'αυτό': ['pronoun'],
+  'δεν': ['particle'],
+  'γιατί': ['adverb', 'conjunction'],
+  'ένα': ['numeral'],
+  'στο': ['preposition'],
+  'με λένε…': ['expression'],
+}
 
 const examplesByWord: Record<string, WordExample[]> = {
   'ναι': [{ greek: 'Ναι, ευχαριστώ.', transliteration: 'нэ, эфхаристо́', russian: 'Да, спасибо.' }],
@@ -118,5 +196,6 @@ const examplesByWord: Record<string, WordExample[]> = {
 
 export const words: WordCard[] = wordList.map((word) => ({
   ...word,
+  partOfSpeech: partOfSpeechByWord[word.greek],
   examples: examplesByWord[word.greek] ?? [],
 }))

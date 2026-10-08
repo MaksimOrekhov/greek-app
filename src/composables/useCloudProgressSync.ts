@@ -143,6 +143,18 @@ export function useCloudProgressSync() {
       window.setTimeout(() => void handleSession(session?.user ?? null), 0)
     })
     unsubscribe = () => data.subscription.unsubscribe()
+
+    // Hydrate any persisted sign-in explicitly instead of relying only on the
+    // initial auth event to start the cloud progress load.
+    void supabase.auth.getSession().then(({ data: sessionData, error }) => {
+      if (error) {
+        status.value = 'error'
+        errorMessage.value = 'Не удалось проверить сессию и загрузить прогресс.'
+        return
+      }
+      void handleSession(sessionData.session?.user ?? null)
+    })
+
     onOnline = () => {
       const userId = user.value?.id
       if (userId) void syncAccount(userId)

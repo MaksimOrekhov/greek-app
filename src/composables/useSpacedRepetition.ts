@@ -1,6 +1,7 @@
 import { computed, onMounted, onUnmounted, shallowRef } from 'vue'
 
 export type ReviewRating = 'again' | 'hard' | 'good' | 'easy'
+export type WordLearningStatus = 'new' | 'learning' | 'due' | 'learned'
 
 export interface WordProgress {
   dueAt: number
@@ -123,6 +124,14 @@ export function useSpacedRepetition() {
     })
   }
 
+  function getWordLearningStatus(wordId: string): WordLearningStatus {
+    const item = progress.value[wordId]
+    if (!item) return 'new'
+    if (item.dueAt <= now.value) return 'due'
+    if (item.intervalDays >= 21) return 'learned'
+    return 'learning'
+  }
+
   function getNextIntervalDays(wordId: string, rating: ReviewRating) {
     if (rating === 'again') return 0
     return calculateInterval(rating, progress.value[wordId]?.intervalDays ?? 0)
@@ -146,8 +155,11 @@ export function useSpacedRepetition() {
     })
   }
 
-  function nextDueDate() {
-    const futureDates = Object.values(progress.value)
+  function nextDueDate(wordIds?: string[]) {
+    const items = wordIds
+      ? wordIds.map((wordId) => progress.value[wordId]).filter((item) => item !== undefined)
+      : Object.values(progress.value)
+    const futureDates = items
       .map((item) => item.dueAt)
       .filter((dueAt) => dueAt > now.value)
     return futureDates.length ? Math.min(...futureDates) : null
@@ -157,6 +169,7 @@ export function useSpacedRepetition() {
     progress,
     dueCount,
     getSessionWords,
+    getWordLearningStatus,
     getNextIntervalDays,
     rateWord,
     nextDueDate,
