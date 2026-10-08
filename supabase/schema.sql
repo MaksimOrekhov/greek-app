@@ -7,6 +7,7 @@ create table public.word_progress (
   repetitions integer not null default 0 check (repetitions >= 0),
   lapses integer not null default 0 check (lapses >= 0),
   last_reviewed_at timestamptz not null default now(),
+  introduced_at timestamptz,
   primary key (user_id, word_id)
 );
 

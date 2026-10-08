@@ -4,7 +4,7 @@ import Flashcard from '../components/Flashcard.vue'
 import ReviewRatings from '../components/ReviewRatings.vue'
 import StudyModeToggle, { type StudyLanguage } from '../components/StudyModeToggle.vue'
 import WordExamples from '../components/WordExamples.vue'
-import { useSpacedRepetition, type ReviewRating } from '../composables/useSpacedRepetition'
+import { NEW_WORDS_PER_DAY, useSpacedRepetition, type ReviewRating, type StudyMode } from '../composables/useSpacedRepetition'
 import { PART_OF_SPEECH_LABELS, words, type PartOfSpeech } from '../data/words'
 
 const props = defineProps<{
@@ -14,17 +14,33 @@ const props = defineProps<{
 
 const currentPosition = shallowRef(0)
 const wordIds = words.map((word) => word.greek)
-const { getSessionWords, getNextIntervalDays, rateWord, nextDueDate } = useSpacedRepetition()
+const { getSessionWords, getAvailableNewWordCount, getNewWordCount, getNextIntervalDays, rateWord, nextDueDate } = useSpacedRepetition()
 const partOfSpeechOptions = Object.entries(PART_OF_SPEECH_LABELS) as [PartOfSpeech, string][]
 const selectedPartOfSpeech = shallowRef(readPartOfSpeechFilter())
+const studyMode = shallowRef<StudyMode>('today')
 const filteredWordIds = computed(() => words
   .filter((word) => !selectedPartOfSpeech.value.length || word.partOfSpeech.some((type) => selectedPartOfSpeech.value.includes(type)))
   .map((word) => word.greek))
-const cardOrder = shallowRef(createShuffledOrder())
+const dueWordCount = computed(() => getSessionWords(filteredWordIds.value, 'review').length)
+const availableNewWordCount = computed(() => getAvailableNewWordCount(filteredWordIds.value))
+const unintroducedWordCount = computed(() => getNewWordCount(filteredWordIds.value))
+const todayWordCount = computed(() => getSessionWords(filteredWordIds.value, 'today').length)
+const cardOrder = shallowRef(createShuffledOrder('today'))
 const frontLanguage = shallowRef<StudyLanguage>('greek')
 const flipped = shallowRef(false)
 const ratedPositions = shallowRef(new Set<number>())
-const eligibleWordCount = computed(() => getSessionWords(filteredWordIds.value).length)
+const emptySessionMessage = computed(() => {
+  if (studyMode.value === 'review') return 'Пока нет слов, которым пора повториться.'
+  if (studyMode.value === 'new') {
+    return unintroducedWordCount.value
+      ? `Дневной лимит — ${NEW_WORDS_PER_DAY} новых слов. Остальные можно изучить завтра.`
+      : 'Новых слов в выбранном наборе больше нет.'
+  }
+  if (todayWordCount.value === 0 && unintroducedWordCount.value > 0) {
+    return 'План на сегодня выполнен. Новые слова появятся завтра, а повторения — по расписанию.'
+  }
+  return 'Слова для сегодняшней сессии закончились.'
+})
 
 const currentWordIndex = computed(() => cardOrder.value[currentPosition.value])
 const currentWord = computed(() => words[currentWordIndex.value])
@@ -40,19 +56,28 @@ const nextReviewLabel = computed(() => {
   return date ? new Intl.DateTimeFormat('ru', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(date) : null
 })
 
-function createShuffledOrder(includeAll = false, avoidFirstIndex?: number, previousOrder: number[] = []) {
-  const eligibleIds = getSessionWords(filteredWordIds.value, includeAll)
+function createShuffledOrder(mode: StudyMode = studyMode.value, avoidFirstIndex?: number, previousOrder: number[] = []) {
+  const dueIds = mode === 'today' ? getSessionWords(filteredWordIds.value, 'review') : []
+  const newIds = mode === 'today' ? getSessionWords(filteredWordIds.value, 'new') : []
+  const eligibleIds = mode === 'today' ? [...dueIds, ...newIds] : getSessionWords(filteredWordIds.value, mode)
   const order = eligibleIds.map((id) => wordIds.indexOf(id))
-  for (let index = order.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1))
-    ;[order[index], order[randomIndex]] = [order[randomIndex], order[index]]
+  const dueCount = dueIds.length
+  const ranges = mode === 'today' ? [[0, dueCount], [dueCount, order.length]] : [[0, order.length]]
+
+  for (const [start, end] of ranges) {
+    for (let index = end - 1; index > start; index -= 1) {
+      const randomIndex = start + Math.floor(Math.random() * (index - start + 1))
+      ;[order[index], order[randomIndex]] = [order[randomIndex], order[index]]
+    }
+
+    const rangeLength = end - start
+    const sameAsPrevious = rangeLength > 1
+      && order.slice(start, end).every((wordIndex, offset) => wordIndex === previousOrder[start + offset])
+    if (sameAsPrevious) [order[start], order[start + 1]] = [order[start + 1], order[start]]
   }
 
-  if (order.length > 1 && order[0] === avoidFirstIndex) {
-    ;[order[0], order[1]] = [order[1], order[0]]
-  }
-
-  if (order.length > 1 && order.every((wordIndex, index) => wordIndex === previousOrder[index])) {
+  const firstRangeEnd = ranges[0][1]
+  if (firstRangeEnd > 1 && order[0] === avoidFirstIndex) {
     ;[order[0], order[1]] = [order[1], order[0]]
   }
 
@@ -80,7 +105,22 @@ function showAllPartOfSpeech() {
 }
 
 function shuffleCards() {
-  cardOrder.value = createShuffledOrder(true, currentWordIndex.value, cardOrder.value)
+  cardOrder.value = createShuffledOrder(studyMode.value, currentWordIndex.value, cardOrder.value)
+  currentPosition.value = 0
+  flipped.value = false
+  ratedPositions.value = new Set()
+}
+
+function startSession(mode: StudyMode) {
+  studyMode.value = mode
+  cardOrder.value = createShuffledOrder(mode)
+  currentPosition.value = 0
+  flipped.value = false
+  ratedPositions.value = new Set()
+}
+
+function resumeUnratedCards() {
+  cardOrder.value = cardOrder.value.filter((_wordIndex, position) => !ratedPositions.value.has(position))
   currentPosition.value = 0
   flipped.value = false
   ratedPositions.value = new Set()
@@ -109,13 +149,6 @@ function rateCurrentWord(rating: ReviewRating) {
   flipped.value = false
 }
 
-function startDueSession() {
-  cardOrder.value = createShuffledOrder(false)
-  currentPosition.value = 0
-  flipped.value = false
-  ratedPositions.value = new Set()
-}
-
 watch(frontLanguage, () => {
   flipped.value = false
 })
@@ -126,11 +159,11 @@ watch(selectedPartOfSpeech, (types) => {
   } catch {
     // Keep the filter usable when browser storage is unavailable.
   }
-  startDueSession()
+  startSession(studyMode.value)
 })
 
 watch(() => props.readyUserId, (userId, previousUserId) => {
-  if (userId || previousUserId) startDueSession()
+  if (userId || previousUserId) startSession(studyMode.value)
 })
 </script>
 
@@ -168,16 +201,21 @@ watch(() => props.readyUserId, (userId, previousUserId) => {
         >{{ label }}</button>
       </fieldset>
 
+      <div class="study-mode-tabs" role="tablist" aria-label="Режим занятий">
+        <button type="button" role="tab" :aria-selected="studyMode === 'today'" :class="{ 'is-active': studyMode === 'today' }" @click="startSession('today')">План на сегодня <span>{{ todayWordCount }}</span></button>
+        <button type="button" role="tab" :aria-selected="studyMode === 'review'" :class="{ 'is-active': studyMode === 'review' }" @click="startSession('review')">Повторить <span>{{ dueWordCount }}</span></button>
+        <button type="button" role="tab" :aria-selected="studyMode === 'new'" :class="{ 'is-active': studyMode === 'new' }" @click="startSession('new')">Новые слова <span>{{ availableNewWordCount }}</span></button>
+      </div>
+      <p class="study-mode-hint">В плане сначала идут слова к повторению, затем — до {{ NEW_WORDS_PER_DAY }} новых слов в день.</p>
+
       <div v-if="sessionComplete" class="session-complete" aria-live="polite">
         <span class="complete-icon" aria-hidden="true">✦</span>
-        <h2>{{ cardOrder.length ? 'На сегодня всё!' : 'Пока нечего повторять' }}</h2>
+        <h2>{{ cardOrder.length ? 'Сессия завершена' : 'Пока нечего учить' }}</h2>
         <p v-if="cardOrder.length">Оценено слов: {{ reviewedWordCount }}<template v-if="remainingWordCount"> · без оценки: {{ remainingWordCount }}</template></p>
-        <p v-else>Новые карточки и слова с подошедшим сроком повтора появятся здесь.</p>
+        <p v-else>{{ emptySessionMessage }}</p>
         <p v-if="nextReviewLabel" class="next-review-note">Ближайший повтор: {{ nextReviewLabel }}</p>
         <div class="completion-actions">
-          <button v-if="remainingWordCount" class="primary-action" @click="startDueSession">Вернуться к словам без оценки</button>
-          <button v-else-if="eligibleWordCount" class="primary-action" @click="startDueSession">Повторить слова по расписанию ({{ eligibleWordCount }})</button>
-          <button class="secondary-action" @click="shuffleCards">Повторить все слова сейчас</button>
+          <button v-if="remainingWordCount" class="primary-action" @click="resumeUnratedCards">Вернуться к словам без оценки</button>
         </div>
       </div>
 

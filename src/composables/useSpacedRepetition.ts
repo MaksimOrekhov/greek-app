@@ -2,6 +2,8 @@ import { computed, onMounted, onUnmounted, shallowRef } from 'vue'
 
 export type ReviewRating = 'again' | 'hard' | 'good' | 'easy'
 export type WordLearningStatus = 'new' | 'learning' | 'due' | 'learned'
+export type StudyMode = 'today' | 'review' | 'new' | 'all'
+export const NEW_WORDS_PER_DAY = 10
 
 export interface WordProgress {
   dueAt: number
@@ -9,6 +11,7 @@ export interface WordProgress {
   repetitions: number
   lapses: number
   lastReviewedAt: number
+  introducedAt?: number
 }
 
 export type ProgressByWord = Record<string, WordProgress>
@@ -96,9 +99,16 @@ export function mergeProgress(remoteProgress: ProgressByWord): ProgressByWord {
   const merged = { ...progress.value }
   for (const [wordId, remoteItem] of Object.entries(remoteProgress)) {
     const localItem = merged[wordId]
-    if (!localItem || remoteItem.lastReviewedAt > localItem.lastReviewedAt) {
+    if (!localItem) {
       merged[wordId] = remoteItem
+      continue
     }
+
+    const latestItem = remoteItem.lastReviewedAt > localItem.lastReviewedAt ? remoteItem : localItem
+    const introducedAt = [localItem.introducedAt, remoteItem.introducedAt]
+      .filter((value): value is number => value !== undefined)
+      .sort((left, right) => left - right)[0]
+    merged[wordId] = introducedAt === undefined ? latestItem : { ...latestItem, introducedAt }
   }
   saveProgress(merged)
   return getProgressSnapshot()
@@ -108,6 +118,15 @@ export function useSpacedRepetition() {
   const now = shallowRef(Date.now())
   let clock: number | undefined
   const dueCount = computed(() => Object.values(progress.value).filter((item) => item.dueAt <= now.value).length)
+  const newWordsIntroducedToday = computed(() => Object.values(progress.value).filter((item) => {
+    if (item.introducedAt === undefined) return false
+    const introducedDate = new Date(item.introducedAt)
+    const today = new Date(now.value)
+    return introducedDate.getFullYear() === today.getFullYear()
+      && introducedDate.getMonth() === today.getMonth()
+      && introducedDate.getDate() === today.getDate()
+  }).length)
+  const newWordsRemainingToday = computed(() => Math.max(0, NEW_WORDS_PER_DAY - newWordsIntroducedToday.value))
 
   onMounted(() => {
     clock = window.setInterval(() => { now.value = Date.now() }, 30_000)
@@ -117,11 +136,26 @@ export function useSpacedRepetition() {
     if (clock !== undefined) window.clearInterval(clock)
   })
 
-  function getSessionWords(wordIds: string[], includeAll = false) {
-    return wordIds.filter((id) => {
+  function getSessionWords(wordIds: string[], mode: StudyMode = 'today') {
+    const newWords = wordIds.filter((id) => !progress.value[id])
+    const availableNewWords = newWords.slice(0, newWordsRemainingToday.value)
+    const dueWords = wordIds.filter((id) => {
       const item = progress.value[id]
-      return includeAll || !item || item.dueAt <= now.value
+      return item !== undefined && item.dueAt <= now.value
     })
+
+    if (mode === 'review') return dueWords
+    if (mode === 'new') return availableNewWords
+    if (mode === 'all') return wordIds
+    return [...dueWords, ...availableNewWords]
+  }
+
+  function getAvailableNewWordCount(wordIds: string[]) {
+    return Math.min(wordIds.filter((id) => !progress.value[id]).length, newWordsRemainingToday.value)
+  }
+
+  function getNewWordCount(wordIds: string[]) {
+    return wordIds.filter((id) => !progress.value[id]).length
   }
 
   function getWordLearningStatus(wordId: string): WordLearningStatus {
@@ -151,6 +185,7 @@ export function useSpacedRepetition() {
         repetitions: rating === 'again' ? 0 : (previous?.repetitions ?? 0) + 1,
         lapses: (previous?.lapses ?? 0) + Number(rating === 'again'),
         lastReviewedAt: now,
+        introducedAt: previous?.introducedAt ?? (previous ? undefined : now),
       },
     })
   }
@@ -168,7 +203,11 @@ export function useSpacedRepetition() {
   return {
     progress,
     dueCount,
+    newWordsIntroducedToday,
+    newWordsRemainingToday,
     getSessionWords,
+    getAvailableNewWordCount,
+    getNewWordCount,
     getWordLearningStatus,
     getNextIntervalDays,
     rateWord,

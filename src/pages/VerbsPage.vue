@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
+import { computed, nextTick, shallowRef, useTemplateRef } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -10,17 +10,20 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from 'reka-ui'
-import { approximateReading, VERB_PERSONS, VERB_TENSES, verbs, type FutureAspect, type VerbEntry, type VerbTense } from '../data/verbs'
+import { approximateReading, VERB_PERSONS, VERB_TENSES, verbs, type FutureAspect, type FutureForm, type VerbEntry, type VerbTense } from '../data/verbs'
 
-const selectedVerb = shallowRef(verbs[0])
+const selectedVerb = shallowRef<VerbEntry | null>(verbs[0])
 const searchTerm = shallowRef('')
+const verbSearchInput = useTemplateRef<HTMLInputElement>('verb-search-input')
 const tense = shallowRef<VerbTense>('present')
 const futureAspect = shallowRef<FutureAspect>('continuous')
 const tenseOptions = Object.entries(VERB_TENSES) as [VerbTense, string][]
-const selectedFuture = computed(() => selectedVerb.value.future.find((form) => form.aspect === futureAspect.value) ?? selectedVerb.value.future[0])
-const visibleForms = computed(() => tense.value === 'future' ? selectedFuture.value.forms : selectedVerb.value.forms[tense.value])
-const visibleTenseLabel = computed(() => tense.value === 'future' ? selectedFuture.value.label : selectedVerb.value.pastLabel && tense.value === 'past' ? selectedVerb.value.pastLabel : VERB_TENSES[tense.value])
-const selectedVerbIndex = computed(() => verbs.indexOf(selectedVerb.value))
+const selectedFuture = computed<FutureForm>(() => selectedVerb.value?.future.find((form) => form.aspect === futureAspect.value) ?? selectedVerb.value?.future[0] ?? { aspect: 'single', label: VERB_TENSES.future, forms: [] })
+const visibleForms = computed(() => selectedVerb.value
+  ? tense.value === 'future' ? selectedFuture.value.forms : selectedVerb.value.forms[tense.value]
+  : [])
+const visibleTenseLabel = computed(() => tense.value === 'future' ? selectedFuture.value.label : selectedVerb.value?.pastLabel && tense.value === 'past' ? selectedVerb.value.pastLabel : VERB_TENSES[tense.value])
+const selectedVerbIndex = computed(() => selectedVerb.value ? verbs.indexOf(selectedVerb.value) : -1)
 const verbPosition = computed(() => `${String(selectedVerbIndex.value + 1).padStart(2, '0')} / ${String(verbs.length).padStart(2, '0')}`)
 const filteredVerbs = computed(() => {
   const query = searchTerm.value.trim().toLocaleLowerCase('ru')
@@ -40,6 +43,12 @@ function selectPreviousVerb() {
 function selectNextVerb() {
   if (selectedVerbIndex.value < verbs.length - 1) selectedVerb.value = verbs[selectedVerbIndex.value + 1]
 }
+
+async function clearVerbSearch() {
+  searchTerm.value = ''
+  await nextTick()
+  verbSearchInput.value?.focus()
+}
 </script>
 
 <template>
@@ -57,12 +66,20 @@ function selectNextVerb() {
           <ComboboxAnchor class="verb-combobox-anchor">
             <ComboboxInput
               id="verb-search"
+              ref="verb-search-input"
               v-model="searchTerm"
               :display-value="displayVerb"
               class="verb-combobox-input"
               placeholder="Найти по-гречески или по-русски"
               autocomplete="off"
             />
+            <button
+              v-if="selectedVerb"
+              type="button"
+              class="verb-combobox-clear"
+              aria-label="Очистить поиск"
+              @click="clearVerbSearch"
+            >×</button>
             <ComboboxTrigger class="verb-combobox-trigger" aria-label="Показать список глаголов"><span class="verb-combobox-chevron" aria-hidden="true"></span></ComboboxTrigger>
           </ComboboxAnchor>
           <ComboboxPortal>
@@ -81,14 +98,14 @@ function selectNextVerb() {
             </ComboboxContent>
           </ComboboxPortal>
         </ComboboxRoot>
-        <nav class="verb-navigation" aria-label="Перейти к другому глаголу">
+        <nav v-if="selectedVerb" class="verb-navigation" aria-label="Перейти к другому глаголу">
           <button type="button" :disabled="selectedVerbIndex === 0" @click="selectPreviousVerb"><span aria-hidden="true">←</span> Предыдущий</button>
           <span class="verb-position" aria-live="polite">{{ verbPosition }}</span>
           <button type="button" :disabled="selectedVerbIndex === verbs.length - 1" @click="selectNextVerb">Следующий <span aria-hidden="true">→</span></button>
         </nav>
       </div>
 
-      <article class="verb-card">
+      <article v-if="selectedVerb" class="verb-card">
         <header class="verb-card-heading">
           <div>
             <h2 lang="el">{{ selectedVerb.lemma }}</h2>
@@ -143,6 +160,8 @@ function selectNextVerb() {
           </table>
         </div>
       </article>
+
+      <p v-else class="verb-empty-selection">Выберите глагол из списка, чтобы увидеть его формы.</p>
 
       <p class="verbs-hint">Чтение дано приблизительно. В будущем перед формой ставится частица θα.</p>
     </section>

@@ -17,6 +17,7 @@ interface CloudWordProgress {
   repetitions: number
   lapses: number
   last_reviewed_at: string
+  introduced_at: string | null
 }
 
 const user = shallowRef<User | null>(null)
@@ -35,11 +36,13 @@ function fromCloud(rows: CloudWordProgress[]): ProgressByWord {
       repetitions: Number(row.repetitions),
       lapses: Number(row.lapses),
       lastReviewedAt: Date.parse(row.last_reviewed_at),
+      introducedAt: row.introduced_at ? Date.parse(row.introduced_at) : undefined,
     }
     return Number.isFinite(item.dueAt) && Number.isFinite(item.lastReviewedAt)
       && Number.isFinite(item.intervalDays) && item.intervalDays >= 0
       && Number.isFinite(item.repetitions) && item.repetitions >= 0
       && Number.isFinite(item.lapses) && item.lapses >= 0
+      && (item.introducedAt === undefined || Number.isFinite(item.introducedAt))
       ? [[row.word_id, item]]
       : []
   }))
@@ -56,6 +59,7 @@ function toCloud(userId: string, onlyWordId?: string) {
     repetitions: item.repetitions,
     lapses: item.lapses,
     last_reviewed_at: new Date(item.lastReviewedAt).toISOString(),
+    introduced_at: item.introducedAt === undefined ? null : new Date(item.introducedAt).toISOString(),
     }))
 }
 
@@ -66,7 +70,7 @@ async function syncAccount(userId: string, revision = sessionRevision) {
 
   const { data, error } = await supabase
     .from('word_progress')
-    .select('word_id, due_at, interval_days, repetitions, lapses, last_reviewed_at')
+    .select('word_id, due_at, interval_days, repetitions, lapses, last_reviewed_at, introduced_at')
     .eq('user_id', userId)
 
   if (revision !== sessionRevision) return

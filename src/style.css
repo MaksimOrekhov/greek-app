@@ -257,6 +257,12 @@ h1 span { color: var(--green); font-family: Georgia, 'Noto Sans Greek', serif; f
 .type-filter-chip { min-height: 34px; padding: 0 11px; border: 1px solid #e2e1d9; border-radius: 99px; background: #fff; color: #62665c; cursor: pointer; font: inherit; font-size: 12px; transition: border-color .18s, background .18s, color .18s; }
 .type-filter-chip:hover { border-color: #aab69e; }
 .type-filter-chip.is-selected { border-color: #64775a; background: #e7ede2; color: #3d5135; font-weight: 700; }
+.study-mode-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 1px 15px; padding: 5px; border-radius: 11px; background: #f0f0ea; }
+.study-mode-tabs button { display: flex; min-height: 38px; align-items: center; justify-content: center; gap: 7px; padding: 0 13px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #676b60; cursor: pointer; font: inherit; font-size: 13px; }
+.study-mode-tabs button:hover { color: #3d5135; }
+.study-mode-tabs button.is-active { border-color: rgba(58, 59, 50, .08); background: #fff; box-shadow: 0 2px 6px rgba(43,45,37,.06); color: #40533a; font-weight: 700; }
+.study-mode-tabs button span { display: inline-grid; min-width: 22px; height: 22px; place-items: center; padding: 0 5px; border-radius: 99px; background: rgba(85,99,74,.1); color: inherit; font-size: 11px; font-weight: 700; }
+.study-mode-hint { margin: -9px 2px 13px; color: #85877d; font-size: 11px; line-height: 1.5; }
 .dictionary-filter-group { display: flex; align-items: center; gap: 14px; }
 .dictionary-type-combobox { width: 190px; }
 .dictionary-type-trigger { display: flex; width: 100%; min-height: 38px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; border: 1px solid #e2e1d9; border-radius: 8px; background: #fbfbf9; color: #454a40; cursor: pointer; font: inherit; font-size: 12px; text-align: left; }
@@ -273,8 +279,11 @@ h1 span { color: var(--green); font-family: Georgia, 'Noto Sans Greek', serif; f
 .verb-combobox { position: relative; min-width: 0; }
 .verb-combobox-anchor { display: flex; min-height: 44px; align-items: center; border: 1px solid #dedfd6; border-radius: 9px; background: #fff; transition: border-color .15s, box-shadow .15s; }
 .verb-combobox-anchor:focus-within { border-color: #8a9a7c; box-shadow: 0 0 0 3px rgba(117,133,105,.14); }
-.verb-combobox-input { width: 100%; min-width: 0; height: 42px; padding: 0 10px 0 12px; border: 0; outline: 0; border-radius: inherit; background: transparent; color: #3d4239; font: inherit; font-size: 15px; }
+.verb-combobox-input { width: 100%; min-width: 0; height: 42px; padding: 0 4px 0 12px; border: 0; outline: 0; border-radius: inherit; background: transparent; color: #3d4239; font: inherit; font-size: 15px; }
 .verb-combobox-input::placeholder { color: #96988e; }
+.verb-combobox-clear { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border: 0; border-radius: 7px; background: transparent; color: #85877d; cursor: pointer; font: 24px/1 'DM Sans', sans-serif; }
+.verb-combobox-clear:hover { background: #f0f2ec; color: #40533a; }
+.verb-combobox-clear:focus-visible { outline: 2px solid rgba(117,133,105,.45); outline-offset: 1px; }
 .verb-combobox-trigger { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #72786d; cursor: pointer; }
 .verb-combobox-trigger:hover { background: #f4f4ef; color: #40533a; }
 .verb-combobox-chevron { display: block; width: 7px; height: 7px; margin-top: -3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); }
@@ -292,6 +301,7 @@ h1 span { color: var(--green); font-family: Georgia, 'Noto Sans Greek', serif; f
 .verb-navigation button:hover:not(:disabled) { background: #f0f2ec; }
 .verb-navigation button:disabled { color: #a8aaa2; cursor: default; }
 .verb-position { min-width: 48px; color: #85877d; font-size: 12px; text-align: center; }
+.verb-empty-selection { margin: 0; padding: 30px 18px; border: 1px solid rgba(58, 59, 50, .07); border-radius: 14px; background: rgba(255,255,255,.78); color: #777a70; text-align: center; }
 .tense-tabs { display: flex; gap: 4px; margin: 0 19px 14px; padding: 4px; border-radius: 10px; background: #f0f0ea; }
 .tense-tabs button { min-height: 36px; padding: 0 13px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #686d62; cursor: pointer; font: inherit; font-size: 13px; white-space: nowrap; }
 .tense-tabs button.is-active { border-color: #e2e1d9; background: #fff; box-shadow: 0 1px 4px rgba(43,45,37,.08); color: #40533a; font-weight: 700; }
