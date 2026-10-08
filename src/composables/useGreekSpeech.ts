@@ -4,6 +4,16 @@ const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
 export function useGreekSpeech() {
   const speechMessage = shallowRef('')
+  let availableVoices: SpeechSynthesisVoice[] = []
+
+  function refreshVoices() {
+    if (isSupported) availableVoices = window.speechSynthesis.getVoices()
+  }
+
+  if (isSupported) {
+    refreshVoices()
+    window.speechSynthesis.addEventListener('voiceschanged', refreshVoices)
+  }
 
   function speakGreek(text: string) {
     if (!isSupported || !text.trim()) return
@@ -13,18 +23,20 @@ export function useGreekSpeech() {
     utterance.rate = 0.85
     utterance.volume = 1
 
-    const voices = window.speechSynthesis.getVoices()
+    refreshVoices()
+    const voices = availableVoices
     const greekVoice = voices.find((voice) => voice.lang.toLowerCase().startsWith('el'))
-    if (!greekVoice) {
-      speechMessage.value = voices.length
-        ? 'Греческий голос не установлен. Добавьте греческий голос в настройках устройства.'
-        : 'Chrome пока не загрузил список голосов. Обновите страницу и попробуйте снова.'
+    if (!greekVoice && voices.length) {
+      speechMessage.value = 'Греческий голос не установлен. Добавьте греческий голос в настройках устройства.'
       window.speechSynthesis.cancel()
       return
     }
 
-    utterance.voice = greekVoice
-    speechMessage.value = ''
+    if (greekVoice) utterance.voice = greekVoice
+    speechMessage.value = greekVoice ? '' : 'Список голосов ещё загружается; пробую системный греческий голос…'
+    utterance.onstart = () => {
+      speechMessage.value = ''
+    }
     utterance.onerror = (event) => {
       if (event.error === 'canceled' || event.error === 'interrupted') return
       if (event.error === 'language-unavailable' || event.error === 'voice-unavailable') {
@@ -41,7 +53,10 @@ export function useGreekSpeech() {
   }
 
   onBeforeUnmount(() => {
-    if (isSupported) window.speechSynthesis.cancel()
+    if (isSupported) {
+      window.speechSynthesis.removeEventListener('voiceschanged', refreshVoices)
+      window.speechSynthesis.cancel()
+    }
   })
 
   return { isSpeechSupported: isSupported, speechMessage, speakGreek }
