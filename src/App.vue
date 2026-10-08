@@ -29,7 +29,7 @@ const frontLanguage = shallowRef<StudyLanguage>('greek')
 const flipped = shallowRef(false)
 const section = shallowRef<'cards' | 'reading'>('cards')
 const ratedPositions = shallowRef(new Set<number>())
-const retryCounts = shallowRef<Record<string, number>>({})
+const eligibleWordCount = computed(() => getSessionWords(wordIds).length)
 
 const currentWordIndex = computed(() => cardOrder.value[currentPosition.value])
 const currentWord = computed(() => words[currentWordIndex.value])
@@ -67,7 +67,6 @@ function shuffleCards() {
   currentPosition.value = 0
   flipped.value = false
   ratedPositions.value = new Set()
-  retryCounts.value = {}
 }
 
 function nextCard() {
@@ -89,11 +88,6 @@ function rateCurrentWord(rating: ReviewRating) {
   void syncRatedWord(wordId)
   ratedPositions.value = new Set(ratedPositions.value).add(currentPosition.value)
 
-  if (rating === 'again' && (retryCounts.value[wordId] ?? 0) < 1) {
-    cardOrder.value = [...cardOrder.value, wordIndex]
-    retryCounts.value = { ...retryCounts.value, [wordId]: (retryCounts.value[wordId] ?? 0) + 1 }
-  }
-
   currentPosition.value += 1
   flipped.value = false
 }
@@ -103,7 +97,6 @@ function startDueSession() {
   currentPosition.value = 0
   flipped.value = false
   ratedPositions.value = new Set()
-  retryCounts.value = {}
 }
 
 watch(frontLanguage, () => {
@@ -170,6 +163,7 @@ watch(cloudReadyUserId, (userId, previousUserId) => {
           <p v-if="nextReviewLabel" class="next-review-note">Ближайший повтор: {{ nextReviewLabel }}</p>
           <div class="completion-actions">
             <button v-if="remainingWordCount" class="primary-action" @click="startDueSession">Вернуться к словам без оценки</button>
+            <button v-else-if="eligibleWordCount" class="primary-action" @click="startDueSession">Повторить слова по расписанию ({{ eligibleWordCount }})</button>
             <button class="secondary-action" @click="shuffleCards">Повторить все слова сейчас</button>
           </div>
         </div>

@@ -28,13 +28,21 @@ let sessionRevision = 0
 let uploadQueue = Promise.resolve()
 
 function fromCloud(rows: CloudWordProgress[]): ProgressByWord {
-  return Object.fromEntries(rows.map((row) => [row.word_id, {
-    dueAt: Date.parse(row.due_at),
-    intervalDays: Number(row.interval_days),
-    repetitions: Number(row.repetitions),
-    lapses: Number(row.lapses),
-    lastReviewedAt: Date.parse(row.last_reviewed_at),
-  }]))
+  return Object.fromEntries(rows.flatMap((row) => {
+    const item = {
+      dueAt: Date.parse(row.due_at),
+      intervalDays: Number(row.interval_days),
+      repetitions: Number(row.repetitions),
+      lapses: Number(row.lapses),
+      lastReviewedAt: Date.parse(row.last_reviewed_at),
+    }
+    return Number.isFinite(item.dueAt) && Number.isFinite(item.lastReviewedAt)
+      && Number.isFinite(item.intervalDays) && item.intervalDays >= 0
+      && Number.isFinite(item.repetitions) && item.repetitions >= 0
+      && Number.isFinite(item.lapses) && item.lapses >= 0
+      ? [[row.word_id, item]]
+      : []
+  }))
 }
 
 function toCloud(userId: string, onlyWordId?: string) {

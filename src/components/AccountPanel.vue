@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import type { CloudStatus } from '../composables/useCloudProgressSync'
 
 const props = defineProps<{
@@ -15,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = shallowRef(false)
+const root = ref<HTMLElement | null>(null)
 const email = shallowRef('')
 const statusLabel = computed(() => ({
   local: 'Сохранение на устройстве',
@@ -25,6 +26,15 @@ const statusLabel = computed(() => ({
   error: 'Ошибка синхронизации',
 }[props.status]))
 
+function handleOutsidePointer(event: PointerEvent) {
+  if (event.target instanceof Node && !root.value?.contains(event.target)) {
+    isOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('pointerdown', handleOutsidePointer))
+onUnmounted(() => document.removeEventListener('pointerdown', handleOutsidePointer))
+
 function submitEmail() {
   const value = email.value.trim()
   if (value) emit('sendLink', value)
@@ -32,7 +42,7 @@ function submitEmail() {
 </script>
 
 <template>
-  <div class="account-control">
+  <div ref="root" class="account-control">
     <button class="account-trigger" :aria-expanded="isOpen" @click="isOpen = !isOpen">
       <span class="account-status-dot" :class="{ 'is-connected': userEmail }"></span>
       {{ userEmail ? 'Аккаунт' : 'Синхронизация' }}

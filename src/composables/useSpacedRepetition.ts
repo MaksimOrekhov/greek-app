@@ -1,4 +1,4 @@
-import { computed, shallowRef } from 'vue'
+import { computed, onMounted, onUnmounted, shallowRef } from 'vue'
 
 export type ReviewRating = 'again' | 'hard' | 'good' | 'easy'
 
@@ -17,10 +17,26 @@ const ANONYMOUS_IMPORT_KEY = 'greek-flashcards:spaced-repetition:anonymous-impor
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
 
+function isWordProgress(value: unknown): value is WordProgress {
+  if (!value || typeof value !== 'object') return false
+  const item = value as Partial<WordProgress>
+  return Number.isFinite(item.dueAt)
+    && Number.isFinite(item.intervalDays)
+    && Number.isFinite(item.repetitions)
+    && Number.isFinite(item.lapses)
+    && Number.isFinite(item.lastReviewedAt)
+    && item.intervalDays! >= 0
+    && item.repetitions! >= 0
+    && item.lapses! >= 0
+}
+
 function readProgress(key: string): ProgressByWord {
   try {
     const stored = localStorage.getItem(key)
-    return stored ? JSON.parse(stored) as ProgressByWord : {}
+    if (!stored) return {}
+    const parsed: unknown = JSON.parse(stored)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    return Object.fromEntries(Object.entries(parsed).filter(([, item]) => isWordProgress(item)))
   } catch {
     return {}
   }
@@ -88,13 +104,22 @@ export function mergeProgress(remoteProgress: ProgressByWord): ProgressByWord {
 }
 
 export function useSpacedRepetition() {
-  const dueCount = computed(() => Object.values(progress.value).filter((item) => item.dueAt <= Date.now()).length)
+  const now = shallowRef(Date.now())
+  let clock: number | undefined
+  const dueCount = computed(() => Object.values(progress.value).filter((item) => item.dueAt <= now.value).length)
+
+  onMounted(() => {
+    clock = window.setInterval(() => { now.value = Date.now() }, 30_000)
+  })
+
+  onUnmounted(() => {
+    if (clock !== undefined) window.clearInterval(clock)
+  })
 
   function getSessionWords(wordIds: string[], includeAll = false) {
-    const now = Date.now()
     return wordIds.filter((id) => {
       const item = progress.value[id]
-      return includeAll || !item || item.dueAt <= now
+      return includeAll || !item || item.dueAt <= now.value
     })
   }
 
@@ -124,7 +149,7 @@ export function useSpacedRepetition() {
   function nextDueDate() {
     const futureDates = Object.values(progress.value)
       .map((item) => item.dueAt)
-      .filter((dueAt) => dueAt > Date.now())
+      .filter((dueAt) => dueAt > now.value)
     return futureDates.length ? Math.min(...futureDates) : null
   }
 
