@@ -15,10 +15,17 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/App.vue` composes the app shell, section navigation, flashcard session, and current-word examples.
 - `src/components/Flashcard.vue` renders and flips the active word card.
 - `src/components/StudyModeToggle.vue` selects which language appears first.
+- `src/components/ReviewRatings.vue` collects the learner's recall rating after a card is flipped.
+- `src/components/AccountPanel.vue` handles email-link sign-in and account status.
 - `src/components/WordExamples.vue` displays phrases for the active word.
+- `src/composables/useSpacedRepetition.ts` schedules reviews and stores per-word progress in browser localStorage.
+- `src/composables/useCloudProgressSync.ts` merges local progress with the signed-in user's Supabase records.
+- `src/lib/supabase.ts` creates the Supabase client from Vite environment variables.
+- `supabase/schema.sql` defines the per-user cloud progress table and Row Level Security policies.
 - `src/components/ReadingGuide.vue` explains Modern Greek letter and letter-pair pronunciation.
 - `src/data/words.ts` is the vocabulary source. Each word has its Greek spelling, Russian meaning, approximate transliteration, category, and an `examples` array.
 - `src/data/readingRules.ts` contains the pronunciation guide content.
+- `.env.local` contains local Supabase config and is ignored by Git; GitHub Pages builds read the equivalent repository Actions variables.
 - `src/style.css` contains global layout, responsive styles, and visual tokens.
 - `.github/workflows/deploy.yml` builds the app and deploys `dist/` to GitHub Pages on pushes to `main`.
 
@@ -30,7 +37,9 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - Keep examples beginner-friendly and ensure the target word or its inflected form appears in the Greek phrase.
 - Russian transliterations are learning aids, not precise phonetic transcriptions. Preserve that distinction in labels and copy.
 - Keep the app usable on narrow screens, keyboard accessible, and respectful of reduced-motion preferences.
-- The vocabulary deck starts shuffled and is reshuffled after a complete pass; manual shuffle starts a fresh order. Avoid showing the same card twice at the shuffle boundary.
+- The review session starts with new and due words in shuffled order; manual shuffle starts a fresh pass through the full deck.
+- After revealing a card, collect one of four ratings. Schedule "Again" for about 10 minutes, "Hard" for at least 1 day, "Good" for at least 3 days, and "Easy" for at least 7 days; grow successful intervals gradually and cap them at 365 days.
+- Persist review progress in localStorage keyed by the Greek word and, when signed in, sync it per user with Supabase. Never put Supabase secret keys in frontend code.
 - When changing card navigation, preserve the behavior that a newly selected word always starts on its first side.
 - The Vite base path is `/greek-app/` for the project Pages URL; keep it aligned with the repository name.
 - Update this file when the app structure or development workflow changes.

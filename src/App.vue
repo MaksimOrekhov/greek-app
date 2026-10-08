@@ -1,24 +1,51 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue'
+import AccountPanel from './components/AccountPanel.vue'
 import Flashcard from './components/Flashcard.vue'
 import ReadingGuide from './components/ReadingGuide.vue'
+import ReviewRatings from './components/ReviewRatings.vue'
 import StudyModeToggle, { type StudyLanguage } from './components/StudyModeToggle.vue'
 import WordExamples from './components/WordExamples.vue'
+import { useCloudProgressSync } from './composables/useCloudProgressSync'
+import { useSpacedRepetition, type ReviewRating } from './composables/useSpacedRepetition'
 import { words } from './data/words'
 
 const currentPosition = shallowRef(0)
+const wordIds = words.map((word) => word.greek)
+const { getSessionWords, getNextIntervalDays, rateWord, nextDueDate } = useSpacedRepetition()
+const {
+  configured: cloudConfigured,
+  user: cloudUser,
+  readyUserId: cloudReadyUserId,
+  status: cloudStatus,
+  errorMessage: cloudMessage,
+  sendSignInLink,
+  signOut,
+  syncRatedWord,
+} = useCloudProgressSync()
+const accountEmail = computed(() => cloudUser.value?.email ?? null)
 const cardOrder = shallowRef(createShuffledOrder())
 const frontLanguage = shallowRef<StudyLanguage>('greek')
 const flipped = shallowRef(false)
 const section = shallowRef<'cards' | 'reading'>('cards')
+const ratedPositions = shallowRef(new Set<number>())
+const retryCounts = shallowRef<Record<string, number>>({})
 
 const currentWordIndex = computed(() => cardOrder.value[currentPosition.value])
 const currentWord = computed(() => words[currentWordIndex.value])
-const progress = computed(() => `${String(currentPosition.value + 1).padStart(2, '0')} / ${String(words.length).padStart(2, '0')}`)
-const progressPercent = computed(() => ((currentPosition.value + 1) / words.length) * 100)
+const sessionComplete = computed(() => currentPosition.value >= cardOrder.value.length)
+const progress = computed(() => `${String(Math.min(currentPosition.value + 1, cardOrder.value.length)).padStart(2, '0')} / ${String(cardOrder.value.length).padStart(2, '0')}`)
+const progressPercent = computed(() => cardOrder.value.length ? (currentPosition.value / cardOrder.value.length) * 100 : 100)
+const reviewedWordCount = computed(() => new Set([...ratedPositions.value].map((position) => cardOrder.value[position]).filter((index) => index !== undefined)).size)
+const remainingWordCount = computed(() => new Set(cardOrder.value).size - reviewedWordCount.value)
+const nextReviewLabel = computed(() => {
+  const date = nextDueDate()
+  return date ? new Intl.DateTimeFormat('ru', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(date) : null
+})
 
-function createShuffledOrder(avoidFirstIndex?: number, previousOrder: number[] = []) {
-  const order = words.map((_, index) => index)
+function createShuffledOrder(includeAll = false, avoidFirstIndex?: number, previousOrder: number[] = []) {
+  const eligibleIds = getSessionWords(wordIds, includeAll)
+  const order = eligibleIds.map((id) => wordIds.indexOf(id))
   for (let index = order.length - 1; index > 0; index -= 1) {
     const randomIndex = Math.floor(Math.random() * (index + 1))
     ;[order[index], order[randomIndex]] = [order[randomIndex], order[index]]
@@ -36,29 +63,55 @@ function createShuffledOrder(avoidFirstIndex?: number, previousOrder: number[] =
 }
 
 function shuffleCards() {
-  cardOrder.value = createShuffledOrder(currentWordIndex.value, cardOrder.value)
+  cardOrder.value = createShuffledOrder(true, currentWordIndex.value, cardOrder.value)
   currentPosition.value = 0
   flipped.value = false
+  ratedPositions.value = new Set()
+  retryCounts.value = {}
 }
 
 function nextCard() {
-  if (currentPosition.value === words.length - 1) {
-    const lastWordIndex = cardOrder.value[currentPosition.value]
-    cardOrder.value = createShuffledOrder(lastWordIndex, cardOrder.value)
-    currentPosition.value = 0
-  } else {
-    currentPosition.value += 1
-  }
+  if (currentPosition.value < cardOrder.value.length - 1) currentPosition.value += 1
   flipped.value = false
 }
 
 function previousCard() {
-  currentPosition.value = (currentPosition.value + words.length - 1) % words.length
+  if (currentPosition.value > 0 && !sessionComplete.value) currentPosition.value -= 1
   flipped.value = false
+}
+
+function rateCurrentWord(rating: ReviewRating) {
+  if (sessionComplete.value || ratedPositions.value.has(currentPosition.value)) return
+
+  const wordIndex = currentWordIndex.value
+  const wordId = wordIds[wordIndex]
+  rateWord(wordId, rating)
+  void syncRatedWord(wordId)
+  ratedPositions.value = new Set(ratedPositions.value).add(currentPosition.value)
+
+  if (rating === 'again' && (retryCounts.value[wordId] ?? 0) < 1) {
+    cardOrder.value = [...cardOrder.value, wordIndex]
+    retryCounts.value = { ...retryCounts.value, [wordId]: (retryCounts.value[wordId] ?? 0) + 1 }
+  }
+
+  currentPosition.value += 1
+  flipped.value = false
+}
+
+function startDueSession() {
+  cardOrder.value = createShuffledOrder(false)
+  currentPosition.value = 0
+  flipped.value = false
+  ratedPositions.value = new Set()
+  retryCounts.value = {}
 }
 
 watch(frontLanguage, () => {
   flipped.value = false
+})
+
+watch(cloudReadyUserId, (userId, previousUserId) => {
+  if (userId || previousUserId) startDueSession()
 })
 </script>
 
@@ -70,7 +123,17 @@ watch(frontLanguage, () => {
         <span class="brand-name">λέξη<span class="brand-period">.</span></span>
       </a>
       <div class="topbar-note"><span class="status-dot"></span>Ваш первый шаг в греческий</div>
-      <div class="topbar-level"><span class="level-spark">✳</span> С нуля</div>
+      <div class="topbar-actions">
+        <div class="topbar-level"><span class="level-spark">✳</span> С нуля</div>
+        <AccountPanel
+          :configured="cloudConfigured"
+          :user-email="accountEmail"
+          :status="cloudStatus"
+          :message="cloudMessage"
+          @send-link="sendSignInLink"
+          @sign-out="signOut"
+        />
+      </div>
     </header>
 
     <section class="study-area" :class="{ 'is-reading': section === 'reading' }" aria-labelledby="page-title">
@@ -78,7 +141,7 @@ watch(frontLanguage, () => {
         <div class="eyebrow"><span class="eyebrow-line"></span>{{ section === 'cards' ? 'НЕМНОГО ГРЕЧЕСКОГО КАЖДЫЙ ДЕНЬ' : 'ПРОИЗНОШЕНИЕ СОВРЕМЕННОГО ГРЕЧЕСКОГО' }}</div>
         <h1 v-if="section === 'cards'" id="page-title">Слово за <span>словом.</span></h1>
         <h1 v-else id="page-title">Читаем <span>по-гречески.</span></h1>
-        <p class="intro-copy">{{ section === 'cards' ? 'Переворачивайте карточки и запоминайте в своём ритме.' : 'Сочетания букв и их примерное чтение по-русски.' }}</p>
+        <p class="intro-copy">{{ section === 'cards' ? 'Переворачивайте карточки и повторяйте слова в нужный момент.' : 'Сочетания букв и их примерное чтение по-русски.' }}</p>
       </div>
 
       <nav class="section-tabs" aria-label="Раздел приложения">
@@ -91,7 +154,7 @@ watch(frontLanguage, () => {
         <div class="study-toolbar">
           <div class="deck-label">
             <span class="deck-icon" aria-hidden="true">✳</span>
-            <div><strong>Первые слова</strong><span>Базовый набор <span class="label-separator">·</span> {{ words.length }} слов</span></div>
+            <div><strong>Первые слова</strong><span>Интервальные повторения <span class="label-separator">·</span> {{ words.length }} слов</span></div>
           </div>
           <div class="study-actions">
             <button class="shuffle-button" aria-label="Перемешать карточки" @click="shuffleCards"><span aria-hidden="true">⤨</span> Перемешать</button>
@@ -99,7 +162,20 @@ watch(frontLanguage, () => {
           </div>
         </div>
 
+        <div v-if="sessionComplete" class="session-complete" aria-live="polite">
+          <span class="complete-icon" aria-hidden="true">✦</span>
+          <h2>{{ cardOrder.length ? 'На сегодня всё!' : 'Пока нечего повторять' }}</h2>
+          <p v-if="cardOrder.length">Оценено слов: {{ reviewedWordCount }}<template v-if="remainingWordCount"> · без оценки: {{ remainingWordCount }}</template></p>
+          <p v-else>Новые карточки и слова с подошедшим сроком повтора появятся здесь.</p>
+          <p v-if="nextReviewLabel" class="next-review-note">Ближайший повтор: {{ nextReviewLabel }}</p>
+          <div class="completion-actions">
+            <button v-if="remainingWordCount" class="primary-action" @click="startDueSession">Вернуться к словам без оценки</button>
+            <button class="secondary-action" @click="shuffleCards">Повторить все слова сейчас</button>
+          </div>
+        </div>
+
         <Flashcard
+          v-else
           :key="currentWordIndex"
           :word="currentWord"
           :front-language="frontLanguage"
@@ -107,27 +183,33 @@ watch(frontLanguage, () => {
           @flip="flipped = !flipped"
         />
 
-        <div class="card-navigation">
-          <button class="nav-button nav-previous" aria-label="Предыдущее слово" @click="previousCard">
+        <div v-if="!sessionComplete" class="card-navigation">
+          <button class="nav-button nav-previous" aria-label="Предыдущее слово" :disabled="currentPosition === 0" @click="previousCard">
             <span aria-hidden="true">←</span><span>Назад</span>
           </button>
           <div class="progress-area" aria-live="polite">
             <div class="progress-count">{{ progress }}</div>
             <div class="progress-track"><span :style="{ width: `${progressPercent}%` }"></span></div>
           </div>
-          <button class="nav-button nav-next" aria-label="Следующее слово" @click="nextCard">
-            <span>Дальше</span><span aria-hidden="true">→</span>
+          <button class="nav-button nav-next" aria-label="Пропустить слово" @click="nextCard" :disabled="currentPosition >= cardOrder.length - 1">
+            <span>Пропустить</span><span aria-hidden="true">→</span>
           </button>
         </div>
+        <ReviewRatings
+          v-if="flipped && !sessionComplete && !ratedPositions.has(currentPosition)"
+          :word-id="currentWord.greek"
+          :get-next-interval-days="getNextIntervalDays"
+          @rate="rateCurrentWord"
+        />
       </div>
 
-      <WordExamples
+      <WordExamples v-if="!sessionComplete"
         :examples="currentWord.examples"
         :front-language="frontLanguage"
         :revealed="flipped"
       />
 
-      <div class="study-tip"><span class="tip-icon">✦</span><span>Попробуйте вспомнить значение до того, как перевернёте карточку</span></div>
+      <div v-if="!sessionComplete" class="study-tip"><span class="tip-icon">✦</span><span>Попробуйте вспомнить значение до того, как перевернёте карточку</span></div>
       </template>
 
       <ReadingGuide v-else />
