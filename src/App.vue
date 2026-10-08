@@ -121,7 +121,11 @@ watch(frontLanguage, () => {
         </div>
       </div>
 
-      <WordExamples :examples="currentWord.examples" :show-translation="flipped" />
+      <WordExamples
+        :examples="currentWord.examples"
+        :front-language="frontLanguage"
+        :revealed="flipped"
+      />
 
       <div class="study-tip"><span class="tip-icon">✦</span><span>Попробуйте вспомнить значение до того, как перевернёте карточку</span></div>
       </template>

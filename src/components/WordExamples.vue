@@ -3,7 +3,8 @@ import type { WordExample } from '../data/words'
 
 defineProps<{
   examples: WordExample[]
-  showTranslation: boolean
+  frontLanguage: 'greek' | 'russian'
+  revealed: boolean
 }>()
 </script>
 
@@ -16,10 +17,13 @@ defineProps<{
         <p>Примеры с этим словом</p>
       </div>
     </div>
-    <article v-for="(example, index) in examples" :key="`${example.greek}-${index}`" class="example-item">
-      <p class="example-greek" lang="el">{{ example.greek }}</p>
-      <p class="example-transliteration">{{ example.transliteration }}</p>
-      <p v-if="showTranslation" class="example-translation">{{ example.russian }}</p>
-    </article>
+    <template v-if="frontLanguage === 'greek' || revealed">
+      <article v-for="(example, index) in examples" :key="`${example.greek}-${index}`" class="example-item">
+        <p class="example-greek" lang="el">{{ example.greek }}</p>
+        <p class="example-transliteration">{{ example.transliteration }}</p>
+        <p v-if="revealed" class="example-translation">{{ example.russian }}</p>
+      </article>
+    </template>
+    <p v-else class="example-locked">Переверните карточку, чтобы увидеть пример</p>
   </section>
 </template>

@@ -32,9 +32,9 @@ const backLanguageName = computed(() => props.frontLanguage === 'greek' ? 'Ру�
       </span>
       <span class="card-center">
         <span class="word-text" :class="{ 'is-greek': frontLanguage === 'greek' }">{{ frontWord }}</span>
-        <span class="pronunciation">
+        <span v-if="frontLanguage === 'greek'" class="pronunciation">
           <span class="sound-icon" aria-hidden="true">♫</span>
-          {{ frontLanguage === 'greek' ? `примерно: ${word.transliteration}` : `${word.greek} · ${word.transliteration}` }}
+          примерно: {{ word.transliteration }}
         </span>
       </span>
       <span class="card-hint"><span class="flip-icon" aria-hidden="true">↻</span>Нажмите, чтобы перевернуть</span>

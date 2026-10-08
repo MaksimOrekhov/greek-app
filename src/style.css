@@ -168,6 +168,7 @@ h1 span { color: var(--green); font-family: Georgia, 'Noto Sans Greek', serif; f
 .example-greek { margin: 0; color: #34392f; font: 500 19px/1.4 'Noto Sans Greek', 'DM Sans', sans-serif; }
 .example-transliteration { margin: 4px 0 0; color: #78866d; font-size: 12px; line-height: 1.5; }
 .example-translation { margin: 4px 0 0; color: #73766c; font-size: 13px; line-height: 1.5; }
+.example-locked { margin: 0; padding: 12px 13px; border-radius: 10px; background: #f6f6f2; color: #92938a; font-size: 13px; line-height: 1.5; }
 
 @media (max-width: 600px) {
   .study-area.is-reading { width: min(100% - 28px, 760px); padding-top: 38px; }
