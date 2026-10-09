@@ -14,6 +14,42 @@ export type ProgressByWord = Record<string, WordProgress>
 export type IntroductionsByWord = Record<string, number>
 export type StudyMode = 'today' | 'review' | 'new' | 'all'
 
+const LEGACY_WORD_IDS: Record<string, string> = { 'καφέ': 'καφές' }
+
+export function canonicalWordId(wordId: string) {
+  return LEGACY_WORD_IDS[wordId] ?? wordId
+}
+
+export function normalizeProgressIds(progress: ProgressByWord): ProgressByWord {
+  const normalized: ProgressByWord = {}
+  for (const [wordId, item] of Object.entries(progress)) {
+    const canonicalId = canonicalWordId(wordId)
+    const previous = normalized[canonicalId]
+    if (!previous) {
+      normalized[canonicalId] = item
+      continue
+    }
+    const latest = item.lastReviewedAt > previous.lastReviewedAt
+      || (item.lastReviewedAt === previous.lastReviewedAt
+        && Boolean(item.reviewId)
+        && (!previous.reviewId || item.reviewId! > previous.reviewId))
+      ? item
+      : previous
+    const introductions = [previous.introducedAt, item.introducedAt].filter((value): value is number => value !== undefined)
+    normalized[canonicalId] = introductions.length ? { ...latest, introducedAt: Math.min(...introductions) } : latest
+  }
+  return normalized
+}
+
+export function normalizeIntroductionIds(introductions: IntroductionsByWord): IntroductionsByWord {
+  const normalized: IntroductionsByWord = {}
+  for (const [wordId, timestamp] of Object.entries(introductions)) {
+    const canonicalId = canonicalWordId(wordId)
+    normalized[canonicalId] = Math.min(normalized[canonicalId] ?? timestamp, timestamp)
+  }
+  return normalized
+}
+
 export function nextInterval(rating: ReviewRating, previousInterval: number) {
   if (rating === 'again') return 0
   if (rating === 'hard') return Math.min(365, Math.max(1, Math.ceil(previousInterval * 0.8)))
@@ -32,8 +68,8 @@ export function formatInterval(days: number) {
 }
 
 export function mergeProgressSnapshots(local: ProgressByWord, remote: ProgressByWord): ProgressByWord {
-  const merged = { ...local }
-  for (const [wordId, remoteItem] of Object.entries(remote)) {
+  const merged = normalizeProgressIds(local)
+  for (const [wordId, remoteItem] of Object.entries(normalizeProgressIds(remote))) {
     const localItem = merged[wordId]
     if (!localItem) { merged[wordId] = remoteItem; continue }
     const remoteIsNewer = remoteItem.lastReviewedAt > localItem.lastReviewedAt

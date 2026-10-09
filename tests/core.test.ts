@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { approximateReading } from '../src/data/approximateReading.ts'
 import { validateVocabularyData, words } from '../src/data/words.ts'
 import { validateVerbData, verbs } from '../src/data/verbs.ts'
-import { canImportAnonymousProgress, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, selectSessionWords } from '../src/lib/studyRules.ts'
+import { canImportAnonymousProgress, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, normalizeIntroductionIds, normalizeProgressIds, selectSessionWords } from '../src/lib/studyRules.ts'
 import { nextPosition, sessionProgress } from '../src/lib/studySession.ts'
 
 test('review intervals preserve rating order, handle first reviews and cap growth', () => {
@@ -35,6 +35,19 @@ test('progress merge keeps the newest review and earliest introduction', () => {
     { слово: { ...remote.слово, lastReviewedAt: 20, reviewId: '00000000-0000-4000-8000-000000000002' } },
   )
   assert.equal(simultaneous.слово.dueAt, remote.слово.dueAt)
+})
+
+test('legacy coffee progress migrates to the dictionary lemma without losing review history', () => {
+  const legacy = { dueAt: 500, intervalDays: 7, repetitions: 3, lapses: 1, lastReviewedAt: 200, introducedAt: 100 }
+  const migrated = normalizeProgressIds({ 'καφέ': legacy })
+  assert.deepEqual(migrated, { 'καφές': legacy })
+  assert.deepEqual(mergeProgressSnapshots({}, { 'καφέ': legacy }), { 'καφές': legacy })
+  assert.deepEqual(normalizeIntroductionIds({ 'καφέ': 100 }), { 'καφές': 100 })
+  const collision = normalizeProgressIds({
+    'καφέ': legacy,
+    'καφές': { ...legacy, dueAt: 800, intervalDays: 14, repetitions: 4, lastReviewedAt: 300, introducedAt: 150 },
+  })
+  assert.deepEqual(collision['καφές'], { ...legacy, dueAt: 800, intervalDays: 14, repetitions: 4, lastReviewedAt: 300, introducedAt: 100 })
 })
 
 test('anonymous progress import is repeatable only for its owner', () => {
@@ -76,6 +89,12 @@ test('approximate reading handles accented αυ/ευ and nasal consonant pairs',
   assert.equal(approximateReading('άγχος'), 'а́нхос')
   assert.equal(approximateReading('σφίγξ'), 'сфи́нкс')
   assert.equal(approximateReading('γεια σου'), 'я су')
+  assert.equal(approximateReading('γιατί'), 'яти́')
+  assert.equal(approximateReading('γέλιο'), 'йэ́лио')
+  assert.equal(approximateReading('θέλω'), 'сэ́ло')
+  assert.equal(approximateReading('δεν'), 'зэн')
+  assert.equal(approximateReading('δουλεύω'), 'зулэ́во')
+  assert.equal(approximateReading('κόκκινη'), 'ко́кини')
 })
 
 test('vocabulary and verb data have complete, unique references and forms', () => {
@@ -85,4 +104,21 @@ test('vocabulary and verb data have complete, unique references and forms', () =
   assert.ok(validateVerbData([verbs[0], verbs[0]]).some((error) => error.includes('Duplicate')))
   const brokenVerb = { ...verbs[0], future: [{ ...verbs[0].future[0], forms: ['θα'] }] }
   assert.ok(validateVerbData([brokenVerb]).some((error) => error.includes('Invalid future')))
+  const coffee = words.find((word) => word.greek === 'καφές')
+  assert.ok(coffee)
+  assert.deepEqual(coffee.partOfSpeech, ['noun'])
+  assert.ok(coffee.examples.some((example) => example.greek === 'Ο καφές είναι ζεστός.'))
+  assert.ok(coffee.examples.some((example) => example.greek === 'Έναν καφέ, παρακαλώ.'))
+  assert.equal(words.some((word) => word.greek === 'καφέ'), false)
+  assert.equal(words.find((word) => word.greek === 'καταλαβαίνω')?.transliteration, 'каталавэ́но')
+  assert.equal(words.find((word) => word.greek === 'θέλω')?.transliteration.includes('*'), false)
+  assert.equal(words.find((word) => word.greek === 'δεν')?.transliteration.includes('*'), false)
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'πηγαίνω')?.future[1].forms, ['θα πάω', 'θα πας', 'θα πάει', 'θα πάμε', 'θα πάτε', 'θα πάνε'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'έρχομαι')?.forms.past, ['ήρθα', 'ήρθες', 'ήρθε', 'ήρθαμε', 'ήρθατε', 'ήρθαν'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'τρώω')?.future[1].forms, ['θα φάω', 'θα φας', 'θα φάει', 'θα φάμε', 'θα φάτε', 'θα φάνε'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'πίνω')?.forms.past, ['ήπια', 'ήπιες', 'ήπιε', 'ήπιαμε', 'ήπιατε', 'ήπιαν'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'βλέπω')?.future[1].forms, ['θα δω', 'θα δεις', 'θα δει', 'θα δούμε', 'θα δείτε', 'θα δουν'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'λέω')?.forms.past, ['είπα', 'είπες', 'είπε', 'είπαμε', 'είπατε', 'είπαν'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'παίρνω')?.forms.past, ['πήρα', 'πήρες', 'πήρε', 'πήραμε', 'πήρατε', 'πήραν'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'δίνω')?.forms.past, ['έδωσα', 'έδωσες', 'έδωσε', 'δώσαμε', 'δώσατε', 'έδωσαν'])
 })

@@ -1,5 +1,5 @@
 import { computed, onMounted, onUnmounted, shallowRef } from 'vue'
-import { canImportAnonymousProgress, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, selectSessionWords, type IntroductionsByWord, type ProgressByWord, type ReviewRating, type StudyMode, type WordProgress } from '../lib/studyRules'
+import { canImportAnonymousProgress, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, normalizeIntroductionIds, normalizeProgressIds, selectSessionWords, type IntroductionsByWord, type ProgressByWord, type ReviewRating, type StudyMode, type WordProgress } from '../lib/studyRules'
 
 export { formatInterval, nextInterval }
 export type { ProgressByWord, ReviewRating, WordProgress }
@@ -34,7 +34,11 @@ function readProgress(key: string): ProgressByWord {
     if (!stored) return {}
     const parsed: unknown = JSON.parse(stored)
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
-    return Object.fromEntries(Object.entries(parsed).filter(([, item]) => isWordProgress(item)))
+    const normalized = normalizeProgressIds(Object.fromEntries(Object.entries(parsed).filter(([, item]) => isWordProgress(item))))
+    if (Object.keys(normalized).length !== Object.keys(parsed).length || Object.keys(normalized).some((wordId) => !(wordId in parsed))) {
+      try { localStorage.setItem(key, JSON.stringify(normalized)) } catch { /* Keep the normalized progress available in memory. */ }
+    }
+    return normalized
   } catch {
     return {}
   }
@@ -45,7 +49,11 @@ function readIntroductions(key: string): IntroductionsByWord {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? '{}')
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
-    return Object.fromEntries(Object.entries(parsed).filter(([, value]) => Number.isFinite(value) && Number(value) > 0)) as IntroductionsByWord
+    const normalized = normalizeIntroductionIds(Object.fromEntries(Object.entries(parsed).filter(([, value]) => Number.isFinite(value) && Number(value) > 0)) as IntroductionsByWord)
+    if (Object.keys(normalized).length !== Object.keys(parsed).length || Object.keys(normalized).some((wordId) => !(wordId in parsed))) {
+      try { localStorage.setItem(key, JSON.stringify(normalized)) } catch { /* Keep the normalized introductions available in memory. */ }
+    }
+    return normalized
   } catch { return {} }
 }
 function introductionsFromProgress(snapshot: ProgressByWord): IntroductionsByWord {
@@ -126,8 +134,8 @@ export function activateProgressScope(userId: string | null): ProgressByWord {
 export function getIntroductionsSnapshot(): IntroductionsByWord { return { ...introductions.value } }
 
 export function mergeIntroductions(remote: IntroductionsByWord): IntroductionsByWord {
-  const merged = { ...introductions.value }
-  for (const [wordId, timestamp] of Object.entries(remote)) {
+  const merged = normalizeIntroductionIds(introductions.value)
+  for (const [wordId, timestamp] of Object.entries(normalizeIntroductionIds(remote))) {
     if (Number.isFinite(timestamp) && timestamp > 0) merged[wordId] = Math.min(merged[wordId] ?? timestamp, timestamp)
   }
   introductions.value = merged

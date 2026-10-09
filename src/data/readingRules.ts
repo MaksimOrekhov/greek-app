@@ -21,7 +21,7 @@ export const vowelPairs: ReadingRule[] = [
   { letters: 'ου', sound: 'у', example: 'ουρανός', pronunciation: 'урано́с — небо' },
   { letters: 'αυ', sound: 'ав / аф', example: 'αύριο · αυτό', pronunciation: 'а́врио · афто́', note: 'ав перед звонким звуком, аф перед глухим' },
   { letters: 'ευ', sound: 'эв / эф', example: 'Ευρώπη · ευχαριστώ', pronunciation: 'эвро́пи · эфхаристо́', note: 'эв перед звонким звуком, эф перед глухим' },
-  { letters: 'ηυ', sound: 'ив / иф', example: 'απηύδησα', pronunciation: 'апи́вдиса — мне надоело', note: 'Очень редкое сочетание; правило как у αυ и ευ' },
+  { letters: 'ηυ', sound: 'ив / иф', example: 'απηύδησα', pronunciation: 'апи́взиса — мне надоело', note: 'Очень редкое сочетание; правило как у αυ и ευ' },
 ]
 
 export const consonantPairs: ReadingRule[] = [

@@ -247,8 +247,8 @@ watch(() => props.readyUserId, (userId, previousUserId) => {
           <div class="progress-count">{{ progress }}</div>
           <div class="progress-track"><span :style="{ width: `${progressPercent}%` }"></span></div>
         </div>
-        <button class="nav-button nav-next" aria-label="Пропустить слово" @click="nextCard">
-          <span>Пропустить</span><span aria-hidden="true">→</span>
+        <button class="nav-button nav-next" aria-label="Дальше" @click="nextCard">
+          <span>Дальше</span><span aria-hidden="true">→</span>
         </button>
       </div>
       <ReviewRatings

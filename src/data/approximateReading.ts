@@ -19,7 +19,22 @@ export function approximateReading(text: string): string {
       index += 4
       continue
     }
+    if (normalized.startsWith('γιά', index)) {
+      result += 'я́'
+      index += 3
+      continue
+    }
+    if (normalized.startsWith('για', index)) {
+      result += 'я'
+      index += 3
+      continue
+    }
     const pair = normalized.slice(index, index + 2)
+    if (pair.length === 2 && pair[0] === pair[1] && pair[0] !== 'γ' && /[βδζθκλμνπρστφχψ]/u.test(pair[0])) {
+      result += readingMap[pair[0]]
+      index += 2
+      continue
+    }
     if (readingMap[pair]) {
       const next = normalized[index + 2] ?? ''
       const isVoiceless = /[κπτφθχσξψ]/u.test(next) || !next || /[\s.,!?;:…]/u.test(next)
@@ -35,7 +50,9 @@ export function approximateReading(text: string): string {
     }
 
     const letter = normalized[index]
-    result += readingMap[letter] ?? letter
+    const gammaBeforeFrontVowel = letter === 'γ'
+      && /^(?:αι|αί|ε|έ|ει|εί|η|ή|ι|ί|οι|οί|υ|ύ|υι|υί)/u.test(normalized.slice(index + 1))
+    result += gammaBeforeFrontVowel ? 'й' : readingMap[letter] ?? letter
     index += 1
   }
 

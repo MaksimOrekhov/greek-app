@@ -48,9 +48,9 @@ import { consonantPairs, doubleConsonants, vowelLetters, vowelPairs } from '../d
           <span v-if="rule.note" class="rule-note">{{ rule.note }}</span>
         </article>
       </div>
-      <p class="guide-footnote"><span>{{ doubleConsonants }}</span> — одинаковые согласные обычно звучат как один звук. Другие соседние согласные чаще всего сохраняют свои отдельные звуки.</p>
+      <p class="guide-footnote"><span>{{ doubleConsonants }}</span> — в стандартном новогреческом удвоенные согласные обычно звучат как один. В кипрской речи некоторые из них произносятся дольше.</p>
     </section>
 
-    <aside class="guide-tip"><span>✦</span> Транскрипция приблизительная: она помогает начать читать, но не заменяет греческое произношение.</aside>
+    <aside class="guide-tip"><span>✦</span> Транскрипция приблизительная. Θ и Δ — межзубные звуки: русские «с» и «з» лишь приближения. Γ перед «э» и «и» смягчается (в записи примерно «й»); точного русского аналога нет.</aside>
   </div>
 </template>
