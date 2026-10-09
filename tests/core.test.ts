@@ -113,6 +113,17 @@ test('vocabulary and verb data have complete, unique references and forms', () =
   assert.equal(words.find((word) => word.greek === 'καταλαβαίνω')?.transliteration, 'каталавэ́но')
   assert.equal(words.find((word) => word.greek === 'θέλω')?.transliteration.includes('*'), false)
   assert.equal(words.find((word) => word.greek === 'δεν')?.transliteration.includes('*'), false)
+  for (const [greek, transliteration] of [
+    ['πώς τον λένε;', 'по́с тон лэ́нэ?'],
+    ['πώς τη λένε;', 'по́с ти лэ́нэ?'],
+    ['πώς το λένε;', 'по́с то лэ́нэ?'],
+  ]) {
+    const word = words.find((entry) => entry.greek === greek)
+    assert.ok(word)
+    assert.equal(word.transliteration, transliteration)
+    assert.ok(word.examples.some((example) => example.transliteration === transliteration))
+  }
+  assert.equal(words.find((word) => word.greek === 'έτοιμη')?.russian, 'готова (женский род)')
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'πηγαίνω')?.future[1].forms, ['θα πάω', 'θα πας', 'θα πάει', 'θα πάμε', 'θα πάτε', 'θα πάνε'])
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'έρχομαι')?.forms.past, ['ήρθα', 'ήρθες', 'ήρθε', 'ήρθαμε', 'ήρθατε', 'ήρθαν'])
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'τρώω')?.future[1].forms, ['θα φάω', 'θα φας', 'θα φάει', 'θα φάμε', 'θα φάτε', 'θα φάνε'])
