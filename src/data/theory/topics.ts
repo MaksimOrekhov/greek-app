@@ -40,7 +40,7 @@ export const theoryResources: TheoryResource[] = [
     category: 'Произношение',
     description: 'Буквы и сочетания букв: приблизительное чтение по-русски.',
     keywords: ['произношение', 'чтение', 'буквы', 'транскрипция'],
-    to: '/reading',
+    to: '/theory/reading',
   },
 ]
 

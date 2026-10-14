@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MarkdownArticle from '../components/theory/MarkdownArticle.vue'
 import { getTheoryTopic, theoryTopics } from '../data/theory/topics'
+import { shouldOpenTheoryExplanation } from '../lib/scrollBehavior'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,7 +14,7 @@ const explanation = computed(() => topic.value ? markdownFiles[`../data/theory/$
 const relatedTopics = computed(() => topic.value?.related.map((id) => getTheoryTopic(id)).filter((item) => item !== undefined) ?? [])
 const explanationOpen = ref(false)
 watch(() => route.fullPath, () => {
-  explanationOpen.value = route.query.explanation === '1' || Boolean(route.hash)
+  explanationOpen.value = shouldOpenTheoryExplanation(route.query.explanation, route.hash)
 }, { immediate: true })
 function toggleExplanation() {
   explanationOpen.value = !explanationOpen.value

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { renderTheoryMarkdown } from '../../data/theory/markdown'
 
 const props = defineProps<{ source: string; variant: 'summary' | 'explanation' }>()
-const html = computed(() => renderTheoryMarkdown(props.source))
+const html = computed(() => renderTheoryMarkdown(props.source, props.variant))
 </script>
 
 <template>

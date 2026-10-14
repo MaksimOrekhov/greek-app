@@ -1,20 +1,19 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { theoryRoutes } from './data/theory/routes'
+import { legacyReadingRoute, theoryRoutes } from './data/theory/routes'
+import { resolveScrollBehavior } from './lib/scrollBehavior'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', redirect: '/cards' },
     { path: '/cards', name: 'cards', component: () => import('./pages/CardsPage.vue') },
-    { path: '/reading', name: 'reading', component: () => import('./pages/ReadingPage.vue') },
+    legacyReadingRoute,
     ...theoryRoutes,
     { path: '/dictionary', name: 'dictionary', component: () => import('./pages/DictionaryPage.vue') },
     { path: '/verbs', name: 'verbs', component: () => import('./pages/VerbsPage.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/cards' },
   ],
-  scrollBehavior(_to, _from, savedPosition) {
-    return _to.hash ? { el: _to.hash } : savedPosition ?? { top: 0 }
-  },
+  scrollBehavior: resolveScrollBehavior,
 })
 
 export default router
