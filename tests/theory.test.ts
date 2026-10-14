@@ -14,6 +14,17 @@ test('theory topic registry has complete metadata, unique IDs, and valid related
   assert.ok(validateTheoryTopics([{ ...theoryTopics[0]!, related: ['missing-topic'] }]).some((error) => error.includes('неизвестную тему')))
 })
 
+test('article and gender topics link to each other and the definite article', () => {
+  const definite = getTheoryTopic('definite-article')!
+  const indefinite = getTheoryTopic('indefinite-article')!
+  const gender = getTheoryTopic('noun-gender')!
+  assert.deepEqual(definite.related, ['indefinite-article', 'noun-gender'])
+  assert.deepEqual(indefinite.related, ['definite-article', 'noun-gender'])
+  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article'])
+  assert.equal(indefinite.category, 'Грамматика')
+  assert.equal(gender.category, 'Грамматика')
+})
+
 test('registered topic content exists and both Markdown files render successfully', async () => {
   for (const topic of theoryTopics) {
     for (const file of [topic.summary, topic.explanation]) {
