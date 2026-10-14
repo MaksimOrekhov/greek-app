@@ -133,3 +133,30 @@ test('vocabulary and verb data have complete, unique references and forms', () =
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'παίρνω')?.forms.past, ['πήρα', 'πήρες', 'πήρε', 'πήραμε', 'πήρατε', 'πήραν'])
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'δίνω')?.forms.past, ['έδωσα', 'έδωσες', 'έδωσε', 'δώσαμε', 'δώσατε', 'έδωσαν'])
 })
+
+test('targeted vocabulary clarifications preserve existing Greek keys and examples', () => {
+  assert.equal(words.length, 155)
+  const word = (greek: string) => {
+    const found = words.find((entry) => entry.greek === greek)
+    assert.ok(found, `Missing vocabulary key: ${greek}`)
+    return found
+  }
+
+  assert.equal(word('δέμα').russian, 'посылка / свёрток')
+  assert.equal(word('πορτοκαλάδα').russian, 'апельсиновый лимонад / напиток')
+  assert.equal(word('γιατρός').transliteration, 'ятро́с')
+  assert.equal(word('γιατρός').examples[0].transliteration, 'о ятро́с и́нэ эзо́')
+  assert.deepEqual(word('γαλοπούλα').examples[0], {
+    greek: 'Τρώω γαλοπούλα.', transliteration: 'тро́о галопу́ла', russian: 'Я ем индейку.',
+  })
+  assert.deepEqual(word('γύρος').examples[0], {
+    greek: 'Μια πίτα με γύρο, παρακαλώ.',
+    transliteration: 'мья пи́та мэ йи́ро, паракало́',
+    russian: 'Питу с гиросом, пожалуйста.',
+  })
+  assert.deepEqual(word('φούρνος').examples[0], {
+    greek: 'Θέλω ένα ψωμί από τον φούρνο, παρακαλώ.',
+    transliteration: 'сэ́ло э́на псоми́ апо́ тон фу́рно, паракало́',
+    russian: 'Хочу буханку хлеба из пекарни, пожалуйста.',
+  })
+})
