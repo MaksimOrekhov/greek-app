@@ -49,6 +49,18 @@ export const theoryTopics: TheoryTopic[] = [
     related: ['definite-article', 'indefinite-article'],
   },
   {
+    id: 'noun-cases',
+    title: 'Падежи существительных',
+    greekTitle: 'Οι πτώσεις των ουσιαστικών',
+    category: 'Грамматика',
+    description: 'Как падеж и артикль показывают роль существительного в предложении.',
+    order: 4,
+    keywords: ['падеж', 'падежи', 'именительный', 'родительный', 'винительный', 'звательный', 'πτώσεις', 'ονομαστική', 'γενική', 'αιτιατική', 'κλητική', 'артикль', 'склонение'],
+    summary: 'content/noun-cases/summary.md',
+    explanation: 'content/noun-cases/explanation.md',
+    related: ['definite-article', 'indefinite-article', 'noun-gender'],
+  },
+  {
     id: 'numbers-0-20',
     title: 'Числительные от 0 до 20',
     greekTitle: 'Αριθμοί από το 0 έως το 20',

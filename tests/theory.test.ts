@@ -71,6 +71,32 @@ test('numbers 20-100 topic is searchable, registered, and explains compound agre
   assert.equal(route.query.explanation, '1')
 })
 
+test('noun cases topic is searchable, linked to grammar topics, and includes validated case forms', async () => {
+  const cases = getTheoryTopic('noun-cases')!
+  assert.equal(cases.title, 'Падежи существительных')
+  assert.equal(cases.greekTitle, 'Οι πτώσεις των ουσιαστικών')
+  assert.equal(cases.category, 'Грамматика')
+  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender'])
+  for (const keyword of ['падеж', 'именительный', 'родительный', 'винительный', 'звательный']) {
+    assert.ok(cases.keywords.includes(keyword), `missing search keyword: ${keyword}`)
+  }
+
+  const summary = await readFile(resolve('src/data/theory', cases.summary), 'utf8')
+  for (const form of ['Ο φίλος είναι εδώ.', 'Το βιβλίο του φίλου.', 'Βλέπω τον φίλο.', 'Φίλε, έλα!']) {
+    assert.ok(summary.includes(form), `missing case example: ${form}`)
+  }
+
+  const explanation = await readFile(resolve('src/data/theory', cases.explanation), 'utf8')
+  for (const form of ['ο φίλος', 'του φίλου', 'τον φίλο', 'φίλε', 'η φίλη', 'της φίλης', 'το παιδί', 'του παιδιού', 'Πάω στον φίλο.', 'με τον φίλο', 'από τον φίλο']) {
+    assert.ok(explanation.includes(form), `missing noun case or preposition example: ${form}`)
+  }
+
+  const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve('/theory/noun-cases?explanation=1')
+  assert.equal(route.name, 'theory-topic')
+  assert.equal(route.params.topicId, 'noun-cases')
+  assert.equal(route.query.explanation, '1')
+})
+
 test('registered topic content exists and both Markdown files render successfully', async () => {
   for (const topic of theoryTopics) {
     for (const file of [topic.summary, topic.explanation]) {

@@ -75,7 +75,7 @@ function toggleExplanation() {
 </template>
 
 <style scoped>
-.study-area.is-theory-topic { width: min(100% - 36px, 800px); padding: 38px 0 70px; margin: 0 auto; position: relative; z-index: 1; }
+.study-area.is-theory-topic { width: min(100% - 48px, 1080px); padding: 38px 0 70px; margin: 0 auto; position: relative; z-index: 1; }
 .theory-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; color: #65715c; font-size: 13px; font-weight: 600; text-decoration: none; }
 .theory-back:hover, .theory-not-found a:hover { color: #40533a; text-decoration: underline; text-underline-offset: 3px; }
 .theory-topic-header { margin-bottom: 25px; }

@@ -27,4 +27,8 @@ const html = computed(() => renderTheoryMarkdown(props.source, props.variant))
 .theory-markdown :deep(code) { padding: 2px 5px; border-radius: 5px; background: #f0f1eb; color: #48533f; font-family: 'Noto Sans Greek', monospace; }
 .theory-markdown :deep(hr) { margin: 24px 0; border: 0; border-top: 1px solid #e9e8e1; }
 .theory-markdown.is-summary { font-size: 13px; }
+@media (min-width: 761px) {
+  .theory-markdown :deep(table) { min-width: 0; }
+  .theory-markdown :deep(th), .theory-markdown :deep(td) { white-space: normal; }
+}
 </style>
