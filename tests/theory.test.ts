@@ -25,6 +25,26 @@ test('article and gender topics link to each other and the definite article', ()
   assert.equal(gender.category, 'Грамматика')
 })
 
+test('numbers topic is registered under its own category and links to related grammar topics', async () => {
+  const numbers = getTheoryTopic('numbers-0-20')!
+  assert.equal(numbers.title, 'Числительные от 0 до 20')
+  assert.equal(numbers.greekTitle, 'Αριθμοί από το 0 έως το 20')
+  assert.equal(numbers.category, 'Числительные')
+  assert.deepEqual(numbers.related, ['indefinite-article', 'noun-gender'])
+  assert.ok(numbers.keywords.includes('числительные'))
+
+  const summary = await readFile(resolve('src/data/theory', numbers.summary), 'utf8')
+  const entries = summary.split('\n').filter((line) => /^\|\s*\d+\s*\|/.test(line))
+  assert.equal(entries.length, 21)
+  assert.match(entries[0]!, /^\| 0 \| μηδέν /)
+  assert.match(entries[20]!, /^\| 20 \| είκοσι /)
+
+  const explanation = await readFile(resolve('src/data/theory', numbers.explanation), 'utf8')
+  for (const form of ['ένας φίλος', 'μία φίλη', 'ένα παιδί', 'τρεις φίλοι', 'τρία παιδιά', 'τέσσερις φίλες', 'τέσσερα παιδιά', 'δεκατρείς φίλοι', 'δεκατριών', 'δεκατέσσερις', 'δεκατεσσάρων', 'μηδενός']) {
+    assert.ok(explanation.includes(form), `missing numeral example or form: ${form}`)
+  }
+})
+
 test('registered topic content exists and both Markdown files render successfully', async () => {
   for (const topic of theoryTopics) {
     for (const file of [topic.summary, topic.explanation]) {
@@ -48,6 +68,9 @@ test('theory catalog and topic routes resolve, including direct topic URLs', () 
   assert.equal(directTopic.name, 'theory-topic')
   assert.equal(directTopic.params.topicId, 'definite-article')
   assert.equal(directTopic.query.explanation, '1')
+  const numbersTopic = router.resolve('/theory/numbers-0-20')
+  assert.equal(numbersTopic.name, 'theory-topic')
+  assert.equal(numbersTopic.params.topicId, 'numbers-0-20')
   const subsection = router.resolve('/theory/definite-article#explanation-1-что-показывает-артикль')
   assert.equal(subsection.name, 'theory-topic')
   assert.equal(subsection.hash, '#explanation-1-что-показывает-артикль')

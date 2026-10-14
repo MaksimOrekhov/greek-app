@@ -48,6 +48,18 @@ export const theoryTopics: TheoryTopic[] = [
     explanation: 'content/noun-gender/explanation.md',
     related: ['definite-article', 'indefinite-article'],
   },
+  {
+    id: 'numbers-0-20',
+    title: 'Числительные от 0 до 20',
+    greekTitle: 'Αριθμοί από το 0 έως το 20',
+    category: 'Числительные',
+    description: 'Названия чисел, варианты произношения и согласование с существительными.',
+    order: 1,
+    keywords: ['числительные', 'числа', 'счёт', '0', '20', 'μηδέν', 'ένα', 'δύο', 'τρία', 'τέσσερα', 'δεκατρία', 'δεκατέσσερα', 'род', 'падеж'],
+    summary: 'content/numbers-0-20/summary.md',
+    explanation: 'content/numbers-0-20/explanation.md',
+    related: ['indefinite-article', 'noun-gender'],
+  },
 ]
 
 export interface TheoryResource {
