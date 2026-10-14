@@ -46,7 +46,7 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['род', 'род существительных', 'мужской', 'женский', 'средний', 'ο', 'η', 'το', 'окончания', 'согласование'],
     summary: 'content/noun-gender/summary.md',
     explanation: 'content/noun-gender/explanation.md',
-    related: ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine'],
+    related: ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine', 'noun-neuter'],
   },
   {
     id: 'noun-cases',
@@ -58,7 +58,7 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['падеж', 'падежи', 'именительный', 'родительный', 'винительный', 'звательный', 'πτώσεις', 'ονομαστική', 'γενική', 'αιτιατική', 'κλητική', 'артикль', 'склонение'],
     summary: 'content/noun-cases/summary.md',
     explanation: 'content/noun-cases/explanation.md',
-    related: ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine'],
+    related: ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter'],
   },
   {
     id: 'noun-masculine',
@@ -70,7 +70,7 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['мужской род', 'мужские существительные', 'мужских существительных', 'склонение мужских', 'склонение', 'падежи', 'окончания', '-ος', '-ας', '-ης', '-ές', 'φίλος', 'άντρας', 'μαθητής', 'καφές'],
     summary: 'content/noun-masculine/summary.md',
     explanation: 'content/noun-masculine/explanation.md',
-    related: ['noun-cases', 'noun-gender', 'definite-article', 'noun-feminine'],
+    related: ['noun-cases', 'noun-gender', 'definite-article', 'noun-feminine', 'noun-neuter'],
   },
   {
     id: 'noun-feminine',
@@ -82,7 +82,19 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['женский род', 'женские существительные', 'склонение женских', 'падежи', 'окончания', '-α', '-η', '-εις', '-ος', '-ού', 'γυναίκα', 'θάλασσα', 'φωνή', 'φίλη', 'πόλη', 'οδός', 'αλεπού'],
     summary: 'content/noun-feminine/summary.md',
     explanation: 'content/noun-feminine/explanation.md',
-    related: ['noun-cases', 'noun-gender', 'noun-masculine'],
+    related: ['noun-cases', 'noun-gender', 'noun-masculine', 'noun-neuter'],
+  },
+  {
+    id: 'noun-neuter',
+    title: 'Склонение существительных среднего рода',
+    greekTitle: 'Κλίση ουδέτερων ουσιαστικών',
+    category: 'Грамматика',
+    description: 'Основные модели среднего рода на -ο, -ι и -μα, падежные формы и ударение.',
+    order: 7,
+    keywords: ['средний род', 'средние существительные', 'склонение средних', 'склонение существительных среднего рода', 'падежи', 'родительный', '-ο', '-ι', '-μα', 'βιβλίο', 'σπίτι', 'παιδί', 'όνομα', 'πρόβλημα', 'μέρος', 'φως'],
+    summary: 'content/noun-neuter/summary.md',
+    explanation: 'content/noun-neuter/explanation.md',
+    related: ['noun-cases', 'noun-gender', 'noun-masculine', 'noun-feminine'],
   },
   {
     id: 'numbers-0-20',

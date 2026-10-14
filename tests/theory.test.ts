@@ -20,7 +20,7 @@ test('article and gender topics link to each other and the definite article', ()
   const gender = getTheoryTopic('noun-gender')!
   assert.deepEqual(definite.related, ['indefinite-article', 'noun-gender', 'noun-masculine'])
   assert.deepEqual(indefinite.related, ['definite-article', 'noun-gender'])
-  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine'])
+  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine', 'noun-neuter'])
   assert.equal(indefinite.category, 'Грамматика')
   assert.equal(gender.category, 'Грамматика')
 })
@@ -76,7 +76,7 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   assert.equal(cases.title, 'Падежи существительных')
   assert.equal(cases.greekTitle, 'Οι πτώσεις των ουσιαστικών')
   assert.equal(cases.category, 'Грамматика')
-  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine'])
+  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter'])
   for (const keyword of ['падеж', 'именительный', 'родительный', 'винительный', 'звательный']) {
     assert.ok(cases.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -102,7 +102,7 @@ test('masculine noun declension topic is searchable, linked, and contains checke
   assert.equal(masculine.title, 'Склонение существительных мужского рода')
   assert.equal(masculine.greekTitle, 'Κλίση αρσενικών ουσιαστικών')
   assert.equal(masculine.category, 'Грамматика')
-  assert.deepEqual(masculine.related, ['noun-cases', 'noun-gender', 'definite-article', 'noun-feminine'])
+  assert.deepEqual(masculine.related, ['noun-cases', 'noun-gender', 'definite-article', 'noun-feminine', 'noun-neuter'])
   for (const keyword of ['мужской род', 'склонение', 'склонение мужских', 'падежи', '-ος', '-ας', '-ης', '-ές', 'μαθητής']) {
     assert.ok(masculine.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -140,7 +140,7 @@ test('feminine noun declension topic is searchable, linked, and contains checked
   assert.equal(feminine.title, 'Склонение существительных женского рода')
   assert.equal(feminine.greekTitle, 'Κλίση θηλυκών ουσιαστικών')
   assert.equal(feminine.category, 'Грамматика')
-  assert.deepEqual(feminine.related, ['noun-cases', 'noun-gender', 'noun-masculine'])
+  assert.deepEqual(feminine.related, ['noun-cases', 'noun-gender', 'noun-masculine', 'noun-neuter'])
   for (const keyword of ['женский род', 'склонение женских', 'падежи', '-α', '-η', '-εις', 'γυναίκα', 'πόλη']) {
     assert.ok(feminine.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -154,6 +154,9 @@ test('feminine noun declension topic is searchable, linked, and contains checked
   for (const form of ['η θάλασσα', 'της θάλασσας', 'των θαλασσών', 'η γυναίκα', 'της γυναίκας', 'των γυναικών', 'η φωνή', 'των φωνών', 'η φίλη', 'των φίλων', 'η πόλη', 'της πόλης', 'οι πόλεις', 'των πόλεων', 'η οδός', 'της οδού', 'η αλεπού', 'των αλεπούδων', 'Φίλη μου, έλα εδώ!']) {
     assert.ok(explanation.includes(form), `missing explanation form or example: ${form}`)
   }
+  assert.ok(explanation.includes('η φίλη — της φίλης — οι φίλες — των φίλων'))
+  assert.ok(explanation.includes('**η φίλη → των φίλων** — ударение сохраняется на первом слоге'))
+  assert.doesNotMatch(explanation, /φίλη[^\n]*ударение (?:стоит на последнем слоге|перемещается с первого слога на последний)/i)
 
   const summaryHtml = renderTheoryMarkdown(summary)
   assert.match(summaryHtml, /class="table-wrap"/)
@@ -177,6 +180,38 @@ test('registered topic content exists and both Markdown files render successfull
       assert.doesNotMatch(html, /<script\b/i)
     }
   }
+})
+
+test('neuter noun declension topic is registered, searchable, linked, and contains checked paradigms', async () => {
+  const neuter = getTheoryTopic('noun-neuter')!
+  assert.equal(neuter.title, 'Склонение существительных среднего рода')
+  assert.equal(neuter.greekTitle, 'Κλίση ουδέτερων ουσιαστικών')
+  assert.equal(neuter.category, 'Грамматика')
+  assert.deepEqual(neuter.related, ['noun-cases', 'noun-gender', 'noun-masculine', 'noun-feminine'])
+  for (const keyword of ['средний род', 'склонение средних', '-ο', '-ι', '-μα', 'βιβλίο', 'σπίτι', 'παιδί', 'όνομα']) {
+    assert.ok(neuter.keywords.includes(keyword), `missing search keyword: ${keyword}`)
+  }
+
+  const summary = await readFile(resolve('src/data/theory', neuter.summary), 'utf8')
+  for (const form of ['του βιβλίου', 'τα βιβλία', 'των βιβλίων', 'του σπιτιού', 'τα σπίτια', 'των σπιτιών', 'του ονόματος', 'τα ονόματα', 'των ονομάτων']) {
+    assert.ok(summary.includes(form), `missing summary form: ${form}`)
+  }
+
+  const explanation = await readFile(resolve('src/data/theory', neuter.explanation), 'utf8')
+  for (const form of ['του βιβλίου', 'των βιβλίων', 'του ονόματος', 'των ονομάτων', 'του δέντρου', 'του προσώπου', 'του παιδιού', 'των παιδιών', 'του προβλήματος', 'των προβλημάτων', 'το μέρος', 'του μέρους', 'τα μέρη', 'των μερών', 'του φωτός', 'των φώτων', 'Τα βιβλία των παιδιών είναι εδώ.', 'Υπάρχουν δύο σπίτια στο χωριό.']) {
+    assert.ok(explanation.includes(form), `missing explanation form or example: ${form}`)
+  }
+  assert.match(explanation, /у \*\*όνομα\*\* ударение в \*\*ονόματος\*\* и \*\*ονόματα\*\* стоит на втором слоге/i)
+  assert.ok(explanation.includes('ударение остаётся на том же слоге: **βιβλίο — βιβλίου — βιβλία — βιβλίων**'))
+  assert.match(renderTheoryMarkdown(summary), /class="table-wrap"/)
+  const explanationHtml = renderTheoryMarkdown(explanation, 'explanation')
+  const topicAnchor = explanationHtml.match(/id="(explanation-\d+-[^\"]+)"/)?.[1]
+  assert.ok(topicAnchor)
+  const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve(`/theory/noun-neuter?explanation=1#${topicAnchor}`)
+  assert.equal(route.name, 'theory-topic')
+  assert.equal(route.params.topicId, 'noun-neuter')
+  assert.equal(route.query.explanation, '1')
+  assert.equal(route.hash, `#${topicAnchor}`)
 })
 
 test('unknown topics are handled without falling back to another article', () => {
