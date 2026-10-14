@@ -116,6 +116,12 @@ test('masculine noun declension topic is searchable, linked, and contains checke
   for (const form of ['ο φίλος', 'του φίλου', 'των φίλων', 'φίλε', 'ο άνθρωπος', 'του ανθρώπου', 'των ανθρώπων', 'ο άντρας', 'του άντρα', 'των αντρών', 'ο μαθητής', 'του μαθητή', 'των μαθητών', 'ο καφές', 'του καφέ', 'οι καφέδες', 'Μαθητή, διάβασε την ερώτηση.']) {
     assert.ok(explanation.includes(form), `missing explanation form or example: ${form}`)
   }
+  assert.ok(explanation.includes('Неверно:** **του άνθρωπου**. **Верно:** **του ανθρώπου**'))
+  assert.ok(explanation.includes('**ο άντρας → οι άντρες**, но **ο ταμίας → οι ταμίες**'))
+  assert.ok(explanation.includes('Не переносите модель **καφές → καφέδες** на существительное **μαθητής**: его множественное число — **μαθητές**.'))
+  for (const obsoleteExample of ['ταμάντρες', 'ταμάδες', '**\\*οι καφέδες** как форма слова']) {
+    assert.ok(!explanation.includes(obsoleteExample), `obsolete misleading example remains: ${obsoleteExample}`)
+  }
   const explanationHtml = renderTheoryMarkdown(explanation, 'explanation')
   assert.match(explanationHtml, /id="explanation-2-модель-на-ος-ο-φίλος"/)
 
