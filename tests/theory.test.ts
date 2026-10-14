@@ -20,7 +20,7 @@ test('article and gender topics link to each other and the definite article', ()
   const gender = getTheoryTopic('noun-gender')!
   assert.deepEqual(definite.related, ['indefinite-article', 'noun-gender', 'noun-masculine'])
   assert.deepEqual(indefinite.related, ['definite-article', 'noun-gender'])
-  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine'])
+  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine'])
   assert.equal(indefinite.category, 'Грамматика')
   assert.equal(gender.category, 'Грамматика')
 })
@@ -76,7 +76,7 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   assert.equal(cases.title, 'Падежи существительных')
   assert.equal(cases.greekTitle, 'Οι πτώσεις των ουσιαστικών')
   assert.equal(cases.category, 'Грамматика')
-  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine'])
+  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine'])
   for (const keyword of ['падеж', 'именительный', 'родительный', 'винительный', 'звательный']) {
     assert.ok(cases.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -102,7 +102,7 @@ test('masculine noun declension topic is searchable, linked, and contains checke
   assert.equal(masculine.title, 'Склонение существительных мужского рода')
   assert.equal(masculine.greekTitle, 'Κλίση αρσενικών ουσιαστικών')
   assert.equal(masculine.category, 'Грамматика')
-  assert.deepEqual(masculine.related, ['noun-cases', 'noun-gender', 'definite-article'])
+  assert.deepEqual(masculine.related, ['noun-cases', 'noun-gender', 'definite-article', 'noun-feminine'])
   for (const keyword of ['мужской род', 'склонение', 'склонение мужских', 'падежи', '-ος', '-ας', '-ης', '-ές', 'μαθητής']) {
     assert.ok(masculine.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -133,6 +133,39 @@ test('masculine noun declension topic is searchable, linked, and contains checke
   assert.equal(route.params.topicId, 'noun-masculine')
   assert.equal(route.query.explanation, '1')
   assert.equal(route.hash, '#explanation-2-модель-на-ος-ο-фίλος')
+})
+
+test('feminine noun declension topic is searchable, linked, and contains checked paradigms', async () => {
+  const feminine = getTheoryTopic('noun-feminine')!
+  assert.equal(feminine.title, 'Склонение существительных женского рода')
+  assert.equal(feminine.greekTitle, 'Κλίση θηλυκών ουσιαστικών')
+  assert.equal(feminine.category, 'Грамматика')
+  assert.deepEqual(feminine.related, ['noun-cases', 'noun-gender', 'noun-masculine'])
+  for (const keyword of ['женский род', 'склонение женских', 'падежи', '-α', '-η', '-εις', 'γυναίκα', 'πόλη']) {
+    assert.ok(feminine.keywords.includes(keyword), `missing search keyword: ${keyword}`)
+  }
+
+  const summary = await readFile(resolve('src/data/theory', feminine.summary), 'utf8')
+  for (const form of ['της γυναίκας', 'των γυναικών', 'τη γυναίκα', 'της φωνής', 'των φωνών', 'φίλη → των φίλων', 'οι πόλεις', 'των πόλεων']) {
+    assert.ok(summary.includes(form), `missing summary form: ${form}`)
+  }
+
+  const explanation = await readFile(resolve('src/data/theory', feminine.explanation), 'utf8')
+  for (const form of ['η θάλασσα', 'της θάλασσας', 'των θαλασσών', 'η γυναίκα', 'της γυναίκας', 'των γυναικών', 'η φωνή', 'των φωνών', 'η φίλη', 'των φίλων', 'η πόλη', 'της πόλης', 'οι πόλεις', 'των πόλεων', 'η οδός', 'της οδού', 'η αλεπού', 'των αλεπούδων', 'Φίλη μου, έλα εδώ!']) {
+    assert.ok(explanation.includes(form), `missing explanation form or example: ${form}`)
+  }
+
+  const summaryHtml = renderTheoryMarkdown(summary)
+  assert.match(summaryHtml, /class="table-wrap"/)
+  const explanationHtml = renderTheoryMarkdown(explanation, 'explanation')
+  const topicAnchor = explanationHtml.match(/id="(explanation-4-[^"]+)"/)?.[1]
+  assert.ok(topicAnchor)
+
+  const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve(`/theory/noun-feminine?explanation=1#${topicAnchor}`)
+  assert.equal(route.name, 'theory-topic')
+  assert.equal(route.params.topicId, 'noun-feminine')
+  assert.equal(route.query.explanation, '1')
+  assert.equal(route.hash, `#${topicAnchor}`)
 })
 
 test('registered topic content exists and both Markdown files render successfully', async () => {
