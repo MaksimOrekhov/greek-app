@@ -60,6 +60,18 @@ export const theoryTopics: TheoryTopic[] = [
     explanation: 'content/numbers-0-20/explanation.md',
     related: ['indefinite-article', 'noun-gender'],
   },
+  {
+    id: 'numbers-20-100',
+    title: 'Числительные от 20 до 100',
+    greekTitle: 'Αριθμοί από το 20 έως το 100',
+    category: 'Числительные',
+    description: 'Десятки, составные числа и согласование последней части с существительным.',
+    order: 2,
+    keywords: ['числительные', 'числа', 'десятки', '100', 'είκοσι', 'τριάντα', 'σαράντα', 'πενήντα', 'εξήντα', 'εβδομήντα', 'ογδόντα', 'ενενήντα', 'εκατό', 'согласование'],
+    summary: 'content/numbers-20-100/summary.md',
+    explanation: 'content/numbers-20-100/explanation.md',
+    related: ['numbers-0-20', 'noun-gender'],
+  },
 ]
 
 export interface TheoryResource {

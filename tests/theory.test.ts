@@ -45,6 +45,32 @@ test('numbers topic is registered under its own category and links to related gr
   }
 })
 
+test('numbers 20-100 topic is searchable, registered, and explains compound agreement', async () => {
+  const numbers = getTheoryTopic('numbers-20-100')!
+  assert.equal(numbers.title, 'Числительные от 20 до 100')
+  assert.equal(numbers.greekTitle, 'Αριθμοί από το 20 έως το 100')
+  assert.equal(numbers.category, 'Числительные')
+  assert.deepEqual(numbers.related, ['numbers-0-20', 'noun-gender'])
+  for (const keyword of ['числа', 'числительные', 'десятки', '100']) {
+    assert.ok(numbers.keywords.includes(keyword), `missing search keyword: ${keyword}`)
+  }
+
+  const summary = await readFile(resolve('src/data/theory', numbers.summary), 'utf8')
+  for (const form of ['20 | είκοσι', '30 | τριάντα', '40 | σαράντα', '50 | πενήντα', '60 | εξήντα', '70 | εβδομήντα', '80 | ογδόντα', '90 | ενενήντα', '100 | εκατό']) {
+    assert.ok(summary.includes(form), `missing tens form: ${form}`)
+  }
+
+  const explanation = await readFile(resolve('src/data/theory', numbers.explanation), 'utf8')
+  for (const form of ['είκοσι ένας φίλοι', 'τριάντα μία φίλες', 'σαράντα ένα παιδιά', 'είκοσι τρεις φίλοι', 'είκοσι τέσσερα παιδιά', 'είκοσι τριών χρονών', 'είκοσι έναν φίλους', 'είκοσι επτά / είκοσι εφτά', 'εκατό ευρώ']) {
+    assert.ok(explanation.includes(form), `missing compound numeral form: ${form}`)
+  }
+
+  const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve('/theory/numbers-20-100?explanation=1')
+  assert.equal(route.name, 'theory-topic')
+  assert.equal(route.params.topicId, 'numbers-20-100')
+  assert.equal(route.query.explanation, '1')
+})
+
 test('registered topic content exists and both Markdown files render successfully', async () => {
   for (const topic of theoryTopics) {
     for (const file of [topic.summary, topic.explanation]) {
