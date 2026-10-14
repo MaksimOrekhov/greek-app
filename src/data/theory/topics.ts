@@ -22,7 +22,7 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['род', 'число', 'падеж', 'ο', 'η', 'το', 'артикли'],
     summary: 'content/definite-article/summary.md',
     explanation: 'content/definite-article/explanation.md',
-    related: ['indefinite-article', 'noun-gender'],
+    related: ['indefinite-article', 'noun-gender', 'noun-masculine'],
   },
   {
     id: 'indefinite-article',
@@ -46,7 +46,7 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['род', 'род существительных', 'мужской', 'женский', 'средний', 'ο', 'η', 'το', 'окончания', 'согласование'],
     summary: 'content/noun-gender/summary.md',
     explanation: 'content/noun-gender/explanation.md',
-    related: ['definite-article', 'indefinite-article'],
+    related: ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine'],
   },
   {
     id: 'noun-cases',
@@ -58,7 +58,19 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['падеж', 'падежи', 'именительный', 'родительный', 'винительный', 'звательный', 'πτώσεις', 'ονομαστική', 'γενική', 'αιτιατική', 'κλητική', 'артикль', 'склонение'],
     summary: 'content/noun-cases/summary.md',
     explanation: 'content/noun-cases/explanation.md',
-    related: ['definite-article', 'indefinite-article', 'noun-gender'],
+    related: ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine'],
+  },
+  {
+    id: 'noun-masculine',
+    title: 'Склонение существительных мужского рода',
+    greekTitle: 'Κλίση αρσενικών ουσιαστικών',
+    category: 'Грамматика',
+    description: 'Основные падежные формы мужских существительных на -ος, -ας, -ης и -ές.',
+    order: 5,
+    keywords: ['мужской род', 'мужские существительные', 'мужских существительных', 'склонение мужских', 'склонение', 'падежи', 'окончания', '-ος', '-ας', '-ης', '-ές', 'φίλος', 'άντρας', 'μαθητής', 'καφές'],
+    summary: 'content/noun-masculine/summary.md',
+    explanation: 'content/noun-masculine/explanation.md',
+    related: ['noun-cases', 'noun-gender', 'definite-article'],
   },
   {
     id: 'numbers-0-20',
