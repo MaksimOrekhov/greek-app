@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AccountPanel from './components/AccountPanel.vue'
 import { useCloudProgressSync } from './composables/useCloudProgressSync'
 
@@ -15,6 +16,7 @@ const {
   syncIntroducedWord,
 } = useCloudProgressSync()
 const accountEmail = computed(() => cloudUser.value?.email ?? null)
+const route = useRoute()
 </script>
 
 <template>
@@ -27,8 +29,8 @@ const accountEmail = computed(() => cloudUser.value?.email ?? null)
 
       <nav class="primary-nav" aria-label="Главное меню">
         <RouterLink to="/cards" active-class="is-active"><span aria-hidden="true">▤</span> Карточки</RouterLink>
-        <RouterLink to="/reading" active-class="is-active"><span aria-hidden="true">Αβ</span> Как читать</RouterLink>
         <RouterLink to="/dictionary" active-class="is-active"><span aria-hidden="true">☷</span> Словарь</RouterLink>
+        <RouterLink to="/theory" active-class="is-active" :class="{ 'is-active': route.path.startsWith('/theory') }"><span aria-hidden="true">✧</span> Теория</RouterLink>
         <RouterLink to="/verbs" active-class="is-active"><span aria-hidden="true">ῥ</span> Глаголы</RouterLink>
       </nav>
 

@@ -17,6 +17,7 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/router.ts` maps the hash-based URLs to pages so direct links work on GitHub Pages.
 - `src/pages/CardsPage.vue` owns the flashcard study session.
 - `src/pages/ReadingPage.vue` presents the pronunciation guide page.
+- `src/pages/TheoryPage.vue` presents the searchable theory catalog; `src/pages/TheoryTopicPage.vue` presents a registered theory topic.
 - `src/pages/DictionaryPage.vue` presents vocabulary statistics and the dictionary page.
 - `src/pages/VerbsPage.vue` presents one selected verb, its tense tabs, and previous/next verb navigation.
 - `src/components/Flashcard.vue` renders and flips the active word card.
@@ -29,10 +30,13 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/lib/supabase.ts` creates the Supabase client from Vite environment variables.
 - `supabase/schema.sql` defines the per-user cloud progress table and Row Level Security policies.
 - `src/components/ReadingGuide.vue` explains Modern Greek letter and letter-pair pronunciation.
+- `src/components/theory/` contains theory catalog and safe Markdown rendering components.
 - `src/components/VocabularyDictionary.vue` shows the complete vocabulary, search and status/type filters, and review progress statistics.
 - `src/data/words.ts` is the vocabulary source. Each word has its Greek spelling, Russian meaning, approximate transliteration, semantic category, grammatical part-of-speech tags, and an `examples` array.
 - `src/data/verbs.ts` contains lemma-level verb conjugations, Russian meanings, and approximate reading support.
 - `src/data/readingRules.ts` contains the pronunciation guide content.
+- `src/data/theory/topics.ts` registers theory topics and links to existing learning resources; `src/data/theory/content/` stores each topic's summary and detailed explanation as Markdown.
+- `src/data/theory/markdown.ts` renders local Markdown with raw HTML disabled; `src/data/theory/routes.ts` defines the theory routes.
 - `.env.local` contains local Supabase config and is ignored by Git; GitHub Pages builds read the equivalent repository Actions variables.
 - `src/style.css` contains global layout, responsive styles, and visual tokens.
 - `.github/workflows/deploy.yml` builds the app and deploys `dist/` to GitHub Pages on pushes to `main`.
