@@ -135,7 +135,7 @@ test('vocabulary and verb data have complete, unique references and forms', () =
 })
 
 test('targeted vocabulary clarifications preserve existing Greek keys and examples', () => {
-  assert.equal(words.length, 155)
+  assert.equal(words.length, 197)
   const word = (greek: string) => {
     const found = words.find((entry) => entry.greek === greek)
     assert.ok(found, `Missing vocabulary key: ${greek}`)
