@@ -25,6 +25,22 @@ test('article and gender topics link to each other and the definite article', ()
   assert.equal(gender.category, 'Грамматика')
 })
 
+test('weak genitive pronouns topic covers possessive and object uses', async () => {
+  const pronouns = getTheoryTopic('personal-pronouns-genitive')!
+  assert.equal(pronouns.category, 'Грамматика')
+  assert.deepEqual(pronouns.related, ['noun-cases', 'definite-article'])
+
+  const summary = await readFile(resolve('src/data/theory', pronouns.summary), 'utf8')
+  for (const form of ['**μου**', '**σου**', '**του**', '**της**', '**μας**', '**σας**', '**τους**']) {
+    assert.ok(summary.includes(form), `missing pronoun form: ${form}`)
+  }
+
+  const explanation = await readFile(resolve('src/data/theory', pronouns.explanation), 'utf8')
+  for (const example of ['Το σπίτι μου είναι εδώ.', 'Μου αρέσει ο καφές.', 'Πες μου!']) {
+    assert.ok(explanation.includes(example), `missing pronoun example: ${example}`)
+  }
+})
+
 test('numbers topic is registered under its own category and links to related grammar topics', async () => {
   const numbers = getTheoryTopic('numbers-0-20')!
   assert.equal(numbers.title, 'Числительные от 0 до 20')

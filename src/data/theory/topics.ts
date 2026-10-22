@@ -97,6 +97,18 @@ export const theoryTopics: TheoryTopic[] = [
     related: ['noun-cases', 'noun-gender', 'noun-masculine', 'noun-feminine'],
   },
   {
+    id: 'personal-pronouns-genitive',
+    title: 'Личные местоимения в родительном падеже',
+    greekTitle: 'Αδύνατοι τύποι προσωπικών αντωνυμιών',
+    category: 'Грамматика',
+    description: 'Слабые формы μου, σου, του, της, μας, σας и τους: принадлежность и дополнение.',
+    order: 8,
+    keywords: ['местоимения', 'личные местоимения', 'слабые формы', 'родительный падеж', 'принадлежность', 'μου', 'σου', 'του', 'της', 'μας', 'σας', 'τους'],
+    summary: 'content/personal-pronouns-genitive/summary.md',
+    explanation: 'content/personal-pronouns-genitive/explanation.md',
+    related: ['noun-cases', 'definite-article'],
+  },
+  {
     id: 'numbers-0-20',
     title: 'Числительные от 0 до 20',
     greekTitle: 'Αριθμοί από το 0 έως το 20',

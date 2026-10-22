@@ -135,7 +135,7 @@ test('vocabulary and verb data have complete, unique references and forms', () =
 })
 
 test('targeted vocabulary clarifications preserve existing Greek keys and examples', () => {
-  assert.equal(words.length, 197)
+  assert.equal(words.length, 215)
   const word = (greek: string) => {
     const found = words.find((entry) => entry.greek === greek)
     assert.ok(found, `Missing vocabulary key: ${greek}`)
@@ -159,4 +159,8 @@ test('targeted vocabulary clarifications preserve existing Greek keys and exampl
     transliteration: 'сэ́ло э́на псоми́ апо́ тон фу́рно, паракало́',
     russian: 'Хочу буханку хлеба из пекарни, пожалуйста.',
   })
+  assert.equal(word('καφές').examples.some((example) => example.greek === 'Ο καφές είναι ζεστός.'), true)
+  for (const greek of ['αδελφός', 'γιαγιά', 'δωμάτιο', 'θείος', 'θεία', 'της', 'τους', 'πόσων', 'χρονών', 'ενός', 'Πλάκα', 'Πόσων χρονών είσαι;', 'Πόσων χρονών είναι;', 'Ο πατέρας μου', 'Η μητέρα της', 'Ο αδελφός του', 'Το σπίτι τους', 'Είμαι είκοσι ενός χρονών']) {
+    assert.ok(word(greek).examples.length, `Missing examples for: ${greek}`)
+  }
 })
