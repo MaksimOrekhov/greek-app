@@ -132,6 +132,18 @@ export const theoryTopics: TheoryTopic[] = [
     explanation: 'content/numbers-20-100/explanation.md',
     related: ['numbers-0-20', 'noun-gender'],
   },
+  {
+    id: 'numbers-100-200',
+    title: 'Числительные от 100 до 200',
+    greekTitle: 'Αριθμοί από το 100 έως το 200',
+    category: 'Числительные',
+    description: 'Формы εκατόν в числах 101–199 и согласование слова διακόσια.',
+    order: 3,
+    keywords: ['числительные', 'числа', '100', '101', '200', 'εκατό', 'εκατόν', 'διακόσια', 'διακόσιοι', 'диакосиа'],
+    summary: 'content/numbers-100-200/summary.md',
+    explanation: 'content/numbers-100-200/explanation.md',
+    related: ['numbers-20-100', 'noun-gender'],
+  },
 ]
 
 export interface TheoryResource {

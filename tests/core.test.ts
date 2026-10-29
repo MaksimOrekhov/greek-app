@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { approximateReading } from '../src/data/approximateReading.ts'
 import { validateVocabularyData, words } from '../src/data/words.ts'
 import { validateVerbData, verbs } from '../src/data/verbs.ts'
+import { theoryTopics, validateTheoryTopics } from '../src/data/theory/topics.ts'
 import { canImportAnonymousProgress, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, normalizeIntroductionIds, normalizeProgressIds, selectSessionWords } from '../src/lib/studyRules.ts'
 import { nextPosition, sessionProgress } from '../src/lib/studySession.ts'
 
@@ -134,8 +135,26 @@ test('vocabulary and verb data have complete, unique references and forms', () =
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'δίνω')?.forms.past, ['έδωσα', 'έδωσες', 'έδωσε', 'δώσαμε', 'δώσατε', 'έδωσαν'])
 })
 
+test('lesson vocabulary and theory through page 46 are registered', () => {
+  assert.equal(words.length, 328)
+  assert.deepEqual(validateTheoryTopics(), [])
+  assert.ok(theoryTopics.some((topic) => topic.id === 'numbers-100-200'))
+
+  const word = (greek: string) => {
+    const found = words.find((entry) => entry.greek === greek)
+    assert.ok(found, `Missing lesson word: ${greek}`)
+    assert.ok(found.examples.length, `Missing example: ${greek}`)
+    return found
+  }
+  for (const greek of ['αρέσω', 'αργώ', 'έτσι κι έτσι', 'συμφωνία', 'θέατρο', 'μεγάλος', 'κόρη', 'Νέα Υόρκη', 'μπαμπάς', 'κορίτσι', 'ντίσκο', 'μπάσκετ', 'ταχυδρομείο', 'φαρμακείο', 'Ακρόπολη', 'γαλλικά', 'γερμανικά', 'μιλάω', 'πηγαίνω']) word(greek)
+  assert.equal(word('γιος').transliteration, 'йос')
+
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'αρέσω')?.forms.present, ['αρέσω', 'αρέσεις', 'αρέσει', 'αρέσουμε', 'αρέσετε', 'αρέσουν'])
+  assert.deepEqual(verbs.find((verb) => verb.lemma === 'αργώ')?.forms.past, ['άργησα', 'άργησες', 'άργησε', 'αργήσαμε', 'αργήσατε', 'άργησαν'])
+})
+
 test('targeted vocabulary clarifications preserve existing Greek keys and examples', () => {
-  assert.equal(words.length, 215)
+  assert.equal(words.length, 328)
   const word = (greek: string) => {
     const found = words.find((entry) => entry.greek === greek)
     assert.ok(found, `Missing vocabulary key: ${greek}`)
