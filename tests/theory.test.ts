@@ -36,9 +36,10 @@ test('weak genitive pronouns topic covers possessive and object uses', async () 
   }
 
   const explanation = await readFile(resolve('src/data/theory', pronouns.explanation), 'utf8')
-  for (const example of ['Το σπίτι μου είναι εδώ.', 'Μου αρέσει ο καφές.', 'Πες μου!']) {
+  for (const example of ['Το σπίτι μου είναι εδώ.', 'Μου αρέσει ο καφές.', 'Μας δίνουν ένα βιβλίο.', 'Πες μου!']) {
     assert.ok(explanation.includes(example), `missing pronoun example: ${example}`)
   }
+  assert.ok(explanation.includes('Некоторые слабые формы совпадают по написанию'))
 })
 
 test('numbers topic is registered under its own category and links to related grammar topics', async () => {
@@ -85,6 +86,17 @@ test('numbers 20-100 topic is searchable, registered, and explains compound agre
   assert.equal(route.name, 'theory-topic')
   assert.equal(route.params.topicId, 'numbers-20-100')
   assert.equal(route.query.explanation, '1')
+})
+
+test('numbers 100-200 Markdown omits the duplicate page title', async () => {
+  const numbers = getTheoryTopic('numbers-100-200')!
+  const summary = await readFile(resolve('src/data/theory', numbers.summary), 'utf8')
+  const explanation = await readFile(resolve('src/data/theory', numbers.explanation), 'utf8')
+
+  assert.doesNotMatch(summary, /^# Числительные от 100 до 200$/m)
+  assert.doesNotMatch(explanation, /^# Числительные от 100 до 200$/m)
+  assert.match(renderTheoryMarkdown(summary), /<p>/)
+  assert.match(renderTheoryMarkdown(explanation), /<h2\b/)
 })
 
 test('noun cases topic is searchable, linked to grammar topics, and includes validated case forms', async () => {

@@ -165,6 +165,13 @@ test('targeted vocabulary clarifications preserve existing Greek keys and exampl
   assert.equal(word('πορτοκαλάδα').russian, 'апельсиновый лимонад / напиток')
   assert.equal(word('γιατρός').transliteration, 'ятро́с')
   assert.equal(word('γιατρός').examples[0].transliteration, 'о ятро́с и́нэ эзо́')
+  assert.deepEqual(word('μαγαζί').examples[0], {
+    greek: 'Το μαγαζί είναι εδώ.', transliteration: 'то магази́ и́нэ эзо́', russian: 'Магазин здесь.',
+  })
+  assert.equal(word('σνομπ').transliteration, 'сноб')
+  assert.deepEqual(word('σνομπ').examples[0], {
+    greek: 'Είναι σνομπ.', transliteration: 'и́нэ сноб', russian: 'Он / она сноб.',
+  })
   assert.deepEqual(word('γαλοπούλα').examples[0], {
     greek: 'Τρώω γαλοπούλα.', transliteration: 'тро́о галопу́ла', russian: 'Я ем индейку.',
   })
