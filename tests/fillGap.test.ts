@@ -39,6 +39,7 @@ import {
 import {
   fillGapQuestionSignature,
   fillGapQuestionContextSignature,
+  fillGapQuestionSituationSignature,
   loadRecentFillGapSignatures,
   loadRecentFillGapContextSignatures,
   rememberFillGapQuestions,
@@ -315,6 +316,10 @@ test('fill-gap generation remains reproducible from a seed', () => {
     const first = generateFillGapQuestions(topic.id, seededRandom(20261104))
     const repeated = generateFillGapQuestions(topic.id, seededRandom(20261104))
     assert.deepEqual(repeated, first, topic.id)
+
+    const firstSession = createFillGapSession(topic.id, trainerFillGapQuestions, seededRandom(20261105), first)
+    const repeatedSession = createFillGapSession(topic.id, trainerFillGapQuestions, seededRandom(20261105), repeated)
+    assert.deepEqual(repeatedSession, firstSession, `${topic.id}: session`)
   }
 })
 
@@ -337,8 +342,90 @@ test('all four generators stay valid and unambiguous across two hundred fixed se
         }
         assertOneAnswer(question)
       }
+
+      const session = createFillGapSession(topic.id, trainerFillGapQuestions, seededRandom(topicIndex * 20_000 + seed), generated)
+      const sessionQuestions = session.rounds.flatMap((round) => round.questions.map((item) => item.question))
+      assert.equal(sessionQuestions.length, FILL_GAP_SESSION_QUESTION_COUNT, `${topic.id}: ${seed}`)
+      assert.equal(sessionQuestions.filter((question) => question.templateId).length, 6, `${topic.id}: ${seed}`)
+      assert.equal(sessionQuestions.filter((question) => !question.templateId).length, 4, `${topic.id}: ${seed}`)
+      assert.equal(new Set(sessionQuestions.map(fillGapQuestionSituationSignature)).size, 10, `${topic.id}: ${seed}`)
     }
   }
+})
+
+test('generated situations do not collide across different templates', () => {
+  const generated = generateFillGapQuestions('verb-eimai', seededRandom(106))
+  const contexts = generated.map(fillGapQuestionSituationSignature)
+  assert.equal(new Set(contexts).size, 6)
+  assert.deepEqual(Object.values(generated.reduce<Record<string, number>>((counts, question) => {
+    counts[question.templateId!] = (counts[question.templateId!] ?? 0) + 1
+    return counts
+  }, {})).sort(), [2, 2, 2])
+  assert.equal(generated.some((question) => question.templateId === 'eimai-pronoun-context'
+    && question.sentenceBefore === 'Εσείς '
+    && question.sentenceAfter === ' από τη Σερβία.'), true)
+  assert.equal(generated.some((question) => question.templateId === 'eimai-introduction'
+    && question.sentenceBefore === 'Εσείς '
+    && question.sentenceAfter === ' από τη Σερβία.'), false)
+})
+
+test('fixed question selection avoids situations already used by generated questions', () => {
+  const topicId = 'personal-pronouns'
+  const fixedQuestions = bankForTopic(topicId)
+  const generated = generateFillGapQuestions(topicId, seededRandom(812))
+  const conflictingFixed = [
+    fixedQuestions.find((question) => question.id === 'pronouns-this-here')!,
+    fixedQuestions.find((question) => question.id === 'pronouns-things-home')!,
+  ]
+
+  for (const [index, fixed] of conflictingFixed.entries()) {
+    const source = generated[index]!
+    const id = `generated-artificial-fixed-conflict-${index + 1}`
+    const options = fixed.options.map((option, optionIndex) => ({
+      ...option,
+      id: `${id}-option-${optionIndex + 1}`,
+    }))
+    generated[index] = {
+      ...fixed,
+      id,
+      templateId: source.templateId,
+      options,
+      correctOptionId: options[fixed.options.findIndex((option) => option.id === fixed.correctOptionId)]!.id,
+    }
+  }
+
+  const session = createFillGapSession(topicId, fixedQuestions, seededRandom(813), generated)
+  const questions = session.rounds.flatMap((round) => round.questions.map((item) => item.question))
+  assert.equal(questions.length, 10)
+  assert.equal(questions.filter((question) => question.templateId).length, 6)
+  assert.equal(questions.filter((question) => !question.templateId).length, 4)
+  assert.equal(new Set(questions.map(fillGapQuestionSituationSignature)).size, 10)
+  for (const fixed of conflictingFixed) assert.equal(questions.some((question) => question.id === fixed.id), false, fixed.id)
+})
+
+test('fixed question selection finishes with duplicate contexts only when alternatives are exhausted', () => {
+  const topicId = 'personal-pronouns'
+  const base = bankForTopic(topicId)[0]!
+  const fixedQuestions = Array.from({ length: 12 }, (_, index) => {
+    const id = `exhausted-fixed-context-${index + 1}`
+    const options = base.options.map((option, optionIndex) => ({
+      ...option,
+      id: `${id}-option-${optionIndex + 1}`,
+    }))
+    return {
+      ...base,
+      id,
+      options,
+      correctOptionId: options[base.options.findIndex((option) => option.id === base.correctOptionId)]!.id,
+    }
+  })
+  const generated = generateFillGapQuestions(topicId, seededRandom(814))
+  const session = createFillGapSession(topicId, fixedQuestions, seededRandom(815), generated)
+  const questions = session.rounds.flatMap((round) => round.questions.map((item) => item.question))
+  assert.equal(questions.length, FILL_GAP_SESSION_QUESTION_COUNT)
+  assert.equal(questions.filter((question) => question.templateId).length, 6)
+  assert.equal(questions.filter((question) => !question.templateId).length, 4)
+  assert.equal(new Set(questions.map((question) => question.id)).size, 10)
 })
 
 test('ten sessions track distinct question combinations and semantic contexts separately', () => {

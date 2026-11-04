@@ -8,6 +8,7 @@ import {
   FILL_GAP_QUESTIONS_PER_ROUND,
   FILL_GAP_SESSION_QUESTION_COUNT,
 } from './sessionConstants.ts'
+import { fillGapQuestionSituationSignature } from './questionHistory.ts'
 
 export { FILL_GAP_ROUND_COUNT, FILL_GAP_QUESTIONS_PER_ROUND, FILL_GAP_SESSION_QUESTION_COUNT } from './sessionConstants.ts'
 
@@ -82,6 +83,35 @@ function assertQuestionIdsAreUnique(questions: FillGapQuestion[], topicId: strin
   }
 }
 
+function selectFixedQuestions(
+  fixedQuestions: FillGapQuestion[],
+  generatedQuestions: FillGapQuestion[],
+  count: number,
+  random: () => number,
+): FillGapQuestion[] {
+  const candidates = shuffle(fixedQuestions, random)
+  const selected: FillGapQuestion[] = []
+  const selectedIds = new Set<string>()
+  const situations = new Set(generatedQuestions.map(fillGapQuestionSituationSignature))
+
+  for (const question of candidates) {
+    if (situations.has(fillGapQuestionSituationSignature(question))) continue
+    selected.push(question)
+    selectedIds.add(question.id)
+    situations.add(fillGapQuestionSituationSignature(question))
+    if (selected.length === count) return selected
+  }
+
+  // If the available pool is exhausted, keep the session size fixed.
+  for (const question of candidates) {
+    if (selectedIds.has(question.id)) continue
+    selected.push(question)
+    selectedIds.add(question.id)
+    if (selected.length === count) break
+  }
+  return selected
+}
+
 export function createFillGapSession(
   topicId: string,
   sourceQuestions: FillGapQuestion[],
@@ -93,13 +123,20 @@ export function createFillGapSession(
   if (fixed.length === 0) throw new Error(`Нельзя начать тренировку «${topicId}»: нет фиксированных заданий.`)
   assertQuestionIdsAreUnique([...fixed, ...generated], topicId)
 
-  const balancedSet = generated.length >= FILL_GAP_GENERATED_QUESTIONS_PER_SESSION
-    && fixed.length >= FILL_GAP_FIXED_QUESTIONS_PER_SESSION
-    ? [
-      ...shuffle(generated, random).slice(0, FILL_GAP_GENERATED_QUESTIONS_PER_SESSION),
-      ...shuffle(fixed, random).slice(0, FILL_GAP_FIXED_QUESTIONS_PER_SESSION),
-    ]
-    : shuffle(fixed, random).slice(0, FILL_GAP_SESSION_QUESTION_COUNT)
+  let balancedSet: FillGapQuestion[]
+  if (generated.length >= FILL_GAP_GENERATED_QUESTIONS_PER_SESSION
+    && fixed.length >= FILL_GAP_FIXED_QUESTIONS_PER_SESSION) {
+    const selectedGenerated = shuffle(generated, random).slice(0, FILL_GAP_GENERATED_QUESTIONS_PER_SESSION)
+    const selectedFixed = selectFixedQuestions(
+      fixed,
+      selectedGenerated,
+      FILL_GAP_FIXED_QUESTIONS_PER_SESSION,
+      random,
+    )
+    balancedSet = [...selectedGenerated, ...selectedFixed]
+  } else {
+    balancedSet = selectFixedQuestions(fixed, [], FILL_GAP_SESSION_QUESTION_COUNT, random)
+  }
 
   if (balancedSet.length < FILL_GAP_SESSION_QUESTION_COUNT) {
     throw new Error(`Нельзя начать тренировку «${topicId}»: нужно не меньше десяти фиксированных заданий.`)

@@ -20,6 +20,7 @@ import type { FillGapQuestion } from '../../../data/trainers/fillGapQuestions.ts
 import {
   fillGapQuestionContextSignature,
   fillGapQuestionSignature,
+  fillGapQuestionSituationSignature,
   type RecentFillGapSignatures,
 } from './questionHistory.ts'
 
@@ -377,9 +378,9 @@ export function generateFillGapQuestions(
   if (templates.length === 0) return []
 
   const generated: FillGapQuestion[] = []
+  const sessionSituations = new Set<string>()
   for (const template of templates) {
     const sessionSignatures = new Set<string>()
-    const sessionContexts = new Set<string>()
     const recentSignatures = recent[template.id] ?? []
     const recentContextSignatures = recentContexts[template.id] ?? []
     for (let slot = 0; slot < FILL_GAP_GENERATED_QUESTIONS_PER_TEMPLATE; slot += 1) {
@@ -392,17 +393,21 @@ export function generateFillGapQuestions(
         const candidate = template.build(slot, variedRandom)
         const signature = fillGapQuestionSignature(candidate)
         const contextSignature = fillGapQuestionContextSignature(candidate)
-        if (sessionSignatures.has(signature) || sessionContexts.has(contextSignature)) continue
+        const situationSignature = fillGapQuestionSituationSignature(candidate)
 
         const historyIndex = recentSignatures.indexOf(signature)
         const contextHistoryIndex = recentContextSignatures.indexOf(contextSignature)
+        const freshSituation = !sessionSituations.has(situationSignature)
+        const freshQuestion = !sessionSignatures.has(signature)
         const rank = [
+          freshSituation ? 1 : 0,
           contextHistoryIndex < 0 ? 1 : 0,
           contextHistoryIndex,
+          freshQuestion ? 1 : 0,
           historyIndex < 0 ? 1 : 0,
           historyIndex,
         ]
-        if (rank[0] === 1 && rank[2] === 1) {
+        if (rank[0] === 1 && rank[1] === 1 && rank[3] === 1 && rank[4] === 1) {
           chosen = candidate
           break
         }
@@ -413,7 +418,7 @@ export function generateFillGapQuestions(
       }
       chosen ??= fallback ?? template.build(slot, random)
       sessionSignatures.add(fillGapQuestionSignature(chosen))
-      sessionContexts.add(fillGapQuestionContextSignature(chosen))
+      sessionSituations.add(fillGapQuestionSituationSignature(chosen))
       generated.push(chosen)
     }
   }
