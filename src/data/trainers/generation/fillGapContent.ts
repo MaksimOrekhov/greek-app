@@ -17,20 +17,29 @@ export const FILL_GAP_PERSONAL_PRONOUNS = [
   { word: 'Εσύ', meaning: 'ты', verb: 'είσαι', group: 'first' },
   { word: 'Αυτός', meaning: 'он', verb: 'είναι', group: 'third-masculine' },
   { word: 'Αυτή', meaning: 'она', verb: 'είναι', group: 'third-feminine' },
-  { word: 'Αυτό', meaning: 'эта вещь', verb: 'είναι', group: 'third-neuter' },
   { word: 'Εμείς', meaning: 'мы', verb: 'είμαστε', group: 'first' },
   { word: 'Εσείς', meaning: 'вы', verb: 'είστε', group: 'second-plural' },
   { word: 'Αυτοί', meaning: 'эти мужчины', verb: 'είναι', group: 'third-masculine-plural' },
   { word: 'Αυτές', meaning: 'эти женщины', verb: 'είναι', group: 'third-feminine-plural' },
-  { word: 'Αυτά', meaning: 'эти вещи', verb: 'είναι', group: 'third-neuter-plural' },
+] as const
+
+export const FILL_GAP_PERSONAL_OBJECT_PRONOUNS = [
+  { word: 'Αυτό', verb: 'είναι', group: 'third-neuter' },
+  { word: 'Αυτά', verb: 'είναι', group: 'third-neuter-plural' },
+] as const
+
+export const FILL_GAP_ALL_PERSONAL_PRONOUNS = [
+  ...FILL_GAP_PERSONAL_PRONOUNS,
+  ...FILL_GAP_PERSONAL_OBJECT_PRONOUNS,
 ] as const
 
 export const FILL_GAP_PRONOUN_REFERENCE_CONTEXTS = [
-  { before: 'Ο Ιβάν; ', pronoun: 'Αυτός', after: 'είναι από τη Σερβία.', hint: 'Иван из Сербии.' },
-  { before: 'Η Λίντα; ', pronoun: 'Αυτή', after: 'είναι από την Αλβανία.', hint: 'Линда из Албании.' },
-  { before: 'Ο Ιβάν και η Λίντα; ', pronoun: 'Αυτοί', after: 'είναι εδώ.', hint: 'Иван и Линда здесь.' },
-  { before: 'Οι φίλες; ', pronoun: 'Αυτές', after: 'είναι στο σπίτι.', hint: 'Подруги дома.' },
-  { before: 'Το βιβλίο; ', pronoun: 'Αυτό', after: 'είναι εδώ.', hint: 'Книга здесь.' },
+  { before: 'Ο Ιβάν; ', pronoun: 'Αυτός', after: ' είναι από τη Σερβία.', hint: 'Иван из Сербии.' },
+  { before: 'Η Λίντα; ', pronoun: 'Αυτή', after: ' είναι από την Αλβανία.', hint: 'Линда из Албании.' },
+  { before: 'Ο Ιβάν και η Λίντα; ', pronoun: 'Αυτοί', after: ' είναι εδώ.', hint: 'Иван и Линда здесь.' },
+  { before: 'Οι φίλες; ', pronoun: 'Αυτές', after: ' είναι στο σπίτι.', hint: 'Подруги дома.' },
+  { before: 'Το βιβλίο; ', pronoun: 'Αυτό', after: ' είναι εδώ.', hint: 'Книга здесь.' },
+  { before: 'Τα βιβλία; ', pronoun: 'Αυτά', after: ' είναι στο σπίτι.', hint: 'Книги дома.' },
 ] as const
 
 export const FILL_GAP_PRONOUN_DIALOGUES = [
@@ -85,10 +94,10 @@ export const FILL_GAP_NUMBER_PRICE_CONTEXTS = [
   { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 70, hint: 'Билет стоит 70 центов.' },
   { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 80, hint: 'Билет стоит 80 центов.' },
   { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 90, hint: 'Билет стоит 90 центов.' },
-  { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 100, hint: 'Билет стоит 100 центов.' },
-  { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 120, hint: 'Билет стоит 120 центов.' },
-  { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 140, hint: 'Билет стоит 140 центов.' },
-  { before: 'Το εισιτήριο κάνει ', after: ' λεπτά.', value: 200, hint: 'Билет стоит 200 центов.' },
+  { before: 'Το εισιτήριο κάνει ', after: ' ευρώ.', value: 1, hint: 'Билет стоит 1 евро.' },
+  { before: 'Το εισιτήριο κάνει ', after: ' ευρώ.', value: 2, hint: 'Билет стоит 2 евро.' },
+  { before: 'Το εισιτήριο κάνει ', after: ' ευρώ.', value: 3, hint: 'Билет стоит 3 евро.' },
+  { before: 'Το εισιτήριο κάνει ', after: ' ευρώ.', value: 4, hint: 'Билет стоит 4 евро.' },
 ] as const
 
 export const FILL_GAP_SOURCE_TABLES = {

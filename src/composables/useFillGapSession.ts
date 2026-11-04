@@ -11,7 +11,11 @@ import {
   type FillGapSession,
 } from '../lib/trainers/fillGap/fillGapSession.ts'
 import { generateFillGapQuestions } from '../lib/trainers/fillGap/fillGapGenerator.ts'
-import { loadRecentFillGapSignatures, rememberFillGapQuestions } from '../lib/trainers/fillGap/questionHistory.ts'
+import {
+  loadRecentFillGapContextSignatures,
+  loadRecentFillGapSignatures,
+  rememberFillGapQuestions,
+} from '../lib/trainers/fillGap/questionHistory.ts'
 
 export function useFillGapSession() {
   const state = shallowRef<FillGapSession | null>(null)
@@ -30,7 +34,12 @@ export function useFillGapSession() {
     }
 
     const previous = state.value?.topicId === topicId ? state.value : null
-    const generated = generateFillGapQuestions(topicId, Math.random, loadRecentFillGapSignatures(topicId))
+    const generated = generateFillGapQuestions(
+      topicId,
+      Math.random,
+      loadRecentFillGapSignatures(topicId),
+      loadRecentFillGapContextSignatures(topicId),
+    )
     state.value = previous
       ? restartFillGapSession(previous, trainerFillGapQuestions, generated)
       : createFillGapSession(topicId, trainerFillGapQuestions, Math.random, generated)

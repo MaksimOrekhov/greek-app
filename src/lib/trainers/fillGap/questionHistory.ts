@@ -1,6 +1,6 @@
 import type { FillGapQuestion } from '../../../data/trainers/fillGapQuestions.ts'
 
-export const FILL_GAP_HISTORY_VERSION = 1
+export const FILL_GAP_HISTORY_VERSION = 2
 export const FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE = 30
 const HISTORY_STORAGE_KEY = 'greek-app:fill-gap-question-history'
 
@@ -11,9 +11,14 @@ export interface FillGapHistoryStorage {
 
 export type RecentFillGapSignatures = Record<string, string[]>
 
+interface StoredTopicHistory {
+  signatures: RecentFillGapSignatures
+  contexts: RecentFillGapSignatures
+}
+
 interface StoredHistory {
-  version: number
-  topics: Record<string, RecentFillGapSignatures>
+  version: 2
+  topics: Record<string, StoredTopicHistory>
 }
 
 function browserStorage(): FillGapHistoryStorage | undefined {
@@ -47,27 +52,53 @@ export function fillGapQuestionSignature(question: FillGapQuestion): string {
   })
 }
 
+/** Identifies the prompt context without counting distractor choices as new content. */
+export function fillGapQuestionContextSignature(question: FillGapQuestion): string {
+  return JSON.stringify({
+    topicId: question.topicId,
+    templateId: question.templateId ?? '',
+    sentenceBefore: normalize(question.sentenceBefore),
+    sentenceAfter: normalize(question.sentenceAfter),
+    hint: normalize(question.hint),
+  })
+}
+
+function cleanSignatureMap(value: unknown): RecentFillGapSignatures {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const signatures: RecentFillGapSignatures = {}
+  for (const [templateId, rawSignatures] of Object.entries(value)) {
+    if (!templateId || !Array.isArray(rawSignatures)) continue
+    signatures[templateId] = rawSignatures
+      .filter((signature): signature is string => typeof signature === 'string' && signature.length < 100_000)
+      .slice(0, FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE)
+  }
+  return signatures
+}
+
 function parseHistory(raw: string | null): StoredHistory {
   if (!raw) return { version: FILL_GAP_HISTORY_VERSION, topics: {} }
   try {
     const value: unknown = JSON.parse(raw)
-    if (!value || typeof value !== 'object') return { version: FILL_GAP_HISTORY_VERSION, topics: {} }
-    const stored = value as Partial<StoredHistory>
-    if (stored.version !== FILL_GAP_HISTORY_VERSION || !stored.topics || typeof stored.topics !== 'object') {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return { version: FILL_GAP_HISTORY_VERSION, topics: {} }
+    }
+    const stored = value as { version?: unknown; topics?: unknown }
+    if (!stored.topics || typeof stored.topics !== 'object' || Array.isArray(stored.topics)) {
       return { version: FILL_GAP_HISTORY_VERSION, topics: {} }
     }
 
     const topics: StoredHistory['topics'] = {}
-    for (const [topicId, rawTemplates] of Object.entries(stored.topics)) {
-      if (!topicId || !rawTemplates || typeof rawTemplates !== 'object') continue
-      const templates: RecentFillGapSignatures = {}
-      for (const [templateId, rawSignatures] of Object.entries(rawTemplates)) {
-        if (!templateId || !Array.isArray(rawSignatures)) continue
-        templates[templateId] = rawSignatures
-          .filter((signature): signature is string => typeof signature === 'string' && signature.length < 100_000)
-          .slice(0, FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE)
+    for (const [topicId, rawTopic] of Object.entries(stored.topics)) {
+      if (!topicId || !rawTopic || typeof rawTopic !== 'object' || Array.isArray(rawTopic)) continue
+      if (stored.version === 1) {
+        topics[topicId] = { signatures: cleanSignatureMap(rawTopic), contexts: {} }
+      } else if (stored.version === FILL_GAP_HISTORY_VERSION) {
+        const current = rawTopic as Partial<StoredTopicHistory>
+        topics[topicId] = {
+          signatures: cleanSignatureMap(current.signatures),
+          contexts: cleanSignatureMap(current.contexts),
+        }
       }
-      topics[topicId] = templates
     }
     return { version: FILL_GAP_HISTORY_VERSION, topics }
   } catch {
@@ -81,10 +112,29 @@ export function loadRecentFillGapSignatures(
 ): RecentFillGapSignatures {
   if (!storage) return {}
   try {
-    return parseHistory(storage.getItem(HISTORY_STORAGE_KEY)).topics[topicId] ?? {}
+    return parseHistory(storage.getItem(HISTORY_STORAGE_KEY)).topics[topicId]?.signatures ?? {}
   } catch {
     return {}
   }
+}
+
+export function loadRecentFillGapContextSignatures(
+  topicId: string,
+  storage: FillGapHistoryStorage | undefined = browserStorage(),
+): RecentFillGapSignatures {
+  if (!storage) return {}
+  try {
+    return parseHistory(storage.getItem(HISTORY_STORAGE_KEY)).topics[topicId]?.contexts ?? {}
+  } catch {
+    return {}
+  }
+}
+
+function rememberSignature(signatures: RecentFillGapSignatures, templateId: string, signature: string): void {
+  signatures[templateId] = [
+    signature,
+    ...(signatures[templateId] ?? []).filter((item) => item !== signature),
+  ].slice(0, FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE)
 }
 
 export function rememberFillGapQuestions(
@@ -95,16 +145,13 @@ export function rememberFillGapQuestions(
   if (!storage) return
   try {
     const history = parseHistory(storage.getItem(HISTORY_STORAGE_KEY))
-    const templates = history.topics[topicId] ?? {}
+    const topic = history.topics[topicId] ?? { signatures: {}, contexts: {} }
     for (const question of questions) {
       if (question.topicId !== topicId || !question.templateId) continue
-      const signature = fillGapQuestionSignature(question)
-      templates[question.templateId] = [
-        signature,
-        ...(templates[question.templateId] ?? []).filter((item) => item !== signature),
-      ].slice(0, FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE)
+      rememberSignature(topic.signatures, question.templateId, fillGapQuestionSignature(question))
+      rememberSignature(topic.contexts, question.templateId, fillGapQuestionContextSignature(question))
     }
-    history.topics[topicId] = templates
+    history.topics[topicId] = topic
     storage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
   } catch {
     // Storage may be disabled, full, or unavailable in private browsing.

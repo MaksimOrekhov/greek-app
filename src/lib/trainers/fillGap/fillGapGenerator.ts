@@ -1,4 +1,5 @@
 import {
+  FILL_GAP_ALL_PERSONAL_PRONOUNS,
   FILL_GAP_CAPITALIZED_RECIPIENT_FORMS,
   FILL_GAP_EIMAI_FAMILY_CONTEXTS,
   FILL_GAP_EIMAI_INTRODUCTIONS,
@@ -16,7 +17,11 @@ import {
   VERIFIED_COUNTING_NUMBERS,
 } from '../../../data/trainers/generation/verifiedContent.ts'
 import type { FillGapQuestion } from '../../../data/trainers/fillGapQuestions.ts'
-import { fillGapQuestionSignature, type RecentFillGapSignatures } from './questionHistory.ts'
+import {
+  fillGapQuestionContextSignature,
+  fillGapQuestionSignature,
+  type RecentFillGapSignatures,
+} from './questionHistory.ts'
 
 export const FILL_GAP_GENERATED_QUESTIONS_PER_TEMPLATE = 2
 export const FILL_GAP_TEMPLATE_COUNT = 3
@@ -82,12 +87,13 @@ function makeQuestion(topicId: string, templateId: string, slot: number, input: 
 }
 
 function personalPronounTemplates(): Template[] {
-  const options = FILL_GAP_PERSONAL_PRONOUNS.map((item) => item.word)
+  const options = FILL_GAP_ALL_PERSONAL_PRONOUNS.map((item) => item.word)
+  const agreementSubjects = FILL_GAP_PERSONAL_PRONOUNS
   return [
     {
       id: 'pronoun-agreement',
       build: (slot, random) => {
-        const subject = choose(FILL_GAP_PERSONAL_PRONOUNS, random)
+        const subject = choose(agreementSubjects, random)
         const predicate = choose(EIMAI_PREDICATES, random)
         const meaning = capitalize(subject.meaning)
         return makeQuestion('personal-pronouns', 'pronoun-agreement', slot, {
@@ -120,7 +126,7 @@ function personalPronounTemplates(): Template[] {
       id: 'pronoun-dialogue',
       build: (slot, random) => {
         const context = choose(FILL_GAP_PRONOUN_DIALOGUES, random)
-        const lowercasePronouns = FILL_GAP_PERSONAL_PRONOUNS.map((item) => item.word.toLocaleLowerCase('el'))
+        const lowercasePronouns = FILL_GAP_ALL_PERSONAL_PRONOUNS.map((item) => item.word.toLocaleLowerCase('el'))
         return makeQuestion('personal-pronouns', 'pronoun-dialogue', slot, {
           instruction: 'Вставь слово в короткий диалог.',
           sentenceBefore: context.before,
@@ -290,6 +296,13 @@ function numberOptions(correctValue: number, excluded: number[], random: RandomS
   return optionsWithAnswer(numberByValue.get(correctValue)!.greek, distractors, random)
 }
 
+function isBetterFallbackRank(candidate: number[], current: number[]): boolean {
+  for (let index = 0; index < candidate.length; index += 1) {
+    if (candidate[index] !== current[index]) return candidate[index]! > current[index]!
+  }
+  return false
+}
+
 function numberTemplates(): Template[] {
   return [
     {
@@ -358,6 +371,7 @@ export function generateFillGapQuestions(
   topicId: string,
   random: RandomSource = Math.random,
   recent: RecentFillGapSignatures = {},
+  recentContexts: RecentFillGapSignatures = {},
 ): FillGapQuestion[] {
   const templates = templatesFor(topicId)
   if (templates.length === 0) return []
@@ -365,29 +379,41 @@ export function generateFillGapQuestions(
   const generated: FillGapQuestion[] = []
   for (const template of templates) {
     const sessionSignatures = new Set<string>()
+    const sessionContexts = new Set<string>()
     const recentSignatures = recent[template.id] ?? []
+    const recentContextSignatures = recentContexts[template.id] ?? []
     for (let slot = 0; slot < FILL_GAP_GENERATED_QUESTIONS_PER_TEMPLATE; slot += 1) {
       let chosen: FillGapQuestion | undefined
-      let oldest: FillGapQuestion | undefined
-      let oldestRank = -1
+      let fallback: FillGapQuestion | undefined
+      let fallbackRank: number[] | undefined
       for (let attempt = 0; attempt < 40; attempt += 1) {
         const phase = (attempt * 0.6180339887498949) % 1
         const variedRandom = () => (random() + phase) % 1
         const candidate = template.build(slot, variedRandom)
         const signature = fillGapQuestionSignature(candidate)
-        if (sessionSignatures.has(signature)) continue
+        const contextSignature = fillGapQuestionContextSignature(candidate)
+        if (sessionSignatures.has(signature) || sessionContexts.has(contextSignature)) continue
+
         const historyIndex = recentSignatures.indexOf(signature)
-        if (historyIndex < 0) {
+        const contextHistoryIndex = recentContextSignatures.indexOf(contextSignature)
+        const rank = [
+          contextHistoryIndex < 0 ? 1 : 0,
+          contextHistoryIndex,
+          historyIndex < 0 ? 1 : 0,
+          historyIndex,
+        ]
+        if (rank[0] === 1 && rank[2] === 1) {
           chosen = candidate
           break
         }
-        if (historyIndex > oldestRank) {
-          oldest = candidate
-          oldestRank = historyIndex
+        if (!fallbackRank || isBetterFallbackRank(rank, fallbackRank)) {
+          fallback = candidate
+          fallbackRank = rank
         }
       }
-      chosen ??= oldest ?? template.build(slot, random)
+      chosen ??= fallback ?? template.build(slot, random)
       sessionSignatures.add(fillGapQuestionSignature(chosen))
+      sessionContexts.add(fillGapQuestionContextSignature(chosen))
       generated.push(chosen)
     }
   }

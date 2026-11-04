@@ -87,9 +87,9 @@ export const trainerFillGapQuestions: FillGapQuestion[] = [
     explanation: 'Подсказка говорит об одной женщине: αυτή значит «она».',
   }),
   fixedQuestion('pronouns-this-here', 'personal-pronouns', {
-    instruction, sentenceBefore: '', sentenceAfter: ' είναι εδώ.', hint: 'Этот предмет здесь.',
+    instruction, sentenceBefore: 'Το βιβλίο; ', sentenceAfter: ' είναι εδώ.', hint: 'Книга здесь.',
     choices: ['Αυτό', 'Αυτή', 'Αυτοί'], correct: 'Αυτό',
-    explanation: 'Для одного предмета в такой фразе подходит αυτό: «это здесь».',
+    explanation: 'Перед пропуском названо Το βιβλίο — «книга». Здесь это слово заменяет Αυτό: Αυτό είναι εδώ.',
   }),
   fixedQuestion('pronouns-men-here', 'personal-pronouns', {
     instruction, sentenceBefore: '', sentenceAfter: ' είναι εδώ.', hint: 'Эти мужчины здесь.',
@@ -102,9 +102,9 @@ export const trainerFillGapQuestions: FillGapQuestion[] = [
     explanation: 'Подсказка говорит о женщинах: αυτές значит «они» о группе женщин.',
   }),
   fixedQuestion('pronouns-things-home', 'personal-pronouns', {
-    instruction, sentenceBefore: '', sentenceAfter: ' είναι στο σπίτι.', hint: 'Эти вещи дома.',
+    instruction, sentenceBefore: 'Τα βιβλία; ', sentenceAfter: ' είναι στο σπίτι.', hint: 'Книги дома.',
     choices: ['Αυτά', 'Αυτές', 'Αυτοί'], correct: 'Αυτά',
-    explanation: 'Подсказка говорит о нескольких предметах: αυτά значит «они» о предметах среднего рода.',
+    explanation: 'Перед пропуском названы Τα βιβλία — «книги». Здесь эти слова заменяет Αυτά: Αυτά είναι στο σπίτι.',
   }),
 
   fixedQuestion('genitive-our-house', 'personal-pronouns-genitive', {

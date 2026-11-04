@@ -32,10 +32,18 @@ import {
   generatedFillGapTemplates,
 } from '../src/lib/trainers/fillGap/fillGapGenerator.ts'
 import {
+  FILL_GAP_NUMBER_PRICE_CONTEXTS,
+  FILL_GAP_PERSONAL_PRONOUNS,
+  FILL_GAP_PRONOUN_REFERENCE_CONTEXTS,
+} from '../src/data/trainers/generation/fillGapContent.ts'
+import {
   fillGapQuestionSignature,
+  fillGapQuestionContextSignature,
   loadRecentFillGapSignatures,
+  loadRecentFillGapContextSignatures,
   rememberFillGapQuestions,
   FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE,
+  FILL_GAP_HISTORY_VERSION,
   type FillGapHistoryStorage,
 } from '../src/lib/trainers/fillGap/questionHistory.ts'
 
@@ -55,7 +63,7 @@ const pronounByHint: Array<[string, string]> = [
   ['я ', 'Εγώ'], ['ты ', 'Εσύ'], ['он ', 'Αυτός'], ['она ', 'Αυτή'], ['этот предмет ', 'Αυτό'], ['эта вещь ', 'Αυτό'],
   ['мы ', 'Εμείς'], ['вы ', 'Εσείς'], ['эти мужчины ', 'Αυτοί'], ['эти женщины ', 'Αυτές'], ['эти вещи ', 'Αυτά'],
   ['иван из сербии', 'Αυτός'], ['линда из албании', 'Αυτή'], ['иван и линда здесь', 'Αυτοί'],
-  ['подруги дома', 'Αυτές'], ['книга здесь', 'Αυτό'],
+  ['подруги дома', 'Αυτές'], ['книга здесь', 'Αυτό'], ['книги дома', 'Αυτά'],
 ]
 const dialoguePronounByHint: Record<string, string> = {
   'я здесь. а ты': 'εσύ',
@@ -168,6 +176,16 @@ function assertOneAnswer(question: FillGapQuestion): void {
   assert.equal(semanticallyValid[0]!.id, question.correctOptionId, question.id)
 }
 
+function assertWordBoundaries(question: FillGapQuestion): void {
+  for (const option of question.options) {
+    const left = question.sentenceBefore
+    const right = question.sentenceAfter
+    const touchesLeft = /[\p{L}\p{M}]$/u.test(left) && /^[\p{L}\p{M}]/u.test(option.text)
+    const touchesRight = /[\p{L}\p{M}]$/u.test(option.text) && /^[\p{L}\p{M}]/u.test(right)
+    assert.equal(touchesLeft || touchesRight, false, `${question.id}: ${left}[${option.text}]${right}`)
+  }
+}
+
 function answerCurrent(session: ReturnType<typeof createFillGapSession>, correct: boolean) {
   const active = session.rounds[session.currentRoundIndex]!.questions[session.currentQuestionIndex]!
   const option = correct
@@ -206,8 +224,43 @@ test('fixed fill-gap bank is valid, expandable, and has at least twelve question
       assert.equal(question.options.filter((option) => option.id === question.correctOptionId).length, 1)
       assert.doesNotMatch(question.sentenceBefore + question.sentenceAfter, /_{2,}|□/u)
       assert.ok(completeFillGapSentence(question).trim())
+      assertWordBoundaries(question)
       assertOneAnswer(question)
     }
+  }
+})
+
+test('object pronouns only appear with a named Greek noun, and prices name euros or cents', () => {
+  const objectForms = new Set(['Αυτό', 'Αυτά'])
+  const agreementForms = FILL_GAP_PERSONAL_PRONOUNS.map((item) => item.word)
+  assert.equal(agreementForms.some((form) => objectForms.has(form)), false)
+
+  const fixed = bankForTopic('personal-pronouns')
+  const bookQuestion = fixed.find((question) => question.id === 'pronouns-this-here')!
+  const booksQuestion = fixed.find((question) => question.id === 'pronouns-things-home')!
+  assert.match(bookQuestion.sentenceBefore, /Το βιβλίο/u)
+  assert.equal(correctOption(bookQuestion).text, 'Αυτό')
+  assert.match(booksQuestion.sentenceBefore, /Τα βιβλία/u)
+  assert.equal(correctOption(booksQuestion).text, 'Αυτά')
+
+  for (const context of FILL_GAP_PRONOUN_REFERENCE_CONTEXTS) {
+    if (objectForms.has(context.pronoun)) assert.ok(context.before.trim(), context.hint)
+  }
+  for (const context of FILL_GAP_NUMBER_PRICE_CONTEXTS) {
+    if (context.after.includes('ευρώ')) {
+      assert.ok(context.value >= 1)
+      assert.match(context.hint, /евро/u)
+    } else {
+      assert.ok(context.value > 0 && context.value < 100)
+      assert.match(context.after, /λεπτά/u)
+      assert.match(context.hint, /центов/u)
+    }
+  }
+  for (const question of bankForTopic('numbers').filter((item) => item.sentenceBefore.includes('κάνει'))) {
+    const usesEuros = question.sentenceAfter.includes('ευρώ')
+    assert.equal(usesEuros, /евро/u.test(question.hint), question.id)
+    assert.match(question.sentenceAfter, usesEuros ? /ευρώ/u : /λεπτά/u)
+    assert.match(question.hint, usesEuros ? /евро/u : /центов/u)
   }
 })
 
@@ -257,6 +310,14 @@ test('each topic has three distinct templates with independently checked answers
   assert.ok(availableNumberSequences().length >= 100)
 })
 
+test('fill-gap generation remains reproducible from a seed', () => {
+  for (const topic of trainerTopics) {
+    const first = generateFillGapQuestions(topic.id, seededRandom(20261104))
+    const repeated = generateFillGapQuestions(topic.id, seededRandom(20261104))
+    assert.deepEqual(repeated, first, topic.id)
+  }
+})
+
 test('all four generators stay valid and unambiguous across two hundred fixed seeds', () => {
   for (const [topicIndex, topic] of trainerTopics.entries()) {
     for (let seed = 0; seed < 200; seed += 1) {
@@ -264,38 +325,109 @@ test('all four generators stay valid and unambiguous across two hundred fixed se
       assert.equal(generated.length, 6, `${topic.id}: ${seed}`)
       assert.equal(new Set(generated.map((question) => question.id)).size, 6, `${topic.id}: ${seed}`)
       assert.equal(new Set(generated.map(fillGapQuestionSignature)).size, 6, `${topic.id}: ${seed}`)
+      assert.equal(new Set(generated.map(fillGapQuestionContextSignature)).size, 6, `${topic.id}: ${seed}`)
       for (const question of generated) {
         assert.ok(question.options.length >= 3 && question.options.length <= 4)
         assert.equal(new Set(question.options.map((option) => option.id)).size, question.options.length)
         assert.equal(new Set(question.options.map((option) => normalized(option.text))).size, question.options.length)
         assert.ok(question.options.some((option) => option.id === question.correctOptionId))
+        assertWordBoundaries(question)
+        if (question.templateId === 'pronoun-agreement') {
+          assert.equal(['Αυτό', 'Αυτά'].includes(correctOption(question).text), false, question.id)
+        }
         assertOneAnswer(question)
       }
     }
   }
 })
 
-test('seeded training and recent history change sentence content over ten starts', () => {
+test('ten sessions track distinct question combinations and semantic contexts separately', () => {
   for (const topic of trainerTopics) {
     const storage = new MemoryStorage()
-    const byTemplate = new Map<string, Set<string>>()
+    const combinationsByTemplate = new Map<string, Set<string>>()
+    const contextsByTemplate = new Map<string, Set<string>>()
     for (let run = 0; run < 10; run += 1) {
-      const generated = generateFillGapQuestions(topic.id, seededRandom(2400 + run), loadRecentFillGapSignatures(topic.id, storage))
+      const generated = generateFillGapQuestions(
+        topic.id,
+        seededRandom(2400 + run),
+        loadRecentFillGapSignatures(topic.id, storage),
+        loadRecentFillGapContextSignatures(topic.id, storage),
+      )
       const signaturesByTemplate = new Map<string, Set<string>>()
+      const contextsInSession = new Map<string, Set<string>>()
       for (const question of generated) {
         const signature = fillGapQuestionSignature(question)
-        const seen = byTemplate.get(question.templateId!) ?? new Set<string>()
+        const context = fillGapQuestionContextSignature(question)
+        const seen = combinationsByTemplate.get(question.templateId!) ?? new Set<string>()
         seen.add(signature)
-        byTemplate.set(question.templateId!, seen)
+        combinationsByTemplate.set(question.templateId!, seen)
+        const seenContexts = contextsByTemplate.get(question.templateId!) ?? new Set<string>()
+        seenContexts.add(context)
+        contextsByTemplate.set(question.templateId!, seenContexts)
         const sessionSignatures = signaturesByTemplate.get(question.templateId!) ?? new Set<string>()
         sessionSignatures.add(signature)
         signaturesByTemplate.set(question.templateId!, sessionSignatures)
+        const sessionContexts = contextsInSession.get(question.templateId!) ?? new Set<string>()
+        sessionContexts.add(context)
+        contextsInSession.set(question.templateId!, sessionContexts)
       }
       assert.ok([...signaturesByTemplate.values()].every((signatures) => signatures.size === 2), topic.id)
+      assert.ok([...contextsInSession.values()].every((contexts) => contexts.size === 2), topic.id)
       rememberFillGapQuestions(topic.id, generated, storage)
     }
-    assert.ok([...byTemplate.values()].every((signatures) => signatures.size >= 10), topic.id)
+    assert.ok([...combinationsByTemplate.values()].every((signatures) => signatures.size >= 10), topic.id)
+    assert.ok([...contextsByTemplate.values()].every((contexts) => contexts.size >= 4), topic.id)
   }
+})
+
+test('context history avoids available contexts, then falls back within a bounded pool', () => {
+  const topicId = 'personal-pronouns'
+  const storage = new MemoryStorage()
+  const first = generateFillGapQuestions(topicId, seededRandom(740))
+  const firstDialogue = first.filter((question) => question.templateId === 'pronoun-dialogue')
+  assert.equal(new Set(firstDialogue.map(fillGapQuestionContextSignature)).size, 2)
+  rememberFillGapQuestions(topicId, first, storage)
+
+  const second = generateFillGapQuestions(
+    topicId,
+    seededRandom(741),
+    loadRecentFillGapSignatures(topicId, storage),
+    loadRecentFillGapContextSignatures(topicId, storage),
+  )
+  const secondDialogue = second.filter((question) => question.templateId === 'pronoun-dialogue')
+  assert.equal(new Set(secondDialogue.map(fillGapQuestionContextSignature)).size, 2)
+  assert.equal(
+    secondDialogue.some((question) => firstDialogue.some((prior) => fillGapQuestionContextSignature(prior) === fillGapQuestionContextSignature(question))),
+    false,
+  )
+  rememberFillGapQuestions(topicId, second, storage)
+
+  // Exhaust the four dialogue contexts; the finite fallback must still finish
+  // every later session with two distinct contexts and without looping.
+  for (let run = 0; run < 12; run += 1) {
+    const next = generateFillGapQuestions(
+      topicId,
+      seededRandom(742 + run),
+      loadRecentFillGapSignatures(topicId, storage),
+      loadRecentFillGapContextSignatures(topicId, storage),
+    )
+    const dialogue = next.filter((question) => question.templateId === 'pronoun-dialogue')
+    assert.equal(dialogue.length, 2)
+    assert.equal(new Set(dialogue.map(fillGapQuestionContextSignature)).size, 2)
+    rememberFillGapQuestions(topicId, next, storage)
+  }
+})
+
+test('context signatures ignore distractors while question signatures retain them', () => {
+  const question = generateFillGapQuestions('numbers', seededRandom(765)).find((item) => item.templateId === 'number-in-price')!
+  const changedDistractors: FillGapQuestion = {
+    ...question,
+    options: question.options.map((option, index) => option.id === question.correctOptionId
+      ? option
+      : { ...option, text: `different-${index}` }),
+  }
+  assert.notEqual(fillGapQuestionSignature(question), fillGapQuestionSignature(changedDistractors))
+  assert.equal(fillGapQuestionContextSignature(question), fillGapQuestionContextSignature(changedDistractors))
 })
 
 test('the ten-question session keeps six generated and four fixed questions across five rounds', () => {
@@ -365,7 +497,11 @@ test('restart starts clean and receives varied generated content', () => {
       history.set(question.templateId!, [...values, fillGapQuestionSignature(question)])
       return history
     }, new Map<string, string[]>())),
-  })
+  }, Object.fromEntries(firstGenerated.reduce<Map<string, string[]>>((history, question) => {
+    const values = history.get(question.templateId!) ?? []
+    history.set(question.templateId!, [...values, fillGapQuestionContextSignature(question)])
+    return history
+  }, new Map<string, string[]>())))
   const restarted = restartFillGapSession(inProgress, trainerFillGapQuestions, secondGenerated, seededRandom(333))
   assert.equal(restarted.currentRoundIndex, 0)
   assert.equal(restarted.currentQuestionIndex, 0)
@@ -447,7 +583,17 @@ test('history is bounded, ignores corruption, and tolerates unavailable storage'
   }
   const bounded = loadRecentFillGapSignatures('numbers', storage)
   assert.ok(Object.values(bounded).every((signatures) => signatures.length <= FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE))
-  assert.equal(JSON.parse(storage.values.get('greek-app:fill-gap-question-history')!).version, 1)
+  const boundedContexts = loadRecentFillGapContextSignatures('numbers', storage)
+  assert.ok(Object.values(boundedContexts).every((signatures) => signatures.length <= FILL_GAP_HISTORY_LIMIT_PER_TEMPLATE))
+  assert.equal(JSON.parse(storage.values.get('greek-app:fill-gap-question-history')!).version, FILL_GAP_HISTORY_VERSION)
+
+  const legacyQuestion = first[0]!
+  storage.values.set('greek-app:fill-gap-question-history', JSON.stringify({
+    version: 1,
+    topics: { numbers: { [legacyQuestion.templateId!]: [fillGapQuestionSignature(legacyQuestion)] } },
+  }))
+  assert.deepEqual(loadRecentFillGapSignatures('numbers', storage)[legacyQuestion.templateId!], [fillGapQuestionSignature(legacyQuestion)])
+  assert.deepEqual(loadRecentFillGapContextSignatures('numbers', storage), {})
 
   storage.values.set('greek-app:fill-gap-question-history', '{broken json')
   assert.deepEqual(loadRecentFillGapSignatures('numbers', storage), {})
