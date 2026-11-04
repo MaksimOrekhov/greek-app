@@ -33,7 +33,8 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/components/theory/` contains theory catalog and safe Markdown rendering components.
 - `src/components/VocabularyDictionary.vue` shows the complete vocabulary, search and status/type filters, and review progress statistics.
 - `src/pages/TrainersPage.vue` lists available trainer topics; `src/pages/TrainerSessionPage.vue` runs a topic session and displays its results.
-- `src/components/trainers/` contains the pair-matching exercise and trainer catalog/result components; `src/data/trainers/` registers topics and holds exercise sets and routes; `src/lib/trainers/session.ts` contains the testable session rules; `src/composables/useTrainerSession.ts` connects those rules to Vue state.
+- `src/pages/TrainerMultiSelectPage.vue` runs the separate multiple-selection session and displays its own result summary.
+- `src/components/trainers/` contains the pair-matching and multiple-selection exercises plus trainer catalog/result components; `src/data/trainers/` registers topics, exercise sets, question banks, and routes; `src/lib/trainers/session.ts` and `src/lib/trainers/multiSelectSession.ts` contain the independent testable session rules; `src/composables/useTrainerSession.ts` and `src/composables/useMultiSelectSession.ts` connect those rules to Vue state.
 - `src/data/words.ts` is the vocabulary source. Each word has its Greek spelling, Russian meaning, approximate transliteration, semantic category, grammatical part-of-speech tags, and an `examples` array.
 - `src/data/verbs.ts` contains lemma-level verb conjugations, Russian meanings, and approximate reading support.
 - `src/data/readingRules.ts` contains the pronunciation guide content.
@@ -60,6 +61,7 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - Persist review progress and first-introduction timestamps in localStorage keyed by the Greek word and, when signed in, sync them per user with Supabase. Server RPCs merge review progress by review timestamp and preserve the earliest introduction. Never put Supabase secret keys in frontend code.
 - When changing card navigation, preserve the behavior that a newly selected word always starts on its first side.
 - Keep trainer sessions local and focused: add only working exercise types to a topic, preserve the shared five-round flow and result summary, and do not add Greek text-entry fields. Verify all new or changed exercise prompts, Greek forms, accents, and meanings against the linguistic sources listed below before adding them to trainer data.
+- Trainer questions for beginners must use everyday wording and test understanding or use of Greek, not knowledge of Russian grammar terms. Explanations may briefly clarify a form in plain language.
 - The Vite base path is `/greek-app/` for the project Pages URL; keep it aligned with the repository name.
 - Update this file when the app structure or development workflow changes.
 

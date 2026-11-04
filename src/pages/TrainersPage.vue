@@ -14,7 +14,7 @@ import { trainerTopics } from '../data/trainers/topics.ts'
     <div class="trainer-catalog-heading">
       <div>
         <h2>Учебные темы</h2>
-        <p>Сейчас доступна механика «Соедини пары».</p>
+        <p>Выберите упражнение для выбранной темы.</p>
       </div>
       <span class="topic-count">{{ trainerTopics.length }} темы</span>
     </div>

@@ -42,7 +42,7 @@ test('four trainer topics and all their pair sets are registered', () => {
     'numbers',
   ])
   assert.deepEqual(trainerTopics.map((topic) => topic.availableExercises), [
-    ['match-pairs'], ['match-pairs'], ['match-pairs'], ['match-pairs'],
+    ['match-pairs', 'multi-select'], ['match-pairs', 'multi-select'], ['match-pairs', 'multi-select'], ['match-pairs', 'multi-select'],
   ])
   assert.equal(trainerPairSets['personal-pronouns']?.pairs.length, 10)
   assert.equal(trainerPairSets['personal-pronouns-genitive']?.pairs.length, 7)
@@ -278,6 +278,9 @@ test('trainer routes resolve the catalog and a session using hash-compatible pat
   const sessionRoute = router.resolve('/trainers/personal-pronouns')
   assert.equal(sessionRoute.name, 'trainer-session')
   assert.equal(sessionRoute.params.topicId, 'personal-pronouns')
+  const multiSelectRoute = router.resolve('/trainers/personal-pronouns/multi-select')
+  assert.equal(multiSelectRoute.name, 'trainer-multi-select')
+  assert.equal(multiSelectRoute.params.topicId, 'personal-pronouns')
 
   const app = await readFile('src/App.vue', 'utf8')
   assert.match(app, /to="\/trainers"[^>]*>.*Тренажёры/s)

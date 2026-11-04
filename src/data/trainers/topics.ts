@@ -7,28 +7,28 @@ export const trainerTopics: TrainerTopic[] = [
     title: 'Личные местоимения',
     description: 'Формы, которые обозначают говорящего, собеседника и тех, о ком говорят.',
     pairSetId: 'personal-pronouns',
-    availableExercises: ['match-pairs'],
+    availableExercises: ['match-pairs', 'multi-select'],
   },
   {
     id: 'personal-pronouns-genitive',
     title: 'Личные местоимения в родительном падеже',
     description: 'Сопоставьте русские притяжательные местоимения с греческими формами принадлежности.',
     pairSetId: 'personal-pronouns-genitive',
-    availableExercises: ['match-pairs'],
+    availableExercises: ['match-pairs', 'multi-select'],
   },
   {
     id: 'verb-eimai',
     title: 'Глагол είμαι',
     description: 'Формы настоящего времени для шести грамматических лиц.',
     pairSetId: 'verb-eimai',
-    availableExercises: ['match-pairs'],
+    availableExercises: ['match-pairs', 'multi-select'],
   },
   {
     id: 'numbers',
     title: 'Числа 0–200',
     description: 'Сопоставление чисел с их греческими названиями в счётной форме.',
     pairSetId: 'numbers',
-    availableExercises: ['match-pairs'],
+    availableExercises: ['match-pairs', 'multi-select'],
   },
 ]
 
@@ -56,6 +56,9 @@ export function validateTrainerRegistry(
     }
     if (!topic.availableExercises.includes('match-pairs')) {
       errors.push(`Для темы ${topic.id} не зарегистрировано сопоставление пар`)
+    }
+    if (!topic.availableExercises.includes('multi-select')) {
+      errors.push(`Для темы ${topic.id} не зарегистрирован выбор нескольких вариантов`)
     }
 
     const pairSet = pairSets[topic.pairSetId]

@@ -1,4 +1,4 @@
-export type TrainerExerciseType = 'match-pairs'
+export type TrainerExerciseType = 'match-pairs' | 'multi-select'
 
 export interface TrainerTopic {
   id: string
