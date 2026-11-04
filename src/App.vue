@@ -32,6 +32,7 @@ const route = useRoute()
         <RouterLink to="/dictionary" active-class="is-active"><span aria-hidden="true">☷</span> Словарь</RouterLink>
         <RouterLink to="/theory" active-class="is-active" :class="{ 'is-active': route.path.startsWith('/theory') }"><span aria-hidden="true">✧</span> Теория</RouterLink>
         <RouterLink to="/verbs" active-class="is-active"><span aria-hidden="true">ῥ</span> Глаголы</RouterLink>
+        <RouterLink to="/trainers" active-class="is-active" :class="{ 'is-active': route.path.startsWith('/trainers') }"><span aria-hidden="true">⤷</span> Тренажёры</RouterLink>
       </nav>
 
       <div class="topbar-actions">

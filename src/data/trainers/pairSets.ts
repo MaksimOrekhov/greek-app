@@ -1,0 +1,67 @@
+import type { TrainerPairSet } from './types.ts'
+
+export const trainerPairSets: Record<string, TrainerPairSet> = {
+  'personal-pronouns': {
+    id: 'personal-pronouns',
+    pairs: [
+      { id: 'ego', prompt: 'Я', answer: 'εγώ' },
+      { id: 'esy', prompt: 'Ты', answer: 'εσύ' },
+      { id: 'autos', prompt: 'Он', answer: 'αυτός' },
+      { id: 'aute', prompt: 'Она', answer: 'αυτή' },
+      { id: 'auto', prompt: 'Оно', answer: 'αυτό' },
+      { id: 'emeis', prompt: 'Мы', answer: 'εμείς' },
+      { id: 'eseis', prompt: 'Вы', answer: 'εσείς' },
+      { id: 'autoi', prompt: 'Они: мужчины или смешанная группа', answer: 'αυτοί' },
+      { id: 'autes', prompt: 'Они: группа женщин', answer: 'αυτές' },
+      { id: 'auta', prompt: 'Они: группа предметов или детей', answer: 'αυτά' },
+    ],
+  },
+  'personal-pronouns-genitive': {
+    id: 'personal-pronouns-genitive',
+    pairs: [
+      { id: 'genitive-me', prompt: 'мой', answer: 'μου' },
+      { id: 'genitive-you-singular', prompt: 'твой', answer: 'σου' },
+      { id: 'genitive-him-it', prompt: 'его', answer: 'του' },
+      { id: 'genitive-her', prompt: 'её', answer: 'της' },
+      { id: 'genitive-us', prompt: 'наш', answer: 'μας' },
+      { id: 'genitive-you-plural', prompt: 'ваш', answer: 'σας' },
+      { id: 'genitive-them', prompt: 'их', answer: 'τους' },
+    ],
+  },
+  'verb-eimai': {
+    id: 'verb-eimai',
+    pairs: [
+      { id: 'eimai-1s', prompt: 'Я', answer: 'είμαι' },
+      { id: 'eimai-2s', prompt: 'Ты', answer: 'είσαι' },
+      { id: 'eimai-3s', prompt: 'Он / она / оно (ед. число)', answer: 'είναι' },
+      { id: 'eimai-1p', prompt: 'Мы', answer: 'είμαστε' },
+      { id: 'eimai-2p', prompt: 'Вы', answer: 'είστε' },
+      { id: 'eimai-3p', prompt: 'Они (мн. число)', answer: 'είναι' },
+    ],
+  },
+  numbers: {
+    id: 'numbers',
+    pairs: [
+      { id: 'number-0', prompt: '0', answer: 'μηδέν' },
+      { id: 'number-2', prompt: '2', answer: 'δύο' },
+      { id: 'number-5', prompt: '5', answer: 'πέντε' },
+      { id: 'number-8', prompt: '8', answer: 'οκτώ' },
+      { id: 'number-12', prompt: '12', answer: 'δώδεκα' },
+      { id: 'number-16', prompt: '16', answer: 'δεκαέξι' },
+      { id: 'number-20', prompt: '20', answer: 'είκοσι' },
+      { id: 'number-21', prompt: '21', answer: 'είκοσι ένα' },
+      { id: 'number-34', prompt: '34', answer: 'τριάντα τέσσερα' },
+      { id: 'number-40', prompt: '40', answer: 'σαράντα' },
+      { id: 'number-53', prompt: '53', answer: 'πενήντα τρία' },
+      { id: 'number-66', prompt: '66', answer: 'εξήντα έξι' },
+      { id: 'number-73', prompt: '73', answer: 'εβδομήντα τρία' },
+      { id: 'number-89', prompt: '89', answer: 'ογδόντα εννέα' },
+      { id: 'number-94', prompt: '94', answer: 'ενενήντα τέσσερα' },
+      { id: 'number-100', prompt: '100', answer: 'εκατό' },
+      { id: 'number-107', prompt: '107', answer: 'εκατόν επτά' },
+      { id: 'number-125', prompt: '125', answer: 'εκατόν είκοσι πέντε' },
+      { id: 'number-178', prompt: '178', answer: 'εκατόν εβδομήντα οκτώ' },
+      { id: 'number-200', prompt: '200', answer: 'διακόσια' },
+    ],
+  },
+}

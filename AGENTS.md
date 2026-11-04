@@ -32,6 +32,8 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/components/ReadingGuide.vue` explains Modern Greek letter and letter-pair pronunciation.
 - `src/components/theory/` contains theory catalog and safe Markdown rendering components.
 - `src/components/VocabularyDictionary.vue` shows the complete vocabulary, search and status/type filters, and review progress statistics.
+- `src/pages/TrainersPage.vue` lists available trainer topics; `src/pages/TrainerSessionPage.vue` runs a topic session and displays its results.
+- `src/components/trainers/` contains the pair-matching exercise and trainer catalog/result components; `src/data/trainers/` registers topics and holds exercise sets and routes; `src/lib/trainers/session.ts` contains the testable session rules; `src/composables/useTrainerSession.ts` connects those rules to Vue state.
 - `src/data/words.ts` is the vocabulary source. Each word has its Greek spelling, Russian meaning, approximate transliteration, semantic category, grammatical part-of-speech tags, and an `examples` array.
 - `src/data/verbs.ts` contains lemma-level verb conjugations, Russian meanings, and approximate reading support.
 - `src/data/readingRules.ts` contains the pronunciation guide content.
@@ -57,6 +59,7 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - After revealing a card, collect one of four ratings. Schedule "Again" for about 10 minutes, "Hard" for at least 1 day, "Good" for at least 3 days, and "Easy" for at least 7 days; grow successful intervals gradually and cap them at 365 days.
 - Persist review progress and first-introduction timestamps in localStorage keyed by the Greek word and, when signed in, sync them per user with Supabase. Server RPCs merge review progress by review timestamp and preserve the earliest introduction. Never put Supabase secret keys in frontend code.
 - When changing card navigation, preserve the behavior that a newly selected word always starts on its first side.
+- Keep trainer sessions local and focused: add only working exercise types to a topic, preserve the shared five-round flow and result summary, and do not add Greek text-entry fields. Verify all new or changed exercise prompts, Greek forms, accents, and meanings against the linguistic sources listed below before adding them to trainer data.
 - The Vite base path is `/greek-app/` for the project Pages URL; keep it aligned with the repository name.
 - Update this file when the app structure or development workflow changes.
 

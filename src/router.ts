@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { legacyReadingRoute, theoryRoutes } from './data/theory/routes'
+import { trainerRoutes } from './data/trainers/routes'
 import { resolveScrollBehavior } from './lib/scrollBehavior'
 
 const router = createRouter({
@@ -11,6 +12,7 @@ const router = createRouter({
     ...theoryRoutes,
     { path: '/dictionary', name: 'dictionary', component: () => import('./pages/DictionaryPage.vue') },
     { path: '/verbs', name: 'verbs', component: () => import('./pages/VerbsPage.vue') },
+    ...trainerRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/cards' },
   ],
   scrollBehavior: resolveScrollBehavior,
