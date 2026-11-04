@@ -1,7 +1,7 @@
 import { trainerPairSets } from './pairSets.ts'
 import type { TrainerExerciseType, TrainerPairSet, TrainerTopic } from './types.ts'
 
-const supportedTrainerExercises = new Set<TrainerExerciseType>(['match-pairs', 'multi-select', 'fill-gaps'])
+const supportedTrainerExercises = new Set<TrainerExerciseType>(['match-pairs', 'multi-select', 'fill-gaps', 'order-items'])
 
 export const trainerTopics: TrainerTopic[] = [
   {
@@ -30,7 +30,7 @@ export const trainerTopics: TrainerTopic[] = [
     title: 'Числа 0–200',
     description: 'Сопоставление чисел с их греческими названиями в счётной форме.',
     pairSetId: 'numbers',
-    availableExercises: ['match-pairs', 'multi-select', 'fill-gaps'],
+    availableExercises: ['match-pairs', 'multi-select', 'fill-gaps', 'order-items'],
   },
 ]
 
