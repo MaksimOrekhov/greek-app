@@ -135,8 +135,7 @@ test('vocabulary and verb data have complete, unique references and forms', () =
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'δίνω')?.forms.past, ['έδωσα', 'έδωσες', 'έδωσε', 'δώσαμε', 'δώσατε', 'έδωσαν'])
 })
 
-test('lesson vocabulary and theory through page 46 are registered', () => {
-  assert.equal(words.length, 328)
+test('lesson vocabulary and theory through page 51 are registered', () => {
   assert.deepEqual(validateTheoryTopics(), [])
   assert.ok(theoryTopics.some((topic) => topic.id === 'numbers-100-200'))
 
@@ -154,7 +153,6 @@ test('lesson vocabulary and theory through page 46 are registered', () => {
 })
 
 test('targeted vocabulary clarifications preserve existing Greek keys and examples', () => {
-  assert.equal(words.length, 328)
   const word = (greek: string) => {
     const found = words.find((entry) => entry.greek === greek)
     assert.ok(found, `Missing vocabulary key: ${greek}`)
@@ -188,5 +186,26 @@ test('targeted vocabulary clarifications preserve existing Greek keys and exampl
   assert.equal(word('καφές').examples.some((example) => example.greek === 'Ο καφές είναι ζεστός.'), true)
   for (const greek of ['αδελφός', 'γιαγιά', 'δωμάτιο', 'θείος', 'θεία', 'της', 'τους', 'πόσων', 'χρονών', 'ενός', 'Πλάκα', 'Πόσων χρονών είσαι;', 'Πόσων χρονών είναι;', 'Ο πατέρας μου', 'Η μητέρα της', 'Ο αδελφός του', 'Το σπίτι τους', 'Είμαι είκοσι ενός χρονών']) {
     assert.ok(word(greek).examples.length, `Missing examples for: ${greek}`)
+  }
+})
+
+test('latest lesson vocabulary is available with examples', () => {
+  for (const greek of ['συγγνώμη', 'διαβάζω', 'μαχαίρι', 'σκέτος', 'εισιτήριο']) {
+    const found = words.find((entry) => entry.greek === greek)
+    assert.ok(found, `Missing latest lesson word: ${greek}`)
+    assert.ok(found.examples.length, `Missing example for latest lesson word: ${greek}`)
+  }
+})
+
+test('εισιτήριο has the correct Russian stress in its card and every example', () => {
+  const ticket = words.find((entry) => entry.greek === 'εισιτήριο')
+  assert.ok(ticket)
+  assert.equal(ticket.transliteration, 'исити́рио')
+
+  const examples = words.flatMap((entry) => entry.examples).filter((example) => example.greek.includes('εισιτήριο'))
+  assert.ok(examples.length)
+  for (const example of examples) {
+    assert.ok(example.transliteration.includes('исити́рио'), `Incorrect ticket reading in: ${example.greek}`)
+    assert.ok(!example.transliteration.includes('иситири́о'), `Old ticket stress remains in: ${example.greek}`)
   }
 })

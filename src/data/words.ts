@@ -339,7 +339,7 @@ const wordList: Omit<WordCard, 'examples' | 'partOfSpeech'>[] = [
   { greek: 'πόσο', russian: 'сколько? (о цене или количестве)', transliteration: 'по́со', category: 'Вопросительные слова' },
   { greek: 'ευρώ', russian: 'евро', transliteration: 'эвро́', category: 'Деньги' },
   { greek: 'λεπτό', russian: 'минута; евроцент', transliteration: 'лэпто́', category: 'Деньги' },
-  { greek: 'εισιτήριο', russian: 'билет', transliteration: 'иситири́о', category: 'Транспорт' },
+  { greek: 'εισιτήριο', russian: 'билет', transliteration: 'исити́рио', category: 'Транспорт' },
 ]
 
 const partOfSpeechByWord: Record<string, PartOfSpeech[]> = {
@@ -934,7 +934,7 @@ const examplesByWord: Record<string, WordExample[]> = {
   'νησί': [{ greek: 'Το νησί είναι μικρό αλλά πολύ όμορφο.', transliteration: 'то ниси́ и́нэ микро́ а́ла поли́ о́морфо', russian: 'Остров маленький, но очень красивый.' }],
   'πόρτα': [{ greek: 'Η πόρτα είναι ανοιχτή.', transliteration: 'и по́рта и́нэ анихти́', russian: 'Дверь открыта.' }],
   'φτηνός': [{ greek: 'Η τυρόπιτα είναι φτηνή.', transliteration: 'и тиропи́та и́нэ фтини́', russian: 'Пирог с сыром дешёвый.' }],
-  'ακριβός': [{ greek: 'Το εισιτήριο είναι ακριβό.', transliteration: 'то иситири́о и́нэ акриво́', russian: 'Билет дорогой.' }],
+  'ακριβός': [{ greek: 'Το εισιτήριο είναι ακριβό.', transliteration: 'то исити́рио и́нэ акриво́', russian: 'Билет дорогой.' }],
   'έξυπνος': [{ greek: 'Το παιδί της είναι έξυπνο.', transliteration: 'то пэзи́ тис и́нэ э́ксипно', russian: 'Её ребёнок умный.' }],
   'ελληνικός': [{ greek: 'Το γραμματόσημο είναι ελληνικό.', transliteration: 'то грамато́симо и́нэ элинико́', russian: 'Марка греческая.' }],
   'ανοιχτός': [{ greek: 'Η πόρτα είναι ανοιχτή.', transliteration: 'и по́рта и́нэ анихти́', russian: 'Дверь открыта.' }],
@@ -944,10 +944,10 @@ const examplesByWord: Record<string, WordExample[]> = {
   'εντάξει': [{ greek: 'Εντάξει, ευχαριστώ.', transliteration: 'энда́кси, эфхаристо́', russian: 'Хорошо, спасибо.' }],
   'τίποτα': [{ greek: 'Θέλετε τίποτα άλλο;', transliteration: 'сэ́лэтэ ти́пота а́ло?', russian: 'Хотите что-нибудь ещё?' }],
   'άλλος': [{ greek: 'Θέλετε τίποτα άλλο;', transliteration: 'сэ́лэтэ ти́пота а́ло?', russian: 'Хотите что-нибудь ещё?' }],
-  'πόσο': [{ greek: 'Πόσο κάνει το εισιτήριο;', transliteration: 'по́со ка́ни то иситири́о?', russian: 'Сколько стоит билет?' }],
+  'πόσο': [{ greek: 'Πόσο κάνει το εισιτήριο;', transliteration: 'по́со ка́ни то исити́рио?', russian: 'Сколько стоит билет?' }],
   'ευρώ': [{ greek: 'Ο καφές κάνει δύο ευρώ.', transliteration: 'о кафэ́с ка́ни зи́о эвро́', russian: 'Кофе стоит два евро.' }],
-  'λεπτό': [{ greek: 'Το εισιτήριο κάνει εβδομήντα λεπτά.', transliteration: 'то иситири́о ка́ни эвзоми́нда лэпта́', russian: 'Билет стоит 70 центов.' }],
-  'εισιτήριο': [{ greek: 'Πόσο κάνει το εισιτήριο;', transliteration: 'по́со ка́ни то иситири́о?', russian: 'Сколько стоит билет?' }],
+  'λεπτό': [{ greek: 'Το εισιτήριο κάνει εβδομήντα λεπτά.', transliteration: 'то исити́рио ка́ни эвзоми́нда лэпта́', russian: 'Билет стоит 70 центов.' }],
+  'εισιτήριο': [{ greek: 'Πόσο κάνει το εισιτήριο;', transliteration: 'по́со ка́ни то исити́рио?', russian: 'Сколько стоит билет?' }],
 }
 
 const internationalWords: WordCard[] = [

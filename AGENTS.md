@@ -59,3 +59,41 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - When changing card navigation, preserve the behavior that a newly selected word always starts on its first side.
 - The Vite base path is `/greek-app/` for the project Pages URL; keep it aligned with the repository name.
 - Update this file when the app structure or development workflow changes.
+
+## Linguistic accuracy and source verification
+
+Verify new or changed Greek learning material against reliable linguistic sources before treating it as correct. Familiarity, resemblance to Russian or English, and passing tests are not sufficient verification.
+
+### Priority sources
+
+- Use the [Triantafyllidis Dictionary of Standard Modern Greek](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/) first for individual words. Check spelling, written accent, pronunciation information, meaning, part of speech, grammatical features, inflection, verb forms, and accepted variants.
+- Use the [Centre for the Greek Language tools](https://www.greek-language.gr/greekLang/modern_greek/tools/index.html) for grammar and usage: cases, declension, gender and number agreement, articles, pronouns, syntax, contrasts between similar forms, and natural use in context.
+- Use the official [Grammar of Modern Greek (A΄–Γ΄ Gymnasium)](https://ebooks.edu.gr/ebooks/v/html/8547/2334/Grammatiki-Neas-Ellinikis-Glossas_A-B-G-Gymnasiou_html-apli/index_B_01.html) for pronunciation, accentuation, forms, declensions, conjugations, and standard variants. The [Triantafyllidis Modern Greek Grammar](https://www.greek-language.gr/greekLang/files/document/modern_greek/grammatiki.triantafyllidi.pdf) is another preferred reference.
+- Other trustworthy linguistic sources may be used when needed; assess their authority and prefer primary or institutional references. Link sources in theory Markdown when the explanation relies on them. Do not claim a source was consulted unless it was actually checked.
+
+### Vocabulary and examples
+
+Every new vocabulary entry must be linguistically verified before it is committed. For each entry in `src/data/words.ts`, check:
+
+- Greek spelling and accentuation, the standard pronunciation, meaning, and part of speech.
+- Applicable grammatical details, including gender, number, case, person, and tense.
+- That each Greek example is grammatical and natural in Modern Greek, uses the intended meaning, and has an accurate Russian translation.
+- The approximate Russian reading of both the headword and each example, including the pronunciation of the exact inflected form used in context.
+
+Check words and complete expressions alike. Prefer short, natural A1–A2 examples; do not invent awkward sentences just to feature a word. For `src/data/verbs.ts`, verify lemma meanings and every added or changed conjugated form, including tense or aspect distinctions where relevant.
+
+Russian readings are learning aids, not IPA. Use source pronunciation information to derive them, follow the app's established Russian-letter conventions, and keep the reading consistent between a card and its examples. Do not transliterate Greek letters mechanically. Pay particular attention to `γ`, `δ`, `θ`, `χ`; `αι`, `ει`, `οι`, `ου`; `αυ`, `ευ`; `μπ`, `ντ`, `γκ`, `γγ`; and stress changes in inflected forms.
+
+### Grammar theory
+
+When adding or changing `src/data/theory/content/`, verify tables, forms, rules, article and pronoun usage, cases, accentuation, exceptions, and example sentences against an authoritative grammar source. Do not generalize from a few examples, apply one declension model to another, or present a valid variant as incorrect. State the limits of a rule where needed, while keeping explanations accessible to A1–A2 learners.
+
+### Uncertain or conflicting evidence
+
+If a preferred source is unavailable, try another reliable source. If a form or explanation still cannot be confirmed, state the uncertainty and do not guess or claim it was verified. Do not replace a confirmed correct form with an assumption. If reliable sources document multiple accepted variants, preserve them and briefly explain the distinction when useful.
+
+### Reports and tests
+
+For any task that adds or changes learning content, include a concise `Linguistic verification` section in the final report. Say what kinds of material were checked, which sources were actually used, whether any questionable forms were corrected, and whether anything remains uncertain. Keep the report brief and list unresolved cases only when present.
+
+Automated tests do not replace linguistic verification. Use tests to check structure, required fields, uniqueness, and forms that have already been confirmed. Do not add assertions for unverified pronunciation or grammar, and do not treat a passing `npm test` as evidence that translations, readings, or grammar are linguistically correct.
