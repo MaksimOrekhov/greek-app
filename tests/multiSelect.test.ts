@@ -87,6 +87,39 @@ test('pronoun questions clarify polite εσείς and avoid treating people as p
   assert.ok(trainerMultiSelectQuestions.some((item) => item.id === 'genitive-plural-before-verb'))
 })
 
+test('Serbia introduction uses the correct final nu form and keeps translations aligned', () => {
+  const introductions = trainerMultiSelectQuestions.find((item) => item.id === 'eimai-introductions')!
+  const serbiaOptions = introductions.options.filter((option) => option.text.includes('Σερβία'))
+
+  assert.equal(serbiaOptions.length, 3)
+  assert.ok(serbiaOptions.every((option) => option.text.includes('από τη Σερβία')))
+  assert.ok(serbiaOptions.every((option) => !option.text.includes('από την Σερβία')))
+  assert.equal(serbiaOptions.filter((option) => option.correct).length, 1)
+  assert.match(serbiaOptions.find((option) => option.correct)!.text, /Я Иван из Сербии/u)
+})
+
+test('είμαι explanations distinguish the verb from the pronoun «я»', () => {
+  const eimaiQuestions = trainerMultiSelectQuestions.filter((item) => item.topicId === 'verb-eimai')
+  assert.ok(eimaiQuestions.every((item) => !/είμαι\s+(?:значит|означает)\s+«я»/iu.test(item.explanation)))
+  const professions = eimaiQuestions.find((item) => item.id === 'eimai-professions')!
+  assert.match(professions.explanation, /глагола «быть»/u)
+})
+
+test('grammar-focused είμαι questions use full Greek sentences and contrast multiple forms', () => {
+  const grammarQuestionIds = ['eimai-we-location', 'eimai-you-location', 'eimai-they-location']
+  const grammarQuestions = trainerMultiSelectQuestions.filter((item) => grammarQuestionIds.includes(item.id))
+  assert.equal(grammarQuestions.length, grammarQuestionIds.length)
+
+  for (const item of grammarQuestions) {
+    assert.ok(item.options.filter((option) => option.correct).length >= 2)
+    assert.ok(item.options.some((option) => !option.correct))
+    assert.ok(item.options.every((option) => !option.text.includes(' — ')))
+    const verbForms = new Set(item.options.map((option) => option.text.match(/είμαι|είσαι|είναι|είμαστε|είστε/u)?.[0]))
+    assert.ok(verbForms.size >= 2)
+    assert.ok(item.options.every((option) => /είμαι|είσαι|είναι|είμαστε|είστε/u.test(option.text)))
+  }
+})
+
 test('question bank validator reports duplicate, empty, missing, and unknown data', () => {
   const goodQuestion = trainerMultiSelectQuestions[0]!
   const malformed = {
