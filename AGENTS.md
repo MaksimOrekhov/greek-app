@@ -43,7 +43,7 @@ A beginner-friendly app for learning Modern Greek with flashcards, approximate R
 - `src/data/theory/markdown.ts` renders local Markdown with raw HTML disabled; `src/data/theory/routes.ts` defines the theory routes.
 - `.env.local` contains local Supabase config and is ignored by Git; GitHub Pages builds read the equivalent repository Actions variables.
 - `src/style.css` contains global layout, responsive styles, and visual tokens.
-- `.github/workflows/deploy.yml` builds the app and deploys `dist/` to GitHub Pages on pushes to `main`.
+- `.github/workflows/deploy.yml` builds the app and deploys `dist/` to GitHub Pages on pushes to `main`; `.github/workflows/pr-checks.yml` runs tests and a build on each pull request targeting `main` without publishing.
 
 ## Change rules
 

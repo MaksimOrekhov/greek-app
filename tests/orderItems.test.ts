@@ -32,6 +32,10 @@ import {
   ORDER_ITEMS_SESSION_QUESTION_COUNT,
 } from '../src/lib/trainers/orderItems/orderItemsGenerator.ts'
 import {
+  focusOrderItemsChoiceButton,
+  registerOrderItemsChoiceButton,
+} from '../src/lib/trainers/orderItems/focusChoiceButton.ts'
+import {
   advanceOrderItemsSession,
   checkOrderItemsAnswer,
   createOrderItemsSession,
@@ -386,6 +390,26 @@ test('selection, removal, reset, check, locking, advance, restart, and results f
   assert.ok(restarted.rounds.flatMap((round) => round.questions).every((question) => !question.checked && question.selectedOrder.length === 0))
 })
 
+test('restoring focus resolves the matching choice by stable item ID, regardless of registration order', () => {
+  const focused: string[] = []
+  const buttons = new Map<string, { focus(): void }>()
+  const firstButton = { focus: () => focused.push('first') }
+  const secondButton = { focus: () => focused.push('second') }
+  const thirdButton = { focus: () => focused.push('third') }
+
+  registerOrderItemsChoiceButton(buttons, 'item-3', thirdButton)
+  registerOrderItemsChoiceButton(buttons, 'item-1', firstButton)
+  registerOrderItemsChoiceButton(buttons, 'item-2', secondButton)
+
+  assert.equal(focusOrderItemsChoiceButton(buttons, 'item-2'), true)
+  assert.deepEqual(focused, ['second'])
+  assert.equal(focusOrderItemsChoiceButton(buttons, 'missing-item'), false)
+  assert.deepEqual(focused, ['second'])
+
+  registerOrderItemsChoiceButton(buttons, 'item-2', null)
+  assert.equal(focusOrderItemsChoiceButton(buttons, 'item-2'), false)
+})
+
 test('T4 is registered only for numbers, uses the hash-compatible route, and keeps the UI accessible', async () => {
   assert.deepEqual(trainerTopics.filter((topic) => topic.availableExercises.includes('order-items')).map((topic) => topic.id), ['numbers'])
   assert.ok(getTrainerTopic('numbers')?.availableExercises.includes('order-items'))
@@ -400,6 +424,10 @@ test('T4 is registered only for numbers, uses the hash-compatible route, and kee
   assert.doesNotMatch(exercise, /availableItems/)
   assert.match(exercise, /:aria-pressed="selectedIds\.has\(item\.id\)"/)
   assert.match(exercise, /'is-selected': selectedIds\.has\(item\.id\)/)
+  assert.match(exercise, /new Map<string, HTMLButtonElement>\(\)/)
+  assert.match(exercise, /:ref="\(element\) => setChoiceButton\(item\.id, element\)"/)
+  assert.match(exercise, /focusOrderItemsChoiceButton\(choiceButtons, itemId\)/)
+  assert.doesNotMatch(exercise, /choiceIndex|choiceButtons\.value/)
   assert.match(exercise, /function toggleChoice[\s\S]*?emit\('removeCard', itemId\)[\s\S]*?emit\('selectCard', itemId\)/)
   assert.match(exercise, /В ответе · нажми, чтобы убрать/)
   assert.match(exercise, /:disabled="checked"[\s\S]*?@click="toggleChoice\(item\.id\)"/)
@@ -414,7 +442,6 @@ test('T4 is registered only for numbers, uses the hash-compatible route, and kee
   assert.match(exercise, /v-if="checked" class="order-card-value"/)
   assert.match(exercise, /watch\(\(\) => props\.checked[\s\S]*?feedbackElement\.value\?\.focus\(\)[\s\S]*?instructionElement\.value\?\.focus\(\)/)
   assert.match(exercise, /@click="removeFromAnswer\(selectedItems\[slot - 1\]!\.id\)"/)
-  assert.match(exercise, /choiceButtons\.value\?\.\[choiceIndex\]\?\.focus\(\)/)
   assert.match(exercise, /tabindex="-1"/)
   assert.match(exercise, /role="status" aria-live="polite"/)
   assert.match(exercise, /focus-visible/)
@@ -426,4 +453,18 @@ test('T4 is registered only for numbers, uses the hash-compatible route, and kee
   assert.match(page, /includes\('order-items'\)/)
   assert.doesNotMatch(page, /currentQuestion\.question\.items[\s\S]*?aria-label="[^"]*value/i)
   assert.doesNotMatch(page, /\$supabase|useSpacedRepetition/)
+})
+
+test('PR CI checks the exact head SHA on Node 22 without publication permissions', async () => {
+  const workflow = await readFile('.github/workflows/pr-checks.yml', 'utf8')
+  assert.match(workflow, /pull_request:\s*\n\s+branches: \[main\]/)
+  assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/)
+  assert.match(workflow, /contents: read/)
+  assert.match(workflow, /node-version: 22/)
+  assert.match(workflow, /run: npm ci/)
+  assert.match(workflow, /run: npm test/)
+  assert.match(workflow, /run: npm run build/)
+  assert.match(workflow, /VITE_SUPABASE_URL: \$\{\{ vars\.VITE_SUPABASE_URL \}\}/)
+  assert.match(workflow, /VITE_SUPABASE_PUBLISHABLE_KEY: \$\{\{ vars\.VITE_SUPABASE_PUBLISHABLE_KEY \}\}/)
+  assert.doesNotMatch(workflow, /secrets\.|pages: write|id-token: write|deploy-pages/)
 })

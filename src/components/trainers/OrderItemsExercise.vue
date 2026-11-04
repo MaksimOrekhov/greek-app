@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, useTemplateRef, watch } from 'vue'
 import { getOrderItemsCorrectOrder, formatOrderItemsValue, type OrderItemsItem, type OrderItemsQuestion } from '../../lib/trainers/orderItems/orderItems.ts'
+import { focusOrderItemsChoiceButton, registerOrderItemsChoiceButton } from '../../lib/trainers/orderItems/focusChoiceButton.ts'
 
 const props = defineProps<{
   question: OrderItemsQuestion
@@ -26,7 +27,7 @@ const emit = defineEmits<{
 
 const instructionElement = useTemplateRef<HTMLHeadingElement>('instruction')
 const feedbackElement = useTemplateRef<HTMLDivElement>('feedback')
-const choiceButtons = useTemplateRef<HTMLButtonElement[]>('choiceButtons')
+const choiceButtons = new Map<string, HTMLButtonElement>()
 const slots = [1, 2, 3, 4]
 const selectedIds = computed(() => new Set(props.selectedOrder))
 const choiceItems = computed<OrderItemsItem[]>(() => props.cardOrder
@@ -56,10 +57,12 @@ function toggleChoice(itemId: string): void {
 
 function removeFromAnswer(itemId: string): void {
   emit('removeCard', itemId)
-  void nextTick(() => {
-    const choiceIndex = choiceItems.value.findIndex((item) => item.id === itemId)
-    choiceButtons.value?.[choiceIndex]?.focus()
-  })
+  void nextTick(() => focusOrderItemsChoiceButton(choiceButtons, itemId))
+}
+
+function setChoiceButton(itemId: string, element: unknown): void {
+  const button = element instanceof HTMLButtonElement ? element : null
+  registerOrderItemsChoiceButton(choiceButtons, itemId, button)
 }
 </script>
 
@@ -111,7 +114,7 @@ function removeFromAnswer(itemId: string): void {
         <button
           v-for="item in choiceItems"
           :key="item.id"
-          ref="choiceButtons"
+          :ref="(element) => setChoiceButton(item.id, element)"
           class="order-choice-card"
           :class="{ 'is-selected': selectedIds.has(item.id) }"
           type="button"
