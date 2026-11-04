@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { trainerMultiSelectQuestions } from '../src/data/trainers/multiSelectQuestions.ts'
+import {
+  trainerMultiSelectQuestions,
+  validateMultiSelectQuestionBank,
+} from '../src/data/trainers/multiSelectQuestions.ts'
 import type { MultiSelectQuestion } from '../src/data/trainers/multiSelectQuestions.ts'
 import { VERIFIED_COUNTING_NUMBERS } from '../src/data/trainers/generation/verifiedContent.ts'
 import { trainerTopics } from '../src/data/trainers/topics.ts'
@@ -169,15 +172,9 @@ class MemoryStorage implements MultiSelectHistoryStorage {
 }
 
 test('each topic generates six questions from three distinct templates and keeps four bank questions', () => {
-  const expectedCounts: Record<string, number> = {
-    'personal-pronouns': 12,
-    'personal-pronouns-genitive': 13,
-    'verb-eimai': 12,
-    numbers: 12,
-  }
-  assert.equal(trainerMultiSelectQuestions.length, 49)
+  assert.ok(trainerMultiSelectQuestions.length >= 49)
   for (const topic of trainerTopics) {
-    assert.equal(trainerMultiSelectQuestions.filter((item) => item.topicId === topic.id).length, expectedCounts[topic.id])
+    assert.ok(trainerMultiSelectQuestions.filter((item) => item.topicId === topic.id).length >= 12, topic.id)
     assert.equal(generatedQuestionTemplates(topic.id).length, 3)
 
     const generated = generateMultiSelectQuestions(topic.id, seededRandom(54))
@@ -190,6 +187,7 @@ test('each topic generates six questions from three distinct templates and keeps
 
     const session = createMultiSelectSession(topic.id, trainerMultiSelectQuestions, seededRandom(89), undefined, generated)
     const questions = session.rounds.flatMap((round) => round.questions.map((item) => item.question))
+    assert.equal(session.rounds.length, 5)
     assert.equal(questions.length, 10)
     assert.equal(questions.filter((item) => item.templateId).length, 6)
     assert.equal(questions.filter((item) => !item.templateId).length, 4)
@@ -208,6 +206,50 @@ test('each topic generates six questions from three distinct templates and keeps
     assert.equal(answered.completed, true)
     assert.equal(getMultiSelectSessionResults(answered).correctAnswers, 10)
   }
+})
+
+test('adding a fixed question keeps the bank valid and preserves the session contract', () => {
+  const sourceQuestion = trainerMultiSelectQuestions.find((item) => item.id === 'pronouns-self-and-other')!
+  const addedQuestion: MultiSelectQuestion = {
+    ...sourceQuestion,
+    id: 'test-extra-pronouns-question',
+    prompt: 'Отметь все греческие слова со значением «я», «ты» или «мы».',
+    options: sourceQuestion.options.map((option, index) => ({
+      ...option,
+      id: `test-extra-pronouns-question-option-${index + 1}`,
+    })),
+  }
+  const extendedBank = [...trainerMultiSelectQuestions, addedQuestion]
+
+  assert.deepEqual(validateMultiSelectQuestionBank(extendedBank), [])
+  assert.equal(trainerMultiSelectQuestions.some((item) => item.id === addedQuestion.id), false)
+
+  const generated = generateMultiSelectQuestions('personal-pronouns', seededRandom(129))
+  const session = createMultiSelectSession(
+    'personal-pronouns',
+    extendedBank,
+    seededRandom(237),
+    undefined,
+    generated,
+  )
+  const questions = session.rounds.flatMap((round) => round.questions.map((item) => item.question))
+  assert.equal(session.rounds.length, 5)
+  assert.equal(questions.length, 10)
+  assert.equal(questions.filter((item) => item.templateId).length, 6)
+  assert.equal(questions.filter((item) => !item.templateId).length, 4)
+  assert.equal(new Set(questions.map((item) => item.id)).size, 10)
+
+  let answered = session
+  for (let index = 0; index < 10; index += 1) {
+    const active = answered.rounds[answered.currentRoundIndex]!.questions[answered.currentQuestionIndex]!
+    for (const option of active.question.options.filter((item) => item.correct)) {
+      answered = toggleMultiSelectOption(answered, option.id).session
+    }
+    answered = submitMultiSelectAnswer(answered).session
+    answered = advanceMultiSelectSession(answered)
+  }
+  assert.equal(answered.completed, true)
+  assert.equal(getMultiSelectSessionResults(answered).correctAnswers, 10)
 })
 
 test('fixed seeds reproduce results and different seeds change actual question content', () => {
