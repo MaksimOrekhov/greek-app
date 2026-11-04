@@ -33,6 +33,16 @@ function normalize(value: string): string {
   return value.normalize('NFC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('ru')
 }
 
+/** Identifies the learner-facing situation across templates and option sets. */
+export function fillGapQuestionSituationSignature(question: FillGapQuestion): string {
+  return JSON.stringify({
+    topicId: question.topicId,
+    sentenceBefore: normalize(question.sentenceBefore),
+    sentenceAfter: normalize(question.sentenceAfter),
+    hint: normalize(question.hint),
+  })
+}
+
 /** Includes the content and answer key while ignoring option display order. */
 export function fillGapQuestionSignature(question: FillGapQuestion): string {
   const options = question.options
