@@ -1,5 +1,10 @@
 import { computed, shallowRef } from 'vue'
 import { trainerMultiSelectQuestions } from '../data/trainers/multiSelectQuestions.ts'
+import { generateMultiSelectQuestions } from '../lib/trainers/generation/multiSelectGenerator.ts'
+import {
+  loadRecentQuestionSignatures,
+  rememberGeneratedQuestions,
+} from '../lib/trainers/generation/questionHistory.ts'
 import {
   advanceMultiSelectSession,
   createMultiSelectSession,
@@ -30,7 +35,9 @@ export function useMultiSelectSession() {
       return false
     }
 
-    session.value = createMultiSelectSession(topicId, questions, Math.random, previous ?? undefined)
+    const generated = generateMultiSelectQuestions(topicId, Math.random, loadRecentQuestionSignatures(topicId))
+    session.value = createMultiSelectSession(topicId, questions, Math.random, previous ?? undefined, generated)
+    rememberGeneratedQuestions(topicId, generated)
     runNumber.value += 1
     return true
   }

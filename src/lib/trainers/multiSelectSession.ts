@@ -1,4 +1,9 @@
 import type { MultiSelectQuestion } from '../../data/trainers/multiSelectQuestions.ts'
+import { multiSelectQuestionSignature } from './generation/questionHistory.ts'
+import {
+  BANK_QUESTIONS_PER_SESSION,
+  GENERATED_QUESTIONS_PER_SESSION,
+} from './generation/multiSelectGenerator.ts'
 
 export const MULTI_SELECT_ROUND_COUNT = 5
 export const MULTI_SELECT_QUESTIONS_PER_ROUND = 2
@@ -60,7 +65,7 @@ function currentQuestion(session: MultiSelectSession): MultiSelectQuestionState 
 
 function questionOrderSignature(session: MultiSelectSession): string {
   return session.rounds.map((round) => round.questions
-    .map((item) => `${item.question.id}:${item.optionOrder.join(',')}`)
+    .map((item) => `${multiSelectQuestionSignature(item.question)}:${item.optionOrder.join(',')}`)
     .join('|'))
     .join(';')
 }
@@ -81,12 +86,14 @@ export function createMultiSelectSession(
   sourceQuestions: MultiSelectQuestion[],
   random: () => number = Math.random,
   previous?: MultiSelectSession,
+  generatedQuestions?: MultiSelectQuestion[],
 ): MultiSelectSession {
   const questions = sourceQuestions.filter((item) => item.topicId === topicId)
   if (questions.length === 0) throw new Error(`Нельзя начать тренировку «${topicId}»: нет вопросов.`)
+  const generated = generatedQuestions?.filter((item) => item.topicId === topicId) ?? []
 
   const questionIds = new Set<string>()
-  for (const item of questions) {
+  for (const item of [...questions, ...generated]) {
     if (!item.id || !item.prompt.trim() || !item.explanation.trim() || item.options.length < 4) {
       throw new Error(`Нельзя начать тренировку «${topicId}»: найден неполный вопрос.`)
     }
@@ -94,7 +101,14 @@ export function createMultiSelectSession(
     questionIds.add(item.id)
   }
 
-  const orderedQuestions = shuffle(questions, random).slice(0, MULTI_SELECT_SESSION_QUESTION_COUNT)
+  const useGeneratedBalance = generated.length >= GENERATED_QUESTIONS_PER_SESSION
+    && questions.length >= BANK_QUESTIONS_PER_SESSION
+  const orderedQuestions = useGeneratedBalance
+    ? shuffle([
+      ...shuffle(generated, random).slice(0, GENERATED_QUESTIONS_PER_SESSION),
+      ...shuffle(questions, random).slice(0, BANK_QUESTIONS_PER_SESSION),
+    ], random)
+    : shuffle(questions, random).slice(0, MULTI_SELECT_SESSION_QUESTION_COUNT)
   while (orderedQuestions.length < MULTI_SELECT_SESSION_QUESTION_COUNT) {
     orderedQuestions.push(questions[orderedQuestions.length % questions.length]!)
   }

@@ -14,6 +14,8 @@ export interface MultiSelectQuestion {
   prompt: string
   options: MultiSelectOption[]
   explanation: string
+  /** Present only for questions produced from a reviewed generation template. */
+  templateId?: string
 }
 
 type Choice = [text: string, correct: boolean]
