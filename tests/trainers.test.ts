@@ -28,6 +28,11 @@ function completeCurrentRound(session: ReturnType<typeof createTrainerSession>) 
   return current
 }
 
+function assertRoundHasUniquePromptsAndAnswers(round: ReturnType<typeof createTrainerSession>['rounds'][number]) {
+  assert.equal(new Set(round.pairs.map((pair) => pair.prompt.trim())).size, round.pairs.length)
+  assert.equal(new Set(round.pairs.map((pair) => pair.answer.trim())).size, round.pairs.length)
+}
+
 test('four trainer topics and all their pair sets are registered', () => {
   assert.deepEqual(validateTrainerRegistry(), [])
   assert.deepEqual(trainerTopics.map((topic) => topic.id), [
@@ -64,15 +69,15 @@ test('four trainer topics and all their pair sets are registered', () => {
   assert.equal(getTrainerTopic('not-a-topic'), undefined)
 })
 
-test('every generated round has up to four pairs with unique answers and no lost mappings', () => {
+test('every generated round has up to four compatible pairs with unique prompts and answers', () => {
   for (const topic of trainerTopics) {
     const pairSet = trainerPairSets[topic.pairSetId]!
     const session = createTrainerSession(topic.id, pairSet.pairs, seededRandom(17))
     assert.equal(session.rounds.length, 5)
 
     for (const round of session.rounds) {
-      assert.ok(round.pairs.length > 0 && round.pairs.length <= 4)
-      assert.equal(new Set(round.pairs.map((pair) => pair.answer)).size, round.pairs.length)
+      assert.equal(round.pairs.length, 4)
+      assertRoundHasUniquePromptsAndAnswers(round)
       assert.equal(new Set(round.pairs.map((pair) => pair.id)).size, round.pairs.length)
       assert.deepEqual(new Set(round.leftOrder), new Set(round.pairs.map((pair) => pair.id)))
       assert.deepEqual(new Set(round.rightOrder), new Set(round.pairs.map((pair) => pair.id)))
@@ -86,6 +91,80 @@ test('every generated round has up to four pairs with unique answers and no lost
   const usedNumbers = numbers.rounds.flatMap((round) => round.pairs.map((pair) => pair.id))
   assert.equal(usedNumbers.length, 20)
   assert.equal(new Set(usedNumbers).size, 20)
+})
+
+test('repeated prompts are separated across rounds while both choices remain usable', () => {
+  const pairs = [
+    { id: 'you-pronoun', prompt: 'Вы', answer: 'εσείς' },
+    { id: 'you-verb', prompt: 'Вы', answer: 'είστε' },
+  ]
+  const session = createTrainerSession('same-prompt', pairs, seededRandom(12))
+
+  assert.equal(session.rounds.length, 5)
+  assert.ok(session.rounds.every((round) => round.pairs.length === 1))
+  session.rounds.forEach(assertRoundHasUniquePromptsAndAnswers)
+  assert.deepEqual(new Set(session.rounds.flatMap((round) => round.pairs.map((pair) => pair.id))), new Set(pairs.map((pair) => pair.id)))
+})
+
+test('repeated answers are separated across rounds while both prompts remain usable', () => {
+  const pairs = [
+    { id: 'he-is', prompt: 'Он', answer: 'είναι' },
+    { id: 'they-are', prompt: 'Они', answer: 'είναι' },
+  ]
+  const session = createTrainerSession('same-answer', pairs, seededRandom(19))
+
+  assert.equal(session.rounds.length, 5)
+  assert.ok(session.rounds.every((round) => round.pairs.length === 1))
+  session.rounds.forEach(assertRoundHasUniquePromptsAndAnswers)
+  assert.deepEqual(new Set(session.rounds.flatMap((round) => round.pairs.map((pair) => pair.id))), new Set(pairs.map((pair) => pair.id)))
+})
+
+test('augmenting matches avoid greedy losses when prompt and answer conflicts overlap', () => {
+  const pairs = [
+    { id: 'a-x', prompt: 'A', answer: 'X' },
+    { id: 'a-y', prompt: 'A', answer: 'Y' },
+    { id: 'b-x', prompt: 'B', answer: 'X' },
+    { id: 'c-z', prompt: 'C', answer: 'Z' },
+  ]
+  for (let seed = 0; seed < 20; seed += 1) {
+    const session = createTrainerSession('overlapping-conflicts', pairs, seededRandom(seed))
+    assert.equal(session.rounds.length, 5)
+    for (const round of session.rounds) {
+      assert.equal(round.pairs.length, 3)
+      assertRoundHasUniquePromptsAndAnswers(round)
+      assert.ok(round.pairs.every((pair) => pairs.some((sourcePair) => sourcePair.id === pair.id)))
+    }
+  }
+})
+
+test('small compatible sets make five finite rounds and reuse pairs when needed', () => {
+  const pairs = [
+    { id: 'one', prompt: 'A', answer: 'X' },
+    { id: 'two', prompt: 'B', answer: 'Y' },
+  ]
+  const session = createTrainerSession('small-compatible-set', pairs, seededRandom(7))
+
+  assert.equal(session.rounds.length, 5)
+  assert.ok(session.rounds.every((round) => round.pairs.length === 2))
+  session.rounds.forEach(assertRoundHasUniquePromptsAndAnswers)
+  assert.equal(session.rounds.flatMap((round) => round.pairs).length, 10)
+})
+
+test('registry allows repeated prompts and answers but checks pair-set identity', () => {
+  const topic = { ...trainerTopics[0]!, id: 'repeat-test', pairSetId: 'repeat-test' }
+  const pairSet = {
+    id: 'repeat-test',
+    pairs: [
+      { id: 'same-prompt-one', prompt: 'Вы', answer: 'εσείς' },
+      { id: 'same-prompt-two', prompt: 'Вы', answer: 'είστε' },
+      { id: 'same-answer-one', prompt: 'Он', answer: 'είναι' },
+      { id: 'same-answer', prompt: 'Они', answer: 'είναι' },
+    ],
+  }
+
+  assert.deepEqual(validateTrainerRegistry([topic], { 'repeat-test': pairSet }), [])
+  assert.ok(validateTrainerRegistry([topic], { 'repeat-test': { ...pairSet, id: 'wrong-id' } })
+    .some((error) => error.includes('не совпадает')))
 })
 
 test('session shuffle changes ordering on restart without changing pair answers', () => {

@@ -63,6 +63,9 @@ export function validateTrainerRegistry(
       errors.push(`Для темы ${topic.id} не найден набор пар ${topic.pairSetId}`)
       continue
     }
+    if (pairSet.id !== topic.pairSetId) {
+      errors.push(`Идентификатор набора пар ${pairSet.id} не совпадает с темой ${topic.id}`)
+    }
     if (pairSet.pairs.length === 0) errors.push(`Пустой набор пар: ${pairSet.id}`)
 
     const pairIds = new Set<string>()

@@ -47,14 +47,58 @@ function shuffle<T>(items: T[], random: () => number): T[] {
   return shuffled
 }
 
-function pairGroups(pairs: TrainerPair[]): TrainerPair[][] {
-  const grouped = new Map<string, TrainerPair[]>()
-  for (const pair of pairs) {
-    const group = grouped.get(pair.answer) ?? []
-    group.push(pair)
-    grouped.set(pair.answer, group)
+function usageOf(pair: TrainerPair, pairUsage: Map<string, number>): number {
+  return pairUsage.get(pair.id) ?? 0
+}
+
+function selectRoundPairs(
+  sourcePairs: TrainerPair[],
+  pairUsage: Map<string, number>,
+  random: () => number,
+): TrainerPair[] {
+  const candidatePairs = shuffle(sourcePairs, random)
+    .sort((left, right) => usageOf(left, pairUsage) - usageOf(right, pairUsage))
+  const pairsByPrompt = new Map<string, TrainerPair[]>()
+
+  for (const pair of candidatePairs) {
+    const prompt = pair.prompt.trim()
+    const candidates = pairsByPrompt.get(prompt) ?? []
+    candidates.push(pair)
+    pairsByPrompt.set(prompt, candidates)
   }
-  return [...grouped.values()]
+
+  const prompts = shuffle([...pairsByPrompt.keys()], random)
+    .sort((left, right) => {
+      const leftUsage = Math.min(...pairsByPrompt.get(left)!.map((pair) => usageOf(pair, pairUsage)))
+      const rightUsage = Math.min(...pairsByPrompt.get(right)!.map((pair) => usageOf(pair, pairUsage)))
+      return leftUsage - rightUsage
+    })
+  const pairByAnswer = new Map<string, TrainerPair>()
+
+  function assignPrompt(prompt: string, seenPrompts: Set<string>, seenAnswers: Set<string>): boolean {
+    if (seenPrompts.has(prompt)) return false
+    seenPrompts.add(prompt)
+
+    for (const pair of pairsByPrompt.get(prompt) ?? []) {
+      const answer = pair.answer.trim()
+      if (seenAnswers.has(answer)) continue
+      seenAnswers.add(answer)
+
+      const previousPair = pairByAnswer.get(answer)
+      if (!previousPair || assignPrompt(previousPair.prompt.trim(), seenPrompts, seenAnswers)) {
+        pairByAnswer.set(answer, pair)
+        return true
+      }
+    }
+
+    return false
+  }
+
+  for (const prompt of prompts) assignPrompt(prompt, new Set(), new Set())
+
+  return shuffle([...pairByAnswer.values()], random)
+    .sort((left, right) => usageOf(left, pairUsage) - usageOf(right, pairUsage))
+    .slice(0, TRAINER_ROUND_PAIR_LIMIT)
 }
 
 function sessionOrderSignature(session: TrainerSession): string {
@@ -90,34 +134,10 @@ export function createTrainerSession(
     sourceIds.add(pair.id)
   }
 
-  const groups = pairGroups(sourcePairs)
-  let groupQueue = shuffle(groups, random)
-  const pairQueues = new Map(groups.map((group) => [group, shuffle(group, random)]))
+  const pairUsage = new Map<string, number>()
   const rounds = Array.from({ length: TRAINER_ROUND_COUNT }, (_, index): TrainerRound => {
-    const selectedGroups: TrainerPair[][] = []
-    const pairsPerRound = Math.min(TRAINER_ROUND_PAIR_LIMIT, groups.length)
-
-    while (selectedGroups.length < pairsPerRound) {
-      if (groupQueue.length === 0) {
-        groupQueue = shuffle(groups.filter((group) => !selectedGroups.includes(group)), random)
-      }
-
-      const group = groupQueue.shift()
-      if (!group || selectedGroups.includes(group)) continue
-      selectedGroups.push(group)
-    }
-
-    const selectedPairs = selectedGroups.map((group) => {
-      let pairQueue = pairQueues.get(group)!
-      if (pairQueue.length === 0) {
-        pairQueue = shuffle(group, random)
-        pairQueues.set(group, pairQueue)
-      }
-      const [pair, ...remainingPairs] = pairQueue
-      pairQueues.set(group, remainingPairs)
-      return pair!
-    })
-    const pairs = shuffle(selectedPairs, random)
+    const pairs = selectRoundPairs(sourcePairs, pairUsage, random)
+    for (const pair of pairs) pairUsage.set(pair.id, usageOf(pair, pairUsage) + 1)
     const pairIds = pairs.map((pair) => pair.id)
 
     return {
