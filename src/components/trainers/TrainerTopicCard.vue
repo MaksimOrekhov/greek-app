@@ -23,6 +23,9 @@ defineProps<{
       <RouterLink v-if="topic.availableExercises.includes('fill-gaps')" class="topic-start-button" :to="`/trainers/${topic.id}/fill-gaps`">
         Заполни пропуски <span aria-hidden="true">→</span>
       </RouterLink>
+      <RouterLink v-if="topic.availableExercises.includes('order-items')" class="topic-start-button" :to="`/trainers/${topic.id}/order-items`">
+        Расставь по порядку <span aria-hidden="true">→</span>
+      </RouterLink>
     </div>
   </article>
 </template>
