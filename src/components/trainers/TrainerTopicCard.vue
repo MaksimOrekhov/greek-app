@@ -20,6 +20,9 @@ defineProps<{
       <RouterLink v-if="topic.availableExercises.includes('multi-select')" class="topic-start-button" :to="`/trainers/${topic.id}/multi-select`">
         Найди все правильные варианты <span aria-hidden="true">→</span>
       </RouterLink>
+      <RouterLink v-if="topic.availableExercises.includes('fill-gaps')" class="topic-start-button" :to="`/trainers/${topic.id}/fill-gaps`">
+        Заполни пропуски <span aria-hidden="true">→</span>
+      </RouterLink>
     </div>
   </article>
 </template>

@@ -1,7 +1,7 @@
 import { trainerPairSets } from './pairSets.ts'
 import type { TrainerExerciseType, TrainerPairSet, TrainerTopic } from './types.ts'
 
-const supportedTrainerExercises = new Set<TrainerExerciseType>(['match-pairs', 'multi-select'])
+const supportedTrainerExercises = new Set<TrainerExerciseType>(['match-pairs', 'multi-select', 'fill-gaps'])
 
 export const trainerTopics: TrainerTopic[] = [
   {
@@ -9,28 +9,28 @@ export const trainerTopics: TrainerTopic[] = [
     title: 'Личные местоимения',
     description: 'Формы, которые обозначают говорящего, собеседника и тех, о ком говорят.',
     pairSetId: 'personal-pronouns',
-    availableExercises: ['match-pairs', 'multi-select'],
+    availableExercises: ['match-pairs', 'multi-select', 'fill-gaps'],
   },
   {
     id: 'personal-pronouns-genitive',
     title: 'Личные местоимения в родительном падеже',
     description: 'Сопоставьте русские притяжательные местоимения с греческими формами принадлежности.',
     pairSetId: 'personal-pronouns-genitive',
-    availableExercises: ['match-pairs', 'multi-select'],
+    availableExercises: ['match-pairs', 'multi-select', 'fill-gaps'],
   },
   {
     id: 'verb-eimai',
     title: 'Глагол είμαι',
     description: 'Формы настоящего времени для шести грамматических лиц.',
     pairSetId: 'verb-eimai',
-    availableExercises: ['match-pairs', 'multi-select'],
+    availableExercises: ['match-pairs', 'multi-select', 'fill-gaps'],
   },
   {
     id: 'numbers',
     title: 'Числа 0–200',
     description: 'Сопоставление чисел с их греческими названиями в счётной форме.',
     pairSetId: 'numbers',
-    availableExercises: ['match-pairs', 'multi-select'],
+    availableExercises: ['match-pairs', 'multi-select', 'fill-gaps'],
   },
 ]
 

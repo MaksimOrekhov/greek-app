@@ -42,7 +42,8 @@ test('four trainer topics and all their pair sets are registered', () => {
     'numbers',
   ])
   assert.deepEqual(trainerTopics.map((topic) => topic.availableExercises), [
-    ['match-pairs', 'multi-select'], ['match-pairs', 'multi-select'], ['match-pairs', 'multi-select'], ['match-pairs', 'multi-select'],
+    ['match-pairs', 'multi-select', 'fill-gaps'], ['match-pairs', 'multi-select', 'fill-gaps'],
+    ['match-pairs', 'multi-select', 'fill-gaps'], ['match-pairs', 'multi-select', 'fill-gaps'],
   ])
   assert.equal(trainerPairSets['personal-pronouns']?.pairs.length, 10)
   assert.equal(trainerPairSets['personal-pronouns-genitive']?.pairs.length, 7)
@@ -290,9 +291,15 @@ test('trainer routes resolve the catalog and a session using hash-compatible pat
   const multiSelectRoute = router.resolve('/trainers/personal-pronouns/multi-select')
   assert.equal(multiSelectRoute.name, 'trainer-multi-select')
   assert.equal(multiSelectRoute.params.topicId, 'personal-pronouns')
+  const fillGapRoute = router.resolve('/trainers/personal-pronouns/fill-gaps')
+  assert.equal(fillGapRoute.name, 'trainer-fill-gaps')
+  assert.equal(fillGapRoute.params.topicId, 'personal-pronouns')
 
   const app = await readFile('src/App.vue', 'utf8')
   assert.match(app, /to="\/trainers"[^>]*>.*Тренажёры/s)
+  const topicCard = await readFile('src/components/trainers/TrainerTopicCard.vue', 'utf8')
+  assert.match(topicCard, /includes\('fill-gaps'\)/)
+  assert.match(topicCard, /\/fill-gaps/)
   const routerSource = await readFile('src/router.ts', 'utf8')
   assert.match(routerSource, /\.\.\.trainerRoutes/)
 })

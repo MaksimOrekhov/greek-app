@@ -278,6 +278,7 @@ test('T2 route resolves separately while the pair-matching route remains availab
   const router = createRouter({ history: createMemoryHistory(), routes: trainerRoutes })
   assert.equal(router.resolve('/trainers/numbers/multi-select').name, 'trainer-multi-select')
   assert.equal(router.resolve('/trainers/numbers').name, 'trainer-session')
+  assert.equal(router.resolve('/trainers/numbers/fill-gaps').name, 'trainer-fill-gaps')
 })
 
 test('multiple-selection interface uses accessible buttons and hides correctness until checking', async () => {
