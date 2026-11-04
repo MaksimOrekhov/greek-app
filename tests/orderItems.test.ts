@@ -96,6 +96,22 @@ function permutations<T>(items: readonly T[]): T[][] {
   return items.flatMap((item, index) => permutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) => [item, ...rest]))
 }
 
+function combinations<T>(items: readonly T[], count: number, visit: (selected: T[]) => void): void {
+  const selected: T[] = []
+  function walk(start: number): void {
+    if (selected.length === count) {
+      visit([...selected])
+      return
+    }
+    for (let index = start; index <= items.length - (count - selected.length); index += 1) {
+      selected.push(items[index]!)
+      walk(index + 1)
+      selected.pop()
+    }
+  }
+  walk(0)
+}
+
 function emptyHistory(): RecentOrderItemsHistory {
   return { full: {}, situations: { numbers: [], prices: [] } }
 }
@@ -150,12 +166,19 @@ test('numeric verification sorts numbers by value rather than Greek spelling', (
   assert.equal(isOrderItemsOrderCorrect(question, ['number-5', 'number-12', 'number-21', 'number-40']), true)
   assert.equal(isOrderItemsOrderCorrect(question, ['number-12', 'number-21', 'number-5', 'number-40']), false)
   assert.equal(isOrderItemsOrderCorrect(question, ['number-5', 'number-5', 'number-21', 'number-40']), false)
+
+  const priceQuestion = orderItemsQuestions.find((item) => item.templateId === 'prices')!
+  const priceOrder = getOrderItemsCorrectOrder(priceQuestion)
+  assert.deepEqual(priceOrder.map((item) => item.value), [...priceOrder.map((item) => item.value)].sort((left, right) => left - right))
+  assert.equal(isOrderItemsOrderCorrect(priceQuestion, priceOrder.map((item) => item.id)), true)
+  assert.equal(isOrderItemsOrderCorrect(priceQuestion, [...priceOrder].reverse().map((item) => item.id)), false)
 })
 
 test('each template generates deterministic, unique, checked questions across 200 seeds', () => {
   for (const templateId of ['ascending', 'descending', 'prices'] as const) {
     const full = new Set<string>()
     const situations = new Set<string>()
+    const priceProfiles = new Set<number>()
     let sawCloseNumbers = false
     let sawLowNumber = false
     let sawLargeNumber = false
@@ -170,8 +193,7 @@ test('each template generates deterministic, unique, checked questions across 20
 
       if (templateId === 'prices') {
         assert.ok(question.items.every((item) => REFERENCE_PRICES.some(([id, greek, value]) => item.id === `price-${id}` && item.greek === greek && item.value === value)))
-        assert.equal(question.items.filter((item) => item.value < 100).length, 2)
-        assert.equal(question.items.filter((item) => item.value >= 100).length, 2)
+        priceProfiles.add(question.items.filter((item) => item.value < 100).length)
       } else {
         assert.ok(question.items.every((item) => REFERENCE_NUMBER_WORDS.some((entry) => item.value === entry.value && item.greek === entry.greek)))
         assert.ok(question.items.every((item) => item.value >= 0 && item.value <= 200))
@@ -188,6 +210,8 @@ test('each template generates deterministic, unique, checked questions across 20
       assert.ok(sawCloseNumbers)
       assert.ok(sawLowNumber)
       assert.ok(sawLargeNumber)
+    } else {
+      assert.deepEqual([...priceProfiles].sort((left, right) => left - right), [0, 1, 2, 3, 4])
     }
   }
 })
@@ -222,12 +246,14 @@ test('ten sequential runs preserve full-combination and learning-situation diver
     descending: { full: new Set(), situations: new Set() },
     prices: { full: new Set(), situations: new Set() },
   }
+  const priceProfiles = new Set<number>()
 
   for (let run = 0; run < 10; run += 1) {
     const set = generateOrderItemsQuestionSet('numbers', seededRandom(900 + run), loadRecentOrderItemsHistory(storage))
     for (const question of set.generated) {
       metrics[question.templateId].full.add(orderItemsQuestionSignature(question))
       metrics[question.templateId].situations.add(orderItemsValueSetSignature(question))
+      if (question.templateId === 'prices') priceProfiles.add(question.items.filter((item) => item.value < 100).length)
     }
     rememberOrderItemsQuestions([...set.fixed, ...set.generated], storage)
   }
@@ -237,6 +263,7 @@ test('ten sequential runs preserve full-combination and learning-situation diver
     assert.equal(metrics[templateId].situations.size, 20)
   }
   assert.equal(metrics.ascending.situations.size + metrics.descending.situations.size, 40)
+  assert.deepEqual([...priceProfiles].sort((left, right) => left - right), [0, 1, 2, 3, 4])
 })
 
 test('fixed questions prefer situations absent from the previous run', () => {
@@ -279,25 +306,21 @@ test('history is versioned, bounded, isolated, and tolerates corrupt or unavaila
 })
 
 test('finite price pool exhaustion degrades to a valid bounded fallback', () => {
-  const cents = REFERENCE_PRICES.filter(([, , value]) => value < 100)
-  const euros = REFERENCE_PRICES.filter(([, , value]) => value >= 100)
   const allPriceContexts: string[] = []
-  for (let first = 0; first < cents.length; first += 1) {
-    for (let second = first + 1; second < cents.length; second += 1) {
-      for (let third = 0; third < euros.length; third += 1) {
-        for (let fourth = third + 1; fourth < euros.length; fourth += 1) {
-          allPriceContexts.push(JSON.stringify({
-            kind: 'price',
-            values: [cents[first]![2], cents[second]![2], euros[third]![2], euros[fourth]![2]].sort((left, right) => left - right),
-          }))
-        }
-      }
-    }
-  }
+  combinations(VERIFIED_ORDER_PRICES, 4, (items) => {
+    allPriceContexts.push(orderItemsValueSetSignature({
+      items: items.map((item) => ({ id: `price-${item.id}`, greek: item.greek, value: item.value, kind: 'price' as const })),
+    } as OrderItemsQuestion))
+  })
+  assert.equal(new Set(allPriceContexts).size, 2380)
   const history = { ...emptyHistory(), situations: { numbers: [], prices: allPriceContexts } }
   const question = generateOrderItemsQuestion('prices', seededRandom(77), 0, history)
   assertQuestionValid(question)
-  assert.equal(question.items.filter((item) => item.value < 100).length, 2)
+  assert.ok(question.items.every((item) => VERIFIED_ORDER_PRICES.some((entry) => entry.id === item.id.slice('price-'.length) && entry.greek === item.greek && entry.value === item.value)))
+
+  const repeatedAfterSessionExhaustion = generateOrderItemsQuestion('prices', seededRandom(78), 0, emptyHistory(), new Set(allPriceContexts))
+  assertQuestionValid(repeatedAfterSessionExhaustion)
+  assert.ok(allPriceContexts.includes(orderItemsValueSetSignature(repeatedAfterSessionExhaustion)))
 })
 
 test('selection, removal, reset, check, locking, advance, restart, and results follow the session rules', () => {
@@ -307,12 +330,23 @@ test('selection, removal, reset, check, locking, advance, restart, and results f
   assert.equal(checkOrderItemsAnswer(session).outcome, 'incomplete')
 
   const firstCard = initial.cardOrder[0]!
+  const secondCard = initial.cardOrder[1]!
+  const thirdCard = initial.cardOrder[2]!
   session = selectOrderItemsCard(session, firstCard).session
   assert.equal(session.rounds[0]!.questions[0]!.selectedOrder[0], firstCard)
   assert.equal(selectOrderItemsCard(session, firstCard).outcome, 'invalid')
+  session = selectOrderItemsCard(session, secondCard).session
+  session = selectOrderItemsCard(session, thirdCard).session
+  assert.deepEqual(session.rounds[0]!.questions[0]!.selectedOrder, [firstCard, secondCard, thirdCard])
+  session = removeOrderItemsCard(session, secondCard).session
+  assert.deepEqual(session.rounds[0]!.questions[0]!.selectedOrder, [firstCard, thirdCard])
+  session = selectOrderItemsCard(session, secondCard).session
+  assert.deepEqual(session.rounds[0]!.questions[0]!.selectedOrder, [firstCard, thirdCard, secondCard])
+  assert.equal(new Set(session.rounds[0]!.questions[0]!.selectedOrder).size, session.rounds[0]!.questions[0]!.selectedOrder.length)
   assert.equal(removeOrderItemsCard(session, firstCard).outcome, 'removed')
   session = removeOrderItemsCard(session, firstCard).session
-  session = selectOrderItemsCard(session, initial.cardOrder[1]!).session
+  assert.deepEqual(session.rounds[0]!.questions[0]!.selectedOrder, [thirdCard, secondCard])
+  session = selectOrderItemsCard(session, firstCard).session
   session = resetOrderItemsAnswer(session).session
   assert.deepEqual(session.rounds[0]!.questions[0]!.selectedOrder, [])
 
@@ -362,7 +396,26 @@ test('T4 is registered only for numbers, uses the hash-compatible route, and kee
   const exercise = await readFile('src/components/trainers/OrderItemsExercise.vue', 'utf8')
   assert.match(exercise, /const slots = \[1, 2, 3, 4\]/)
   assert.doesNotMatch(exercise, /<(?:input|textarea)\b/i)
-  assert.match(exercise, /<button[\s\S]*?@click="emit\('selectCard'/)
+  assert.match(exercise, /v-for="item in choiceItems"/)
+  assert.doesNotMatch(exercise, /availableItems/)
+  assert.match(exercise, /:aria-pressed="selectedIds\.has\(item\.id\)"/)
+  assert.match(exercise, /'is-selected': selectedIds\.has\(item\.id\)/)
+  assert.match(exercise, /function toggleChoice[\s\S]*?emit\('removeCard', itemId\)[\s\S]*?emit\('selectCard', itemId\)/)
+  assert.match(exercise, /В ответе · нажми, чтобы убрать/)
+  assert.match(exercise, /:disabled="checked"[\s\S]*?@click="toggleChoice\(item\.id\)"/)
+  const choicesStart = exercise.indexOf('class="order-choice-card"')
+  const choicesEnd = exercise.indexOf('</button>', choicesStart)
+  const choiceButton = exercise.slice(choicesStart, choicesEnd)
+  const choiceButtonStart = exercise.lastIndexOf('<button', choicesStart)
+  const choiceButtonTag = exercise.slice(choiceButtonStart, exercise.indexOf('>', choicesStart))
+  assert.doesNotMatch(choiceButtonTag, /v-if=/)
+  assert.doesNotMatch(choiceButton, /formatOrderItemsValue|item\.value/)
+  assert.match(exercise, /:aria-label="checked[\s\S]*?formatOrderItemsValue/)
+  assert.match(exercise, /v-if="checked" class="order-card-value"/)
+  assert.match(exercise, /watch\(\(\) => props\.checked[\s\S]*?feedbackElement\.value\?\.focus\(\)[\s\S]*?instructionElement\.value\?\.focus\(\)/)
+  assert.match(exercise, /@click="removeFromAnswer\(selectedItems\[slot - 1\]!\.id\)"/)
+  assert.match(exercise, /choiceButtons\.value\?\.\[choiceIndex\]\?\.focus\(\)/)
+  assert.match(exercise, /tabindex="-1"/)
   assert.match(exercise, /role="status" aria-live="polite"/)
   assert.match(exercise, /focus-visible/)
   assert.match(exercise, /prefers-reduced-motion/)

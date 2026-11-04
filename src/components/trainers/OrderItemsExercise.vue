@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, useTemplateRef, watch } from 'vue'
 import { getOrderItemsCorrectOrder, formatOrderItemsValue, type OrderItemsItem, type OrderItemsQuestion } from '../../lib/trainers/orderItems/orderItems.ts'
 
 const props = defineProps<{
@@ -24,12 +24,14 @@ const emit = defineEmits<{
   advance: []
 }>()
 
-const instructionElement = ref<HTMLHeadingElement | null>(null)
+const instructionElement = useTemplateRef<HTMLHeadingElement>('instruction')
+const feedbackElement = useTemplateRef<HTMLDivElement>('feedback')
+const choiceButtons = useTemplateRef<HTMLButtonElement[]>('choiceButtons')
 const slots = [1, 2, 3, 4]
 const selectedIds = computed(() => new Set(props.selectedOrder))
-const availableItems = computed<OrderItemsItem[]>(() => props.cardOrder
+const choiceItems = computed<OrderItemsItem[]>(() => props.cardOrder
   .map((id) => props.question.items.find((item) => item.id === id))
-  .filter((item): item is OrderItemsItem => item !== undefined && !selectedIds.value.has(item.id)))
+  .filter((item): item is OrderItemsItem => item !== undefined))
 const selectedItems = computed(() => props.selectedOrder
   .map((id) => props.question.items.find((item) => item.id === id) ?? null))
 const correctOrder = computed(() => getOrderItemsCorrectOrder(props.question))
@@ -38,6 +40,27 @@ const progress = computed(() => `${props.questionNumber} из ${props.totalQuest
 onMounted(() => {
   if (props.autofocus) void nextTick(() => instructionElement.value?.focus())
 })
+
+watch(() => props.checked, async (checked, wasChecked) => {
+  if (!checked && !wasChecked) return
+  await nextTick()
+  if (checked) feedbackElement.value?.focus()
+  else instructionElement.value?.focus()
+})
+
+function toggleChoice(itemId: string): void {
+  if (props.checked) return
+  if (selectedIds.value.has(itemId)) emit('removeCard', itemId)
+  else emit('selectCard', itemId)
+}
+
+function removeFromAnswer(itemId: string): void {
+  emit('removeCard', itemId)
+  void nextTick(() => {
+    const choiceIndex = choiceItems.value.findIndex((item) => item.id === itemId)
+    choiceButtons.value?.[choiceIndex]?.focus()
+  })
+}
 </script>
 
 <template>
@@ -70,7 +93,7 @@ onMounted(() => {
             :aria-label="checked
               ? `Позиция ${slot}: ${selectedItems[slot - 1]!.greek} — ${formatOrderItemsValue(selectedItems[slot - 1]!)}`
               : `Убрать из ответа, позиция ${slot}: ${selectedItems[slot - 1]!.greek}`"
-            @click="emit('removeCard', selectedItems[slot - 1]!.id)"
+            @click="removeFromAnswer(selectedItems[slot - 1]!.id)"
           >
             <span class="order-card-greek">{{ selectedItems[slot - 1]!.greek }}</span>
             <span v-if="checked" class="order-card-value">{{ formatOrderItemsValue(selectedItems[slot - 1]!) }}</span>
@@ -83,18 +106,25 @@ onMounted(() => {
 
     <section class="order-available-area" aria-labelledby="order-available-title">
       <h3 id="order-available-title">Карточки</h3>
-      <p v-if="!checked" class="order-helper">Нажимай на карточки в нужном порядке.</p>
-      <div class="order-available-cards" role="group" aria-label="Доступные греческие карточки">
+      <p v-if="!checked" class="order-helper">Нажимай на карточки в нужном порядке. Выбранную можно нажать ещё раз, чтобы убрать.</p>
+      <div class="order-available-cards" role="group" aria-label="Греческие карточки для ответа">
         <button
-          v-for="item in availableItems"
+          v-for="item in choiceItems"
           :key="item.id"
+          ref="choiceButtons"
           class="order-choice-card"
+          :class="{ 'is-selected': selectedIds.has(item.id) }"
           type="button"
-          @click="emit('selectCard', item.id)"
+          :disabled="checked"
+          :aria-pressed="selectedIds.has(item.id)"
+          :aria-label="selectedIds.has(item.id)
+            ? `${item.greek}: выбрано, нажмите, чтобы убрать из ответа`
+            : `${item.greek}: нажмите, чтобы добавить в ответ`"
+          @click="toggleChoice(item.id)"
         >
           {{ item.greek }}
+          <span v-if="selectedIds.has(item.id)" class="order-choice-state" aria-hidden="true">✓ В ответе · нажми, чтобы убрать</span>
         </button>
-        <p v-if="availableItems.length === 0 && !checked" class="order-all-selected">Все карточки выбраны. Проверь порядок или сбрось его.</p>
       </div>
     </section>
 
@@ -102,7 +132,7 @@ onMounted(() => {
       Проверить
     </button>
 
-    <div v-else class="order-feedback" :class="isCorrect ? 'is-success' : 'is-error'" role="status" aria-live="polite" aria-atomic="true">
+    <div v-else ref="feedback" class="order-feedback" :class="isCorrect ? 'is-success' : 'is-error'" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">
       <strong>{{ isCorrect ? 'Верно!' : 'Пока неверно.' }}</strong>
       <div v-if="!isCorrect" class="order-correct-answer">
         <span class="order-feedback-label">Правильный порядок:</span>
@@ -127,7 +157,7 @@ onMounted(() => {
 .order-progress-track { height: 4px; flex: 1; overflow: hidden; border-radius: 99px; background: #eeeee8; }
 .order-progress-track span { display: block; height: 100%; border-radius: inherit; background: #7f9272; transition: width .2s ease; }
 .order-items-exercise h2 { margin: 19px 0; color: #32352e; font: 700 clamp(19px, 4vw, 23px)/1.35 'Manrope', 'Noto Sans Greek', sans-serif; text-align: center; }
-.order-items-exercise h2:focus { outline: none; }
+.order-items-exercise h2:focus { outline: 3px solid rgba(105, 130, 91, .38); outline-offset: 4px; border-radius: 3px; }
 .order-answer-area, .order-available-area { min-width: 0; margin-top: 13px; padding: 14px; border: 1px solid #e5e5dc; border-radius: 12px; background: #fbfbf9; }
 .order-area-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .order-answer-area h3, .order-available-area h3 { margin: 0; color: #686b61; font-size: 12px; font-weight: 700; }
@@ -147,12 +177,16 @@ onMounted(() => {
 .order-available-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 11px; }
 .order-choice-card { min-width: 0; min-height: 57px; padding: 9px 8px; border: 1px solid #e0e2d9; border-radius: 10px; background: #fff; color: #3f433a; cursor: pointer; font: 600 clamp(15px, 4vw, 18px)/1.4 'Manrope', 'Noto Sans Greek', sans-serif; overflow-wrap: anywhere; text-align: center; transition: border-color .16s, background .16s, transform .16s; }
 .order-choice-card:hover { border-color: #c4d0ba; background: #f6f8f3; transform: translateY(-1px); }
-.order-all-selected { grid-column: 1 / -1; margin: 0; padding: 5px 0; color: #888a80; font-size: 11px; }
+.order-choice-card.is-selected { border-color: #a9ba9f; background: #edf3e9; color: #465a3f; box-shadow: inset 0 0 0 1px #a9ba9f; }
+.order-choice-card:disabled { cursor: default; }
+.order-choice-card:disabled:hover { transform: none; }
+.order-choice-state { display: block; margin-top: 3px; color: #52654a; font: 600 10px/1.35 'Manrope', sans-serif; }
 .order-choice-card:focus-visible, .order-answer-card:focus-visible, .order-reset-button:focus-visible, .order-action-button:focus-visible { outline: 3px solid rgba(105, 130, 91, .38); outline-offset: 2px; }
 .order-action-button { min-height: 45px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; padding: 0 17px; border: 1px solid #52654a; border-radius: 9px; background: #52654a; color: #fff; cursor: pointer; font-size: 13px; font-weight: 700; }
 .order-action-button:disabled { border-color: #dadbd4; background: #e8e9e3; color: #92938a; cursor: not-allowed; }
 .order-action-button:hover:not(:disabled) { border-color: #40533a; background: #40533a; }
 .order-feedback { margin-top: 14px; padding: 13px; border: 1px solid #e4e4dc; border-radius: 11px; background: #f8f8f5; }
+.order-feedback:focus { outline: 3px solid rgba(105, 130, 91, .38); outline-offset: 3px; }
 .order-feedback > strong { display: block; color: #505349; font-size: 14px; }
 .order-feedback p { margin: 8px 0 0; color: #686b61; font-size: 12px; line-height: 1.55; }
 .order-feedback.is-success { border-color: #ccd8c4; background: #f2f6ee; }

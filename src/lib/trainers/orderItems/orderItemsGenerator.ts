@@ -12,6 +12,15 @@ export const ORDER_ITEMS_SESSION_QUESTION_COUNT = 10
 
 type RandomSource = () => number
 type NumberProfile = 'any' | 'nearby' | 'mixed-range' | 'hundreds'
+type PriceProfile = { cents: number; euros: number }
+
+const PRICE_PROFILES: readonly PriceProfile[] = [
+  { cents: 4, euros: 0 },
+  { cents: 3, euros: 1 },
+  { cents: 2, euros: 2 },
+  { cents: 1, euros: 3 },
+  { cents: 0, euros: 4 },
+]
 
 const EMPTY_HISTORY: RecentOrderItemsHistory = { full: {}, situations: { numbers: [], prices: [] } }
 
@@ -138,43 +147,54 @@ function choosePrices(
   const cents = VERIFIED_ORDER_PRICES.filter((item) => item.value < 100)
   const euroPrices = VERIFIED_ORDER_PRICES.filter((item) => item.value >= 100)
   const recentSet = new Set(recent)
+  const preferredProfile = choose(PRICE_PROFILES, random)
 
-  const candidateItems = (small: readonly typeof cents[number][], large: readonly typeof euroPrices[number][]) => [
-    ...small.map((item) => makeItem(`price-${item.id}`, item.greek, item.value, 'price')),
-    ...large.map((item) => makeItem(`price-${item.id}`, item.greek, item.value, 'price')),
+  const candidateItems = (selectedCents: readonly typeof cents[number][], selectedEuros: readonly typeof euroPrices[number][]) => [
+    ...selectedCents.map((item) => makeItem(`price-${item.id}`, item.greek, item.value, 'price')),
+    ...selectedEuros.map((item) => makeItem(`price-${item.id}`, item.greek, item.value, 'price')),
   ]
   const isAvailable = (items: OrderItemsItem[], ignoreHistory = false) => {
     const signature = orderItemsValueSetSignature({ items } as OrderItemsQuestion)
     return !used.has(signature) && (ignoreHistory || !recentSet.has(signature))
   }
 
+  const findAvailableItems = (profiles: readonly PriceProfile[], ignoreHistory = false): OrderItemsItem[] | undefined => {
+    for (const profile of profiles) {
+      let selected: OrderItemsItem[] | undefined
+      combinations(cents, profile.cents, (selectedCents) => combinations(euroPrices, profile.euros, (selectedEuros) => {
+        const items = candidateItems(selectedCents, selectedEuros)
+        if (!isAvailable(items, ignoreHistory)) return false
+        selected = items
+        return true
+      }))
+      if (selected) return selected
+    }
+    return undefined
+  }
+
   for (let attempt = 0; attempt < 256; attempt += 1) {
-    const small = shuffled(cents, random).slice(0, 2)
-    const large = shuffled(euroPrices, random).slice(0, 2)
-    const items = candidateItems(small, large)
+    const selectedCents = shuffled(cents, random).slice(0, preferredProfile.cents)
+    const selectedEuros = shuffled(euroPrices, random).slice(0, preferredProfile.euros)
+    const items = candidateItems(selectedCents, selectedEuros)
     if (isAvailable(items)) return items
   }
 
-  let selected: OrderItemsItem[] | undefined
-  combinations(cents, 2, (small) => combinations(euroPrices, 2, (large) => {
-    const items = candidateItems(small, large)
-    if (!isAvailable(items)) return false
-    selected = items
-    return true
-  }))
+  const otherProfiles = shuffled(PRICE_PROFILES.filter((profile) => profile !== preferredProfile), random)
+  const profileOrder = [preferredProfile, ...otherProfiles]
+  let selected = findAvailableItems([preferredProfile])
   if (selected) return selected
 
-  combinations(cents, 2, (small) => combinations(euroPrices, 2, (large) => {
-    const items = candidateItems(small, large)
-    if (!isAvailable(items, true)) return false
-    selected = items
-    return true
-  }))
+  selected = findAvailableItems(otherProfiles)
   if (selected) return selected
 
-  // The verified pool has a finite set of pairs; repeat only after that pool is exhausted.
-  selected = candidateItems(cents.slice(0, 2), euroPrices.slice(0, 2))
-  return selected
+  // When recent history covers every candidate, reuse a checked combination while
+  // still avoiding a duplicate elsewhere in the current session.
+  selected = findAvailableItems(profileOrder, true)
+  if (selected) return selected
+
+  // The verified pool has a finite set of four-price combinations; only repeat
+  // after all 2,380 distinct contexts have been used in this session.
+  return candidateItems(cents.slice(0, 4), [])
 }
 
 export function generateOrderItemsQuestion(
