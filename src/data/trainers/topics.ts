@@ -1,5 +1,7 @@
 import { trainerPairSets } from './pairSets.ts'
-import type { TrainerPairSet, TrainerTopic } from './types.ts'
+import type { TrainerExerciseType, TrainerPairSet, TrainerTopic } from './types.ts'
+
+const supportedTrainerExercises = new Set<TrainerExerciseType>(['match-pairs', 'multi-select'])
 
 export const trainerTopics: TrainerTopic[] = [
   {
@@ -54,11 +56,16 @@ export function validateTrainerRegistry(
     if (!topic.id || !topic.title || !topic.description || !topic.pairSetId) {
       errors.push(`Неполные данные темы тренажёра: ${topic.id}`)
     }
-    if (!topic.availableExercises.includes('match-pairs')) {
-      errors.push(`Для темы ${topic.id} не зарегистрировано сопоставление пар`)
+    if (topic.availableExercises.length === 0) {
+      errors.push(`Для темы ${topic.id} не зарегистрировано ни одного упражнения`)
     }
-    if (!topic.availableExercises.includes('multi-select')) {
-      errors.push(`Для темы ${topic.id} не зарегистрирован выбор нескольких вариантов`)
+    const exerciseTypes = new Set<string>()
+    for (const exercise of topic.availableExercises) {
+      if (!supportedTrainerExercises.has(exercise)) {
+        errors.push(`Неизвестный тип упражнения ${exercise} в теме ${topic.id}`)
+      }
+      if (exerciseTypes.has(exercise)) errors.push(`Тип упражнения ${exercise} повторяется в теме ${topic.id}`)
+      exerciseTypes.add(exercise)
     }
 
     const pairSet = pairSets[topic.pairSetId]

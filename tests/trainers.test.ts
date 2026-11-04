@@ -167,6 +167,15 @@ test('registry allows repeated prompts and answers but checks pair-set identity'
     .some((error) => error.includes('не совпадает')))
 })
 
+test('trainer registry validates only declared exercise types', () => {
+  const topic = { ...trainerTopics[0]!, id: 'pairs-only', pairSetId: 'pairs-only', availableExercises: ['match-pairs'] as const }
+  const pairSet = { id: 'pairs-only', pairs: [{ id: 'one', prompt: 'one', answer: 'ένα' }] }
+  assert.deepEqual(validateTrainerRegistry([topic], { 'pairs-only': pairSet }), [])
+
+  const unknownTopic = { ...topic, availableExercises: ['unknown'] } as unknown as typeof topic
+  assert.ok(validateTrainerRegistry([unknownTopic], { 'pairs-only': pairSet }).some((error) => error.includes('Неизвестный тип упражнения')))
+})
+
 test('session shuffle changes ordering on restart without changing pair answers', () => {
   const pairSet = trainerPairSets['personal-pronouns']!
   const first = createTrainerSession('personal-pronouns', pairSet.pairs, seededRandom(5))

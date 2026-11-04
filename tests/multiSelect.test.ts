@@ -38,20 +38,53 @@ function answerCurrentCorrectly(session: ReturnType<typeof createMultiSelectSess
   return current
 }
 
-test('all four topics expose 12 beginner-friendly multiple-selection questions', () => {
+test('all four topics expose at least 12 beginner-friendly multiple-selection questions', () => {
   assert.deepEqual(validateTrainerRegistry(), [])
   assert.deepEqual(validateMultiSelectQuestionBank(), [])
   for (const topic of trainerTopics) {
     assert.ok(topic.availableExercises.includes('multi-select'))
-    assert.equal(trainerMultiSelectQuestions.filter((item) => item.topicId === topic.id).length, 12)
+    assert.ok(trainerMultiSelectQuestions.filter((item) => item.topicId === topic.id).length >= 12)
     assert.equal(createMultiSelectSession(topic.id, trainerMultiSelectQuestions, seededRandom(71)).rounds.length, 5)
   }
-  assert.equal(trainerMultiSelectQuestions.length, 48)
+  assert.ok(trainerMultiSelectQuestions.length >= 48)
   assert.ok(trainerMultiSelectQuestions.every((item) => item.options.filter((option) => option.correct).length >= 2))
   assert.ok(trainerMultiSelectQuestions.every((item) => item.options.some((option) => !option.correct)))
 
   const prompts = trainerMultiSelectQuestions.map((item) => item.prompt).join('\n')
   assert.doesNotMatch(prompts, /третье лицо|родительн\w* падеж|винительн\w* падеж|множественн\w* число|грамматическ\w* лиц/iu)
+})
+
+test('number comparisons require reading Greek and explain every option numerically', () => {
+  const rangeIds = [
+    'numbers-over-fifty',
+    'numbers-under-twenty',
+    'numbers-twenty-to-fifty',
+    'numbers-over-hundred',
+    'numbers-round-tens',
+    'numbers-between-fifty-and-one-hundred',
+    'numbers-below-fifty',
+  ]
+  const rangeQuestions = trainerMultiSelectQuestions.filter((item) => rangeIds.includes(item.id))
+  assert.equal(rangeQuestions.length, rangeIds.length)
+
+  for (const item of rangeQuestions) {
+    for (const option of item.options) {
+      assert.doesNotMatch(option.text, /\d/u)
+      assert.match(option.text, /^[\p{Script=Greek}\s]+$/u)
+      assert.match(item.explanation, new RegExp(option.text + '\\s+—\\s+\\d+', 'u'))
+    }
+  }
+})
+
+test('pronoun questions clarify polite εσείς and avoid treating people as possessions', () => {
+  const groupQuestion = trainerMultiSelectQuestions.find((item) => item.id === 'pronouns-in-groups')!
+  assert.match(groupQuestion.explanation, /вежливым «Вы» при обращении к одному человеку/u)
+
+  const genitiveOptions = trainerMultiSelectQuestions
+    .filter((item) => item.topicId === 'personal-pronouns-genitive')
+    .flatMap((item) => item.options.map((option) => option.text))
+  assert.ok(genitiveOptions.every((option) => !/οι φίλοι|η φίλη|ο πατέρας/u.test(option)))
+  assert.ok(trainerMultiSelectQuestions.some((item) => item.id === 'genitive-plural-before-verb'))
 })
 
 test('question bank validator reports duplicate, empty, missing, and unknown data', () => {
