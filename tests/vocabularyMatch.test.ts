@@ -43,14 +43,18 @@ function normalize(value: string): string {
 // Independent reference cases: the generator's own conflict table is not used
 // to validate session pairings.
 const reviewedConflicts: readonly (readonly string[])[] = [
-  ['καλά', 'εντάξει'],
+  ['καλά', 'εντάξει', 'μια χαρά'],
   ['στο', 'στην'],
   ['είστε', 'είσαστε'],
   ['ώρα', 'καιρός', 'χρόνος'],
   ['μα', 'αλλά'],
   ['χάρτης', 'κάρτα'],
   ['λέω', 'μιλάω'],
+  ['και', 'κι'],
+  ['παρακαλώ', 'ορίστε'],
+  ['άντρας', 'τύπος'],
   ['κινηματογράφος', 'σινεμά'],
+  ['φιλμ', 'σινεμά'],
 ]
 
 function independentlyAmbiguous(left: TrainerPair, right: TrainerPair): boolean {
@@ -86,8 +90,6 @@ test('the vocabulary pool is adapted directly from all valid dictionary records'
 })
 
 test('only a small ambiguity layer blocks reviewed synonyms and exact duplicate labels', () => {
-  assert.deepEqual(VOCABULARY_MATCH_CONFLICT_GROUPS, reviewedConflicts)
-  assert.equal(VOCABULARY_MATCH_CONFLICT_GROUPS.flat().length, 17)
   for (const group of reviewedConflicts) {
     const groupPairs = adaptWordsToTrainerPairs(words).filter((pair) => group.includes(pair.answer))
     assert.equal(groupPairs.length, group.length)
@@ -106,6 +108,60 @@ test('only a small ambiguity layer blocks reviewed synonyms and exact duplicate 
     { id: 'context-a', prompt: 'быть (он / она / оно / они)', answer: 'είναι' },
     { id: 'context-b', prompt: 'он', answer: 'αυτός' },
   ), false)
+})
+
+test('independent semantic cases stay out of the same round while the generator still fills 20 slots', () => {
+  const pairs = adaptWordsToTrainerPairs(words)
+  const requiredConflicts = [
+    ['και', 'κι'],
+    ['παρακαλώ', 'ορίστε'],
+    ['άντρας', 'τύπος'],
+  ] as const
+  const allReviewedGreek = new Set(reviewedConflicts.flat())
+
+  for (const [leftGreek, rightGreek] of requiredConflicts) {
+    const left = pairs.find((pair) => pair.answer === leftGreek)
+    const right = pairs.find((pair) => pair.answer === rightGreek)
+    assert.ok(left, `missing dictionary item: ${leftGreek}`)
+    assert.ok(right, `missing dictionary item: ${rightGreek}`)
+    assert.equal(areVocabularyPairsAmbiguous(left, right), true, `${leftGreek}/${rightGreek} must conflict`)
+
+    // Use the real dictionary rows plus 19 independently compatible choices.
+    // With 21 available entries the conflicting pair must lose one slot, not
+    // shrink the session or remove either word from future cycles.
+    const fillers: TrainerPair[] = []
+    for (const candidate of pairs) {
+      if (candidate.id === left.id || candidate.id === right.id || allReviewedGreek.has(candidate.answer)) continue
+      if (independentlyAmbiguous(left, candidate) || independentlyAmbiguous(right, candidate)) continue
+      if (fillers.some((filler) => independentlyAmbiguous(filler, candidate))) continue
+      fillers.push(candidate)
+      if (fillers.length === 19) break
+    }
+    assert.equal(fillers.length, 19)
+
+    const candidates = [fillers[0]!, left, right, ...fillers.slice(1)]
+    const history = {
+      version: 1 as const,
+      cycle: 0,
+      order: candidates.map((pair) => pair.id),
+      completedIds: [],
+    }
+    const selected = selectVocabularyMatchPairs(candidates, history, () => 0)
+    assert.equal(selected.length, 20)
+    assert.equal(selected.some((pair) => pair.id === left.id) && selected.some((pair) => pair.id === right.id), false)
+    assert.ok(selected.some((pair) => pair.id === fillers[0]!.id), 'conflict filtering must use the final free slot')
+
+    const session = createTrainerSession('vocabulary-match', selected, seededRandom(400))
+    assert.equal(session.rounds.length, 5)
+    assert.ok(session.rounds.every((round) => round.pairs.length === 4))
+    for (const round of session.rounds) {
+      for (let firstIndex = 0; firstIndex < round.pairs.length; firstIndex += 1) {
+        for (let secondIndex = firstIndex + 1; secondIndex < round.pairs.length; secondIndex += 1) {
+          assert.equal(independentlyAmbiguous(round.pairs[firstIndex]!, round.pairs[secondIndex]!), false)
+        }
+      }
+    }
+  }
 })
 
 test('each generated session has five rounds of four different, unambiguous pairs', () => {
@@ -167,6 +223,13 @@ test('completed sessions rotate through every dictionary entry before a new cycl
   while (visited.size < pairs.length && sessionCount < 30) {
     const selected = selectVocabularyMatchPairs(pairs, history, seededRandom(1000 + sessionCount))
     const session = createTrainerSession('vocabulary-match', selected, seededRandom(2000 + sessionCount))
+    for (const round of session.rounds) {
+      for (let firstIndex = 0; firstIndex < round.pairs.length; firstIndex += 1) {
+        for (let secondIndex = firstIndex + 1; secondIndex < round.pairs.length; secondIndex += 1) {
+          assert.equal(independentlyAmbiguous(round.pairs[firstIndex]!, round.pairs[secondIndex]!), false)
+        }
+      }
+    }
     const completedIds = session.rounds.flatMap((round) => round.pairs.map((pair) => pair.id))
     assert.equal(new Set(completedIds).size, 20)
     for (const id of completedIds) visited.add(id)

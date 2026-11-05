@@ -8,14 +8,18 @@ import type { VocabularyMatchHistory } from './vocabularyMatchHistory.ts'
  * second vocabulary list; IDs and glosses always come from `words`.
  */
 export const VOCABULARY_MATCH_CONFLICT_GROUPS: readonly (readonly string[])[] = [
-  ['καλά', 'εντάξει'],
+  ['καλά', 'εντάξει', 'μια χαρά'],
   ['στο', 'στην'],
   ['είστε', 'είσαστε'],
   ['ώρα', 'καιρός', 'χρόνος'],
   ['μα', 'αλλά'],
   ['χάρτης', 'κάρτα'],
   ['λέω', 'μιλάω'],
+  ['και', 'κι'],
+  ['παρακαλώ', 'ορίστε'],
+  ['άντρας', 'τύπος'],
   ['κινηματογράφος', 'σινεμά'],
+  ['φιλμ', 'σινεμά'],
 ]
 
 export const VOCABULARY_MATCH_SESSION_PAIR_COUNT = 20
