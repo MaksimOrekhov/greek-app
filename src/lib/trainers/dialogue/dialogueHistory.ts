@@ -33,6 +33,7 @@ export function dialogueExactQuestionSignature(question: DialogueQuestion): stri
     .map((option) => `${normalize(option.greek)}:${option.id === question.correctOptionId ? '1' : '0'}`)
     .sort()
   return JSON.stringify([
+    normalize(question.replySpeaker),
     question.context.map((line) => [normalize(line.speaker), normalize(line.greek)]),
     correct ? normalize(correct.greek) : '',
     options,

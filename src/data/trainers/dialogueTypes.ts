@@ -18,6 +18,7 @@ export interface DialogueQuestion {
   level: DialogueLevel
   categoryId: string
   situationId: string
+  replySpeaker: string
   intentId: string
   context: DialogueLine[]
   options: DialogueOption[]

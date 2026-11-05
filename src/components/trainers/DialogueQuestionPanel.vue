@@ -19,9 +19,6 @@ const emit = defineEmits<{
 const questionHeading = useTemplateRef<HTMLHeadingElement>('questionHeading')
 const feedbackHeading = useTemplateRef<HTMLHeadingElement>('feedbackHeading')
 const correctOption = computed(() => dialogueQuestionCorrectOption(props.questionState.question))
-const selectedOption = computed(() => props.questionState.question.options.find(
-  (option) => option.id === props.questionState.selectedOptionId,
-))
 const orderedOptions = computed(() => props.questionState.optionOrder.map(
   (id) => props.questionState.question.options.find((option) => option.id === id),
 ).filter((option) => option !== undefined))
@@ -50,7 +47,7 @@ defineExpose({ focusQuestion })
     </div>
 
     <h2 :id="`dialogue-question-${questionState.question.id}`" ref="questionHeading" class="dialogue-prompt-title" tabindex="-1">
-      Продолжи разговор
+      Продолжи разговор: {{ questionState.question.replySpeaker }}
     </h2>
     <div class="dialogue-transcript" aria-label="Диалог на греческом">
       <p v-for="(line, index) in questionState.question.context" :key="`${index}-${line.speaker}`" class="dialogue-line">
@@ -59,7 +56,7 @@ defineExpose({ focusQuestion })
         <span v-if="questionState.checked" class="dialogue-russian">{{ line.translation }}</span>
       </p>
       <p v-if="questionState.checked && correctOption" class="dialogue-line dialogue-answer-line">
-        <span class="dialogue-speaker">Ты</span>
+        <span class="dialogue-speaker">{{ questionState.question.replySpeaker }}</span>
         <span class="dialogue-greek">{{ correctOption.greek }}</span>
         <span class="dialogue-russian">{{ correctOption.translation }}</span>
       </p>
@@ -93,13 +90,12 @@ defineExpose({ focusQuestion })
         {{ questionState.isCorrect ? 'Правильно!' : 'Ответ не подходит' }}
       </h3>
       <p class="dialogue-explanation">{{ questionState.question.explanation }}</p>
-      <p v-if="selectedOption && !questionState.isCorrect" class="dialogue-selected-explanation">
-        <strong>Вы выбрали:</strong> {{ selectedOption.greek }} — {{ selectedOption.translation }}
-        {{ selectedOption.explanation }}
-      </p>
-      <p v-if="correctOption" class="dialogue-correct-explanation">
-        <strong>Почему подходит:</strong> {{ correctOption.explanation }}
-      </p>
+      <ul class="dialogue-translations" aria-label="Переводы и разбор всех вариантов">
+        <li v-for="option in orderedOptions" :key="option.id">
+          <span lang="el">{{ option.greek }}</span> — {{ option.translation }}
+          <span class="dialogue-russian">{{ option.explanation }}</span>
+        </li>
+      </ul>
     </div>
 
     <div class="dialogue-actions">
@@ -146,6 +142,8 @@ defineExpose({ focusQuestion })
 .dialogue-feedback-title { margin: 0 0 6px; color: #40533a; font: 700 15px 'Manrope', sans-serif; }
 .dialogue-explanation, .dialogue-selected-explanation, .dialogue-correct-explanation { margin: 0; color: #60665b; font-size: 12px; line-height: 1.55; overflow-wrap: anywhere; }
 .dialogue-selected-explanation, .dialogue-correct-explanation { margin-top: 7px; }
+.dialogue-translations { margin: 10px 0 0; padding-left: 18px; color: #60665b; font-size: 12px; line-height: 1.55; overflow-wrap: anywhere; }
+.dialogue-translations li + li { margin-top: 10px; }
 .dialogue-actions { display: flex; justify-content: flex-end; margin-top: 17px; }
 .dialogue-primary-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 16px; border: 1px solid #52654a; border-radius: 9px; background: #52654a; color: #fff; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
 .dialogue-primary-button:hover:not(:disabled) { background: #40533a; }

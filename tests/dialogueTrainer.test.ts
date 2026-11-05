@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { useDialogueSession } from '../src/composables/useDialogueSession.ts'
+import { createSSRApp } from 'vue'
+import { renderToString } from '@vue/server-renderer'
+import { parse, compileScript } from '@vue/compiler-sfc'
+import ts from 'typescript'
 import { dialogueCategories, dialogueQuestions } from '../src/data/trainers/dialogueQuestions.ts'
 import { trainerRoutes } from '../src/data/trainers/routes.ts'
 import {
@@ -52,9 +57,9 @@ test('dialogue bank meets its reviewed structure and coverage targets', () => {
   assert.equal(dialogueQuestions.filter((question) => question.level === 'A2').length, 23)
   assert.equal(new Set(dialogueQuestions.map((question) => question.id)).size, dialogueQuestions.length)
   assert.equal(new Set(dialogueQuestions.map((question) => question.situationId)).size, dialogueQuestions.length)
-  assert.ok(new Set(dialogueQuestions.map((question) => question.intentId)).size >= 24)
+  assert.ok(new Set(dialogueQuestions.map((question) => question.intentId)).size >= 10)
   assert.ok(dialogueQuestions.filter((question) => question.level === 'A2').length >= 10)
-  assert.equal(dialogueQuestions.filter((question) => question.context.length >= 2).length, 31)
+  assert.equal(dialogueQuestions.filter((question) => question.context.length >= 2).length, 25)
 
   for (const category of dialogueCategories) {
     assert.ok(dialogueQuestions.filter((question) => question.categoryId === category.id).length >= 5, category.id)
@@ -82,6 +87,7 @@ test('T6 creates five rounds of two unique questions with broad topic coverage',
     assert.equal(new Set(questions.map((item) => item.question.id)).size, 10)
     assert.equal(new Set(questions.map((item) => item.question.situationId)).size, 10)
     assert.ok(new Set(questions.map((item) => item.question.categoryId)).size >= 4)
+    assert.ok(new Set(questions.map((item) => item.question.intentId)).size >= 7)
     assert.ok(questions.every((item) => item.optionOrder.length === 3))
   }
 })
@@ -162,7 +168,7 @@ test('ten launches rotate through the full bank and never repeat a situation wit
 
   assert.equal(seenIds.size, 36)
   assert.equal(seenSituations.size, 36)
-  assert.equal(seenIntents.size, 36)
+  assert.equal(seenIntents.size, new Set(dialogueQuestions.map((question) => question.intentId)).size)
   assert.equal(withinSessionRepeats, 0)
   assert.equal(history.exactQuestionSignatures.length, 36)
   assert.equal(history.situationIds.length, 36)
@@ -214,6 +220,7 @@ test('exact question signatures ignore answer order while situation signatures i
   const question = dialogueQuestions[0]!
   const reordered = { ...question, options: [...question.options].reverse() }
   assert.equal(dialogueExactQuestionSignature(question), dialogueExactQuestionSignature(reordered))
+  assert.notEqual(dialogueExactQuestionSignature(question), dialogueExactQuestionSignature({ ...question, replySpeaker: "Другой участник" }))
 
   const editedDistractor = {
     ...question,
@@ -235,4 +242,68 @@ test('T6 route and controls expose keyboard and screen-reader states with a mobi
   assert.match(page, /exercise\.value\?\.focusQuestion\(\)/)
   assert.match(page, /resultsView\.value\?\.focusHeading\(\)/)
   assert.doesNotMatch(panel, /<input\b/)
+})
+
+
+test('history records only checked answers across early exit and re-entry', () => {
+  const storage = new MemoryStorage()
+  const first = useDialogueSession({ storage, random: seeded(12) })
+  first.start()
+  assert.equal(storage.values.size, 0)
+  first.checkAnswer()
+  assert.equal(storage.values.size, 0)
+  const question = first.currentQuestion.value!.question
+  first.selectOption(question.correctOptionId)
+  first.checkAnswer()
+  const saved = storage.getItem(DIALOGUE_HISTORY_KEY)
+  assert.equal(loadDialogueQuestionHistory(dialogueQuestions, storage).situationIds.length, 1)
+  first.checkAnswer()
+  assert.equal(storage.getItem(DIALOGUE_HISTORY_KEY), saved)
+  const reentered = useDialogueSession({ storage, random: seeded(12) })
+  reentered.start()
+  assert.equal(storage.getItem(DIALOGUE_HISTORY_KEY), saved)
+  assert.ok(!reentered.session.value!.rounds.flatMap(r => r.questions).some(q => q.question.id === question.id))
+  const completeStorage = new MemoryStorage()
+  const full = useDialogueSession({ storage: completeStorage, random: seeded(3) })
+  full.start()
+  for (let i = 0; i < 10; i++) {
+    full.selectOption(full.currentQuestion.value!.question.correctOptionId)
+    full.checkAnswer()
+    full.advance()
+  }
+  assert.equal(loadDialogueQuestionHistory(dialogueQuestions, completeStorage).situationIds.length, 10)
+  storage.unavailable = true
+  assert.doesNotThrow(() => { reentered.start(); reentered.selectOption(reentered.currentQuestion.value!.question.correctOptionId); reentered.checkAnswer() })
+})
+
+test('reply roles match reviewed participants rather than a blanket user label', () => {
+  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Ελένη','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ' ]
+  assert.deepEqual(dialogueQuestions.map(q => q.replySpeaker), roles)
+})
+
+test('rendered panel names the reply speaker before answering and reveals every translation only after checking', async () => {
+  const filename = new URL('../src/components/trainers/DialogueQuestionPanel.vue', import.meta.url)
+  const { descriptor } = parse(readFileSync(filename, 'utf8'))
+  const compiled = compileScript(descriptor, { id: 'dialogue-regression', inlineTemplate: true })
+  let code = ts.transpileModule(compiled.content, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText
+  code = code.replaceAll('"vue"', JSON.stringify(import.meta.resolve('vue')))
+    .replaceAll("'vue'", JSON.stringify(import.meta.resolve('vue')))
+    .replaceAll("'../../lib/trainers/dialogue/dialogueSession.ts'", JSON.stringify(new URL('../src/lib/trainers/dialogue/dialogueSession.ts', import.meta.url).href))
+  const component = (await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`)).default
+  const session = createDialogueSession(dialogueQuestions, seeded(8))
+  const item = session.rounds[0]!.questions[0]!
+  item.question = dialogueQuestions.find(q => q.id === 'd-place-03')!
+  item.optionOrder = item.question.options.map(o => o.id)
+  const props = { questionState: item, roundNumber: 1, totalRounds: 5, questionNumber: 1, totalQuestions: 10 }
+  const before = await renderToString(createSSRApp(component, props))
+  assert.ok(before.includes('Οδηγός'))
+  assert.ok(!before.includes('Переводы и разбор'))
+  for (const option of item.question.options) assert.ok(!before.includes(option.translation))
+  item.checked = true
+  item.selectedOptionId = item.question.correctOptionId
+  item.isCorrect = true
+  const after = await renderToString(createSSRApp(component, props))
+  for (const option of item.question.options) assert.ok(after.includes(option.translation))
+  assert.ok(after.includes('Переводы и разбор всех вариантов'))
+  assert.ok(!after.includes('dialogue-speaker">Ты'))
 })

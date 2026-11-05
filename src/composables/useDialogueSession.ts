@@ -23,7 +23,8 @@ function browserStorage(): DialogueHistoryStorage | undefined {
   }
 }
 
-export function useDialogueSession() {
+export function useDialogueSession(options: { storage?: DialogueHistoryStorage; random?: () => number } = {}) {
+  const storage = options.storage ?? browserStorage()
   const state = shallowRef<DialogueSession | null>(null)
   const session = computed(() => state.value)
   const currentRound = computed(() => state.value?.rounds[state.value.currentRoundIndex] ?? null)
@@ -31,12 +32,9 @@ export function useDialogueSession() {
   const results = computed(() => state.value?.completed ? getDialogueSessionResults(state.value) : null)
 
   function start(): void {
-    const storage = browserStorage()
     const history = loadDialogueQuestionHistory(dialogueQuestions, storage)
-    const next = createDialogueSession(dialogueQuestions, Math.random, history)
+    const next = createDialogueSession(dialogueQuestions, options.random ?? Math.random, history)
     state.value = next
-    const selectedQuestions = next.rounds.flatMap((round) => round.questions.map((item) => item.question))
-    saveDialogueQuestionHistory(rememberDialogueQuestions(history, selectedQuestions), storage)
   }
 
   function selectOption(optionId: string): void {
@@ -44,7 +42,14 @@ export function useDialogueSession() {
   }
 
   function checkAnswer(): void {
-    if (state.value) state.value = checkDialogueAnswer(state.value).session
+    if (!state.value) return
+    const question = currentQuestion.value?.question
+    const result = checkDialogueAnswer(state.value)
+    state.value = result.session
+    if (result.outcome === 'checked' && question) {
+      const history = loadDialogueQuestionHistory(dialogueQuestions, storage)
+      saveDialogueQuestionHistory(rememberDialogueQuestions(history, [question]), storage)
+    }
   }
 
   function advance(): void {

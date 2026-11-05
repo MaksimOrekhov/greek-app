@@ -98,6 +98,7 @@ function chooseQuestions(
   const selected: DialogueQuestion[] = []
   const selectedIds = new Set<string>()
   const selectedSituations = new Set<string>()
+  const selectedIntents = new Set<string>()
   const categoryIds = shuffle(dialogueCategories.map((category) => category.id), random)
 
   // A first pass through all available categories guarantees broad session coverage.
@@ -105,10 +106,12 @@ function chooseQuestions(
     const candidates = questions.filter((question) =>
       question.categoryId === categoryId && !selectedIds.has(question.id) && !selectedSituations.has(question.situationId),
     )
-    const chosen = pickPreferredQuestion(candidates, history, random)
+    const novelIntents = candidates.filter((question) => !selectedIntents.has(question.intentId))
+    const chosen = pickPreferredQuestion(novelIntents.length ? novelIntents : candidates, history, random)
     if (!chosen) continue
     selected.push(chosen)
     selectedIds.add(chosen.id)
+    selectedIntents.add(chosen.intentId)
     selectedSituations.add(chosen.situationId)
   }
 
@@ -116,10 +119,12 @@ function chooseQuestions(
     const candidates = questions.filter((question) =>
       !selectedIds.has(question.id) && !selectedSituations.has(question.situationId),
     )
-    const chosen = pickPreferredQuestion(candidates, history, random)
+    const novelIntents = candidates.filter((question) => !selectedIntents.has(question.intentId))
+    const chosen = pickPreferredQuestion(novelIntents.length ? novelIntents : candidates, history, random)
     if (!chosen) break
     selected.push(chosen)
     selectedIds.add(chosen.id)
+    selectedIntents.add(chosen.intentId)
     selectedSituations.add(chosen.situationId)
   }
 
