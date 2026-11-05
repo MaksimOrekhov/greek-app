@@ -301,9 +301,9 @@ export const dialogueQuestions: DialogueQuestion[] = [
     correctOptionId: 'return', explanation: 'В реплике сказано, что поездка будет туда и обратно.',
   },
   {
-    id: 'd-place-05', level: 'A2', categoryId: 'places-travel', situationId: 'bus-route-appointment-address', intentId: 'check-stop-near-address',
+    id: 'd-place-05', level: 'A2', categoryId: 'places-travel', situationId: 'bus-route-appointment-address', intentId: 'check-bus-route-to-address',
     context: [
-      { speaker: 'Μαρία', greek: 'Έχω ραντεβού στην οδό Αθηνάς 12. Στον χάρτη βλέπω το λεωφορείο 3 στην οδό Κύπρου.', translation: 'У меня встреча по адресу: улица Афинас, 12. На карте я вижу автобус № 3 на улице Кипру.' },
+      { speaker: 'Μαρία', greek: 'Έχω ραντεβού στην οδό Αθηνάς 12. Στον χάρτη η γραμμή 3 περνάει από την οδό Κύπρου, όχι από την οδό Αθηνάς.', translation: 'У меня встреча по адресу: улица Афинас, 12. На карте маршрут № 3 проходит по улице Кипру, а не по улице Афинас.' },
       { speaker: 'Ελένη', greek: 'Περνάει το λεωφορείο 3 από την οδό Αθηνάς;', translation: 'Автобус № 3 проходит по улице Афинас?' },
     ],
     options: [
@@ -420,17 +420,18 @@ export const dialogueQuestions: DialogueQuestion[] = [
     correctOptionId: 'repeat', explanation: 'Ты не расслышал фамилию, поэтому просишь сотрудника повторить её.',
   },
   {
-    id: 'd-polite-02', level: 'A1', categoryId: 'politeness-requests', situationId: 'decline-more-water', intentId: 'politely-decline-offer',
+    id: 'd-polite-02', level: 'A1', categoryId: 'politeness-requests', situationId: 'decline-more-water', intentId: 'explain-polite-decline',
     context: [
       { speaker: 'Σερβιτόρος', greek: 'Θέλετε άλλο νερό;', translation: 'Хотите ещё воды?' },
-      { speaker: 'Εσύ', greek: 'Το ποτήρι μου είναι ακόμα γεμάτο.', translation: 'Мой стакан ещё полный.' },
+      { speaker: 'Άννα', greek: 'Όχι, ευχαριστώ. Το ποτήρι μου είναι ακόμα γεμάτο.', translation: 'Нет, спасибо. Мой стакан ещё полный.' },
+      { speaker: 'Νίκος', greek: 'Γιατί δεν θέλει άλλο νερό;', translation: 'Почему она не хочет ещё воды?' },
     ],
     options: [
-      { id: 'decline', greek: 'Όχι, ευχαριστώ. Δεν χρειάζομαι άλλο.', translation: 'Нет, спасибо. Больше не нужно.', explanation: 'Стакан полный, поэтому вежливо отказаться от добавки.' },
-      { id: 'more', greek: 'Ναι, ένα ακόμα ποτήρι, παρακαλώ.', translation: 'Да, ещё один стакан, пожалуйста.', explanation: 'Это просит добавить воды, хотя стакан ещё полный.' },
-      { id: 'food', greek: 'Θα ήθελα έναν καφέ.', translation: 'Я бы хотел кофе.', explanation: 'Официант предложил воду, а не кофе.' },
+      { id: 'full', greek: 'Γιατί το ποτήρι της είναι ακόμα γεμάτο.', translation: 'Потому что её стакан ещё полный.', explanation: 'Анна сама назвала эту причину отказа.' },
+      { id: 'empty', greek: 'Γιατί το ποτήρι της είναι άδειο.', translation: 'Потому что её стакан пустой.', explanation: 'Анна сказала, что стакан ещё полный.' },
+      { id: 'wants-more', greek: 'Γιατί θέλει άλλο νερό.', translation: 'Потому что она хочет ещё воды.', explanation: 'Анна отказалась от воды и сказала, что стакан ещё полный.' },
     ],
-    correctOptionId: 'decline', explanation: 'Ты говоришь, что стакан ещё полный, и вежливо отказываешься от ещё одной порции.',
+    correctOptionId: 'full', explanation: 'Анна вежливо отказалась: она уже сказала, что её стакан полный.',
   },
   {
     id: 'd-polite-03', level: 'A2', categoryId: 'politeness-requests', situationId: 'explain-return-ticket', intentId: 'explain-transport-term',
