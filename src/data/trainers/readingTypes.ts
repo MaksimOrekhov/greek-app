@@ -8,7 +8,7 @@ export type ReadingGenreId =
   | 'timetable'
   | 'invitation'
   | 'email'
-  | 'work-notice'
+  | 'customer-notice'
   | 'service-notice'
   | 'instructions'
   | 'rental-listing'

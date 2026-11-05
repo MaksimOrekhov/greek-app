@@ -101,26 +101,45 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
 
   const center = text('r-a1-notice-center')
   const centerQuestionThree = question(center.id, 'r-a1-notice-center-q3')
-  assert.match(center.greek, /Το μάθημα είναι δωρεάν, αλλά πάρε τηλέφωνο πριν έρθεις\./)
+  assert.match(center.greek, /Το μάθημα είναι δωρεάν, αλλά τηλεφωνήστε πριν έρθετε\./)
   assert.doesNotMatch(center.greek, /τηλεφωνική κράτηση|Η είσοδος/)
+  assert.match(center.translationRu, /перед приходом позвоните/)
   assert.ok(centerQuestionThree.options.some((option) => option.textRu === 'Позвонить до прихода.'))
+  assert.equal(centerQuestionThree.options.find((option) => option.id === centerQuestionThree.correctOptionId)?.textRu, 'Позвонить до прихода.')
   assert.match(centerQuestionThree.explanationRu, /позвонить/)
+  assert.doesNotMatch(centerQuestionThree.options.map((option) => option.textRu + option.feedbackRu).join(' '), /нужна запись|записаться/)
 
   const workQuestionOne = question('r-a2-work-hours', 'r-a2-work-hours-q1')
   const workQuestionTwo = question('r-a2-work-hours', 'r-a2-work-hours-q2')
   assert.equal(workQuestionOne.skillId, 'purpose')
-  assert.equal(workQuestionOne.promptRu, 'Зачем с понедельника офис будет открываться раньше?')
+  assert.equal(workQuestionOne.promptRu, 'Для чего с понедельника офис открывается раньше?')
   assert.deepEqual(workQuestionOne.options.map((option) => option.textRu), [
-    'Чтобы обслуживать клиентов, приходящих до начала работы.',
+    'Чтобы обслуживать клиентов до начала их рабочего дня.',
     'Чтобы офис закрывался раньше вечером.',
     'Чтобы встречаться с клиентами в выходные.',
   ])
+  assert.equal(workQuestionOne.options.find((option) => option.id === workQuestionOne.correctOptionId)?.textRu,
+    'Чтобы обслуживать клиентов до начала их рабочего дня.')
   assert.doesNotMatch(workQuestionOne.promptRu + workQuestionOne.options.map((option) => option.textRu).join(' '), /среду|электрическ|до десяти/i)
   assert.equal(workQuestionTwo.promptRu, 'Почему в среду офис откроется позже?')
   assert.match(workQuestionTwo.explanationRu, /электрической системы/)
+  const workNotice = text('r-a2-work-hours')
+  assert.equal(workNotice.genreId, 'customer-notice')
+  assert.match(workNotice.greek, /^Αγαπητοί πελάτες,/)
+  assert.match(workNotice.greek, /σας εξυπηρετούμε καλύτερα πριν από τη δουλειά σας/)
+  assert.match(workNotice.greek, /Αν έχετε ραντεβού.*παρακαλούμε να μας τηλεφωνήσετε/)
+  assert.match(workNotice.translationRu, /^Уважаемые клиенты,/)
+  assert.doesNotMatch(workNotice.greek + workNotice.translationRu, /συνάδελφοι|коллеги/)
+  assert.equal(workQuestionTwo.options.find((option) => option.id === workQuestionTwo.correctOptionId)?.textRu,
+    'Будут проверять электрическую систему.')
+  assert.equal(question(workNotice.id, 'r-a2-work-hours-q3').options.find((option) =>
+    option.id === question(workNotice.id, 'r-a2-work-hours-q3').correctOptionId)?.textRu,
+  'Тем, у кого встреча назначена до десяти.')
 
   const petros = text('r-a2-story-petros')
   assert.match(petros.greek, /ο Πέτρος/)
+  assert.match(petros.greek, /Στον δρόμο αγόρασε/)
+  assert.doesNotMatch(petros.greek, /Στο δρόμο/)
   assert.match(petros.translationRu, /Петрос/)
   assert.doesNotMatch(JSON.stringify(petros), /Петрис/)
   const petrosQuestionOne = question(petros.id, 'r-a2-story-petros-q1')
@@ -138,11 +157,19 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
   const timetable = text('r-a1-timetable-line3')
   assert.equal(timetable.contextNoteRu, 'Учебное расписание. Маршрут вымышленный.')
   assert.match(timetable.greek, /Η γραμμή 3 ξεκινά/)
+  assert.match(timetable.greek, /Το μάθημα της Μαρίας στο Κέντρο Γειτονιάς αρχίζει στις εννέα\. Εκείνη παίρνει τη γραμμή 3\./)
+  assert.doesNotMatch(timetable.greek, /γι[’'] αυτό περιμένει στην πλατεία/)
+  assert.doesNotMatch(timetable.translationRu, /поэтому она ждёт на площади/)
   assert.doesNotMatch(timetable.greek, /Για την άσκηση|φανταστικ/)
   assert.doesNotMatch(timetable.translationRu, /вымышлен|упражнен/i)
+  assert.equal(question(timetable.id, 'r-a1-timetable-line3-q1').options.find((option) =>
+    option.id === question(timetable.id, 'r-a1-timetable-line3-q1').correctOptionId)?.textRu,
+  'От площади Элиас.')
   const timetableQuestionTwo = question(timetable.id, 'r-a1-timetable-line3-q2')
   assert.deepEqual(timetableQuestionTwo.options.map((option) => option.textRu), ['В 8:20.', 'В 8:15.', 'В 8:25.'])
+  assert.equal(timetableQuestionTwo.options.find((option) => option.id === timetableQuestionTwo.correctOptionId)?.textRu, 'В 8:20.')
   const timetableQuestionThree = question(timetable.id, 'r-a1-timetable-line3-q3')
+  assert.equal(timetableQuestionThree.options.find((option) => option.id === timetableQuestionThree.correctOptionId)?.textRu, 'В девять.')
   assert.equal(timetableQuestionThree.skillId, 'specific-information')
   assert.ok(timetableQuestionThree.evidenceEl.every((fragment) => timetable.greek.includes(fragment)))
   assert.match(timetableQuestionThree.explanationRu, /В расписании.*девять/)
@@ -150,6 +177,7 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
 
   const invitationQuestionTwo = question('r-a1-invitation-anna', 'r-a1-invitation-anna-q2')
   assert.equal(invitationQuestionTwo.skillId, 'purpose')
+  assert.doesNotMatch(invitationQuestionTwo.options.filter((option) => option.id !== invitationQuestionTwo.correctOptionId).map((option) => option.textRu).join(' '), /праздник|музык/i)
   const sophiaQuestionTwo = question('r-a2-story-sophia', 'r-a2-story-sophia-q2')
   assert.equal(sophiaQuestionTwo.skillId, 'sequence')
   assert.equal(sophiaQuestionTwo.promptRu, 'В каком порядке София искала ключи?')
@@ -181,6 +209,60 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
     sequence: 3,
     'specific-information': 29,
   })
+})
+
+test('T7.2 corrects invitation, recipe, courtesy, deadlines, and route logic', () => {
+  const text = (id: string) => readingTexts.find((item) => item.id === id)!
+  const question = (textId: string, questionId: string) =>
+    text(textId).questions.find((item) => item.id === questionId)!
+  const answer = (item: ReturnType<typeof question>) =>
+    item.options.find((option) => option.id === item.correctOptionId)!
+
+  const invitation = text('r-a1-invitation-anna')
+  const invitationQ1 = question(invitation.id, 'r-a1-invitation-anna-q1')
+  const invitationQ2 = question(invitation.id, 'r-a1-invitation-anna-q2')
+  const invitationQ3 = question(invitation.id, 'r-a1-invitation-anna-q3')
+  assert.equal(answer(invitationQ1).textRu, 'Приглашает их на праздник.')
+  assert.equal(answer(invitationQ2).textRu, 'Чтобы узнать, сколько человек придёт.')
+  assert.equal(answer(invitationQ3).textRu, 'Сладкое.')
+  assert.doesNotMatch(invitationQ2.options.filter((option) => option.id !== invitationQ2.correctOptionId).map((option) => option.textRu).join(' '), /праздник|музык/i)
+  assert.match(invitation.translationRu, /не позднее пятницы/)
+  assert.match(invitationQ2.promptRu, /не позднее пятницы/)
+
+  const saladQ1 = question('r-a2-instructions-salad', 'r-a2-instructions-salad-q1')
+  const saladQ2 = question('r-a2-instructions-salad', 'r-a2-instructions-salad-q2')
+  const saladQ3 = question('r-a2-instructions-salad', 'r-a2-instructions-salad-q3')
+  assert.equal(answer(saladQ1).textRu, 'Вымыть помидоры и огурец и нарезать их.')
+  assert.equal(answer(saladQ2).textRu, 'Чтобы помидоры не размялись.')
+  assert.equal(answer(saladQ3).textRu, 'В конце.')
+  assert.deepEqual(saladQ3.options.filter((option) => option.id !== saladQ3.correctOptionId).map((option) => option.textRu), [
+    'До начала приготовления салата.',
+    'После подачи на стол.',
+  ])
+  const saladQuestionThreeSurface = [saladQ3.promptRu, ...saladQ3.options.flatMap((option) => [option.textRu, option.feedbackRu])].join(' ')
+  assert.doesNotMatch(saladQuestionThreeSurface, /вымыть|нарезать|помидор|огурец/i)
+
+  const delivery = text('r-a2-delivery-notice')
+  const deliveryQ2 = question(delivery.id, 'r-a2-delivery-notice-q2')
+  const deliveryQ3 = question(delivery.id, 'r-a2-delivery-notice-q3')
+  assert.match(delivery.greek, /μέχρι την Παρασκευή/)
+  assert.match(delivery.greek, /τηλεφωνήστε μέχρι αύριο/)
+  assert.match(delivery.translationRu, /не позднее пятницы/)
+  assert.match(delivery.translationRu, /не позднее завтрашнего дня/)
+  assert.equal(deliveryQ2.promptRu, 'Какой последний день для получения посылки в офисе?')
+  assert.match(answer(deliveryQ2).textRu, /Не позднее пятницы/)
+  assert.match(deliveryQ2.explanationRu, /не позднее пятницы/)
+  assert.match(answer(deliveryQ3).textRu, /не позднее завтрашнего дня/)
+  assert.match(deliveryQ3.explanationRu, /не позднее завтрашнего дня/)
+  assert.doesNotMatch(delivery.translationRu + deliveryQ2.options.map((option) => option.textRu + option.feedbackRu).join(' ') + deliveryQ3.options.map((option) => option.textRu + option.feedbackRu).join(' '), /до пятницы|до завтра/i)
+  assert.match(text('r-a2-library-message').translationRu, /не позднее пятницы/)
+
+  const timetable = text('r-a1-timetable-line3')
+  assert.match(timetable.greek, /Η γραμμή 3 ξεκινά από την Πλατεία Ελιάς στις 8:10/)
+  assert.match(timetable.greek, /περνά από την αγορά στις 8:20/)
+  assert.match(timetable.greek, /Το μάθημα της Μαρίας στο Κέντρο Γειτονιάς αρχίζει στις εννέα/)
+  assert.doesNotMatch(timetable.greek, /γι[’'] αυτό περιμένει|όχι στην αγορά/)
+  assert.ok(timetable.questions.every((item) => item.evidenceEl.every((fragment) => timetable.greek.includes(fragment))))
 })
 
 test('T7 sessions build five distinct rounds, rising from two A1 texts to three A2 texts', () => {
