@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   attempt: [leftPairId: string, rightPairId: string]
+  roundComplete: []
 }>()
 
 type Side = 'left' | 'right'
@@ -72,6 +73,15 @@ function attemptMatch(leftPairId: string, rightPairId: string): void {
   }
 
   emit('attempt', leftPairId, rightPairId)
+
+  if (leftPairId === rightPairId) {
+    void nextTick(() => {
+      const nextPair = orderedPairs(props.leftOrder)
+        .find((pair) => !props.matchedPairIds.includes(pair.id))
+      if (nextPair) leftButtons.get(nextPair.id)?.focus()
+      else if (props.matchedPairIds.length === props.pairs.length) emit('roundComplete')
+    })
+  }
 }
 
 function choose(side: Side, pairId: string): void {
@@ -88,6 +98,13 @@ function choose(side: Side, pairId: string): void {
   selectedRightId.value = pairId
   if (selectedLeftId.value) attemptMatch(selectedLeftId.value, pairId)
 }
+
+function focusFirstAvailable(): void {
+  const pair = orderedPairs(props.leftOrder).find((item) => !props.matchedPairIds.includes(item.id))
+  if (pair) leftButtons.get(pair.id)?.focus()
+}
+
+defineExpose({ focusFirstAvailable })
 
 function measureConnections(): void {
   const element = board.value

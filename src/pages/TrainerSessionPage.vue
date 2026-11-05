@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MatchPairsExercise from '../components/trainers/MatchPairsExercise.vue'
 import TrainerSessionResults from '../components/trainers/TrainerSessionResults.vue'
@@ -11,6 +11,8 @@ const router = useRouter()
 const topicId = computed(() => String(route.params.topicId ?? ''))
 const topic = computed(() => getTrainerTopic(topicId.value))
 const { session, currentRound, results, roundKey, start, attempt, advance, restart } = useTrainerSession()
+const matchExercise = useTemplateRef<InstanceType<typeof MatchPairsExercise>>('matchExercise')
+const nextRoundButton = useTemplateRef<HTMLButtonElement>('nextRoundButton')
 
 watch(topicId, (id) => start(id), { immediate: true })
 
@@ -18,6 +20,16 @@ const matchedCount = computed(() => currentRound.value?.foundPairIds.length ?? 0
 
 function handleRestart(): void {
   restart()
+  void nextTick(() => matchExercise.value?.focusFirstAvailable())
+}
+
+function focusRoundAction(): void {
+  void nextTick(() => nextRoundButton.value?.focus())
+}
+
+function advanceRound(): void {
+  advance()
+  void nextTick(() => matchExercise.value?.focusFirstAvailable())
 }
 
 function returnToCatalog(): void {
@@ -64,6 +76,7 @@ function returnToCatalog(): void {
       </div>
 
       <MatchPairsExercise
+        ref="matchExercise"
         :key="roundKey"
         :pairs="currentRound.pairs"
         :left-order="currentRound.leftOrder"
@@ -71,6 +84,7 @@ function returnToCatalog(): void {
         :matched-pair-ids="currentRound.foundPairIds"
         :round-key="roundKey"
         @attempt="attempt"
+        @round-complete="focusRoundAction"
       />
 
       <div class="round-progress" aria-label="Прогресс в раунде">
@@ -80,7 +94,7 @@ function returnToCatalog(): void {
 
       <div v-if="currentRound.completed" class="round-complete">
         <p>Все пары найдены. Ошибочных попыток в раунде: {{ currentRound.errors }}.</p>
-        <button class="round-next-button" type="button" @click="advance">
+        <button ref="nextRoundButton" class="round-next-button" type="button" @click="advanceRound">
           {{ session.currentRoundIndex === session.rounds.length - 1 ? 'Показать результат' : 'Следующий раунд' }}
           <span aria-hidden="true">→</span>
         </button>

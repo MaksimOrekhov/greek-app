@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { nextTick, onMounted, useTemplateRef } from 'vue'
 import type { TrainerTopic } from '../../data/trainers/types.ts'
 import type { TrainerSessionResults } from '../../lib/trainers/session.ts'
+
+const resultTitle = useTemplateRef<HTMLHeadingElement>('resultTitle')
 
 function russianCount(value: number, forms: [string, string, string]): string {
   const remainder100 = value % 100
@@ -20,13 +23,17 @@ defineEmits<{
   restart: []
   catalog: []
 }>()
+
+onMounted(() => {
+  void nextTick(() => resultTitle.value?.focus())
+})
 </script>
 
 <template>
   <section class="trainer-results" aria-labelledby="trainer-results-title">
     <div class="results-mark" aria-hidden="true">✓</div>
     <p class="results-eyebrow">Тренировка завершена</p>
-    <h2 id="trainer-results-title">{{ topic.title }}</h2>
+    <h2 id="trainer-results-title" ref="resultTitle" tabindex="-1">{{ topic.title }}</h2>
     <p class="results-intro">
       Вы прошли {{ results.completedRounds }} {{ russianCount(results.completedRounds, ['раунд', 'раунда', 'раундов']) }}
       и нашли {{ results.foundPairs }} {{ russianCount(results.foundPairs, ['пару', 'пары', 'пар']) }}.
