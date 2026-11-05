@@ -86,6 +86,103 @@ test('T7 bank contains 15 reviewed texts, 45 questions, and evidence inside each
   }
 })
 
+test('T7.1 targeted content corrections keep questions independent and evidence aligned', () => {
+  const text = (id: string) => readingTexts.find((item) => item.id === id)!
+  const question = (textId: string, questionId: string) =>
+    text(textId).questions.find((item) => item.id === questionId)!
+
+  const ad = text('r-a1-ad-desk')
+  const adQuestionTwo = question(ad.id, 'r-a1-ad-desk-q2')
+  assert.equal(adQuestionTwo.promptRu, 'Сколько ящиков указано в объявлении?')
+  assert.doesNotMatch(adQuestionTwo.promptRu, /стол/i)
+  assert.deepEqual(adQuestionTwo.options.map((option) => option.textRu), ['Два.', 'Один.', 'Четыре.'])
+  assert.match(ad.greek, /Πουλάω ένα μικρό γραφείο/)
+  assert.doesNotMatch(ad.greek, /κατάλληλο|παραλαβή|πωλήτρια/)
+
+  const center = text('r-a1-notice-center')
+  const centerQuestionThree = question(center.id, 'r-a1-notice-center-q3')
+  assert.match(center.greek, /Το μάθημα είναι δωρεάν, αλλά πάρε τηλέφωνο πριν έρθεις\./)
+  assert.doesNotMatch(center.greek, /τηλεφωνική κράτηση|Η είσοδος/)
+  assert.ok(centerQuestionThree.options.some((option) => option.textRu === 'Позвонить до прихода.'))
+  assert.match(centerQuestionThree.explanationRu, /позвонить/)
+
+  const workQuestionOne = question('r-a2-work-hours', 'r-a2-work-hours-q1')
+  const workQuestionTwo = question('r-a2-work-hours', 'r-a2-work-hours-q2')
+  assert.equal(workQuestionOne.skillId, 'purpose')
+  assert.equal(workQuestionOne.promptRu, 'Зачем с понедельника офис будет открываться раньше?')
+  assert.deepEqual(workQuestionOne.options.map((option) => option.textRu), [
+    'Чтобы обслуживать клиентов, приходящих до начала работы.',
+    'Чтобы офис закрывался раньше вечером.',
+    'Чтобы встречаться с клиентами в выходные.',
+  ])
+  assert.doesNotMatch(workQuestionOne.promptRu + workQuestionOne.options.map((option) => option.textRu).join(' '), /среду|электрическ|до десяти/i)
+  assert.equal(workQuestionTwo.promptRu, 'Почему в среду офис откроется позже?')
+  assert.match(workQuestionTwo.explanationRu, /электрической системы/)
+
+  const petros = text('r-a2-story-petros')
+  assert.match(petros.greek, /ο Πέτρος/)
+  assert.match(petros.translationRu, /Петрос/)
+  assert.doesNotMatch(JSON.stringify(petros), /Петрис/)
+  const petrosQuestionOne = question(petros.id, 'r-a2-story-petros-q1')
+  assert.doesNotMatch(petrosQuestionOne.options.slice(1).map((option) => option.textRu).join(' '), /автобус|кофе/i)
+
+  const elena = text('r-a1-story-elena')
+  assert.match(elena.greek, /Το απόγευμα/)
+  assert.match(elena.translationRu, /После обеда/)
+  assert.doesNotMatch(elena.translationRu, /Днём/)
+  const weekend = text('r-a2-email-weekend')
+  assert.match(weekend.greek, /Το απόγευμα/)
+  assert.match(weekend.translationRu, /После обеда/)
+  assert.doesNotMatch(weekend.translationRu, /Днём/)
+
+  const timetable = text('r-a1-timetable-line3')
+  assert.equal(timetable.contextNoteRu, 'Учебное расписание. Маршрут вымышленный.')
+  assert.match(timetable.greek, /Η γραμμή 3 ξεκινά/)
+  assert.doesNotMatch(timetable.greek, /Για την άσκηση|φανταστικ/)
+  assert.doesNotMatch(timetable.translationRu, /вымышлен|упражнен/i)
+  const timetableQuestionTwo = question(timetable.id, 'r-a1-timetable-line3-q2')
+  assert.deepEqual(timetableQuestionTwo.options.map((option) => option.textRu), ['В 8:20.', 'В 8:15.', 'В 8:25.'])
+  const timetableQuestionThree = question(timetable.id, 'r-a1-timetable-line3-q3')
+  assert.equal(timetableQuestionThree.skillId, 'specific-information')
+  assert.ok(timetableQuestionThree.evidenceEl.every((fragment) => timetable.greek.includes(fragment)))
+  assert.match(timetableQuestionThree.explanationRu, /В расписании.*девять/)
+  assert.doesNotMatch(timetableQuestionThree.explanationRu, /карте|маршруте/)
+
+  const invitationQuestionTwo = question('r-a1-invitation-anna', 'r-a1-invitation-anna-q2')
+  assert.equal(invitationQuestionTwo.skillId, 'purpose')
+  const sophiaQuestionTwo = question('r-a2-story-sophia', 'r-a2-story-sophia-q2')
+  assert.equal(sophiaQuestionTwo.skillId, 'sequence')
+  assert.equal(sophiaQuestionTwo.promptRu, 'В каком порядке София искала ключи?')
+  assert.equal(sophiaQuestionTwo.options.find((option) => option.id === sophiaQuestionTwo.correctOptionId)?.textRu,
+    'Сначала в сумке, потом на кухонном столе, в конце у двери.')
+  assert.ok(sophiaQuestionTwo.evidenceEl.every((fragment) => text('r-a2-story-sophia').greek.includes(fragment)))
+
+  const posterQuestionOne = question('r-a2-poster-films', 'r-a2-poster-films-q1')
+  assert.doesNotMatch(posterQuestionOne.options.slice(1).map((option) => option.textRu).join(' '), /только один фильм/i)
+  assert.equal(question('r-a2-poster-films', 'r-a2-poster-films-q2').skillId, 'specific-information')
+  assert.equal(question('r-a2-poster-films', 'r-a2-poster-films-q3').skillId, 'specific-information')
+
+  const deliveryQuestionThree = question('r-a2-delivery-notice', 'r-a2-delivery-notice-q3')
+  assert.equal(deliveryQuestionThree.skillId, 'specific-information')
+  assert.doesNotMatch(deliveryQuestionThree.options.slice(1).map((option) => option.textRu).join(' '), /суббот|офис закрыт/i)
+  const libraryQuestionTwo = question('r-a2-library-message', 'r-a2-library-message-q2')
+  assert.equal(libraryQuestionTwo.skillId, 'specific-information')
+  assert.doesNotMatch(libraryQuestionTwo.options.slice(1).map((option) => option.textRu).join(' '), /друг/i)
+
+  const skillCounts = Object.fromEntries(
+    [...new Set(readingTexts.flatMap((item) => item.questions.map((entry) => entry.skillId)))].sort().map((skill) => [
+      skill,
+      readingTexts.flatMap((item) => item.questions).filter((entry) => entry.skillId === skill).length,
+    ]),
+  )
+  assert.deepEqual(skillCounts, {
+    'cause-effect': 9,
+    purpose: 4,
+    sequence: 3,
+    'specific-information': 29,
+  })
+})
+
 test('T7 sessions build five distinct rounds, rising from two A1 texts to three A2 texts', () => {
   const signatures = new Set<string>()
   for (let seed = 0; seed < 100; seed += 1) {
@@ -354,4 +451,27 @@ test('the T7 route and UI keep both answers together and hide the translation un
     assert.ok(after.includes(item.question.explanationRu))
     for (const evidence of item.question.evidenceEl) assert.ok(after.includes(evidence))
   }
+
+  const timetable = readingTexts.find((item) => item.id === 'r-a1-timetable-line3')!
+  const timetableRound = {
+    number: 1,
+    text: timetable,
+    questions: timetable.questions.slice(0, 2).map((question) => ({
+      question,
+      optionOrder: question.options.map((option) => option.id),
+      selectedOptionId: null,
+      checked: false,
+      isCorrect: null,
+    })),
+    checked: false,
+    completed: false,
+  }
+  const timetableBeforeCheck = await renderToString(createSSRApp(component, {
+    round: timetableRound,
+    totalRounds: 5,
+  }))
+  const noteIndex = timetableBeforeCheck.indexOf(timetable.contextNoteRu!)
+  const passageIndex = timetableBeforeCheck.indexOf(timetable.greek)
+  assert.ok(noteIndex >= 0 && noteIndex < passageIndex)
+  assert.ok(!timetableBeforeCheck.includes(timetable.translationRu))
 })

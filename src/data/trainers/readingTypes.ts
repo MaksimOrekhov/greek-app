@@ -46,6 +46,7 @@ export interface ReadingText {
   level: ReadingLevel
   genreId: ReadingGenreId
   titleRu: string
+  contextNoteRu?: string
   greek: string
   translationRu: string
   questions: ReadingQuestion[]

@@ -60,6 +60,7 @@ defineExpose({ focusTextHeading })
 
     <h2 ref="textHeading" class="reading-title" tabindex="-1">Прочитай текст</h2>
     <p class="reading-instruction">Прочитай текст. Ответь на оба вопроса, затем нажми «Проверить ответы».</p>
+    <p v-if="round.text.contextNoteRu" class="reading-context-note">{{ round.text.contextNoteRu }}</p>
 
     <article class="reading-source" lang="el" aria-label="Текст на греческом языке">
       <p v-for="(paragraph, index) in paragraphs" :key="index">{{ paragraph }}</p>
@@ -126,6 +127,7 @@ defineExpose({ focusTextHeading })
 .reading-progress-track { height: 4px; margin-top: 9px; overflow: hidden; border-radius: 99px; background: #eeeee8; }
 .reading-progress-track span { display: block; height: 100%; border-radius: inherit; background: #7f9272; transition: width .2s ease; }
 .reading-title { margin: 19px 0 4px; color: #353a31; font: 700 18px/1.4 'Manrope', sans-serif; overflow-wrap: anywhere; }
+.reading-context-note { margin: 0 0 10px; color: #687064; font-size: 13px; line-height: 1.45; }
 .reading-instruction { margin: 0 0 14px; color: #85877d; font-size: 12px; line-height: 1.5; }
 .reading-source { min-width: 0; padding: 18px; border: 1px solid #e5e7df; border-radius: 13px; background: #f2f3ef; color: #34392f; font: 500 19px/1.7 'Noto Sans Greek', 'DM Sans', sans-serif; overflow-wrap: anywhere; }
 .reading-source p { margin: 0; }
