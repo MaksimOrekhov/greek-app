@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
+import { useTemplateRef, watch } from 'vue'
 import { NOMINATIVE_ARTICLES, type NominativeArticle } from '../../lib/trainers/articleGender/articleGenderTypes.ts'
 import type { ArticleGenderQuestion } from '../../lib/trainers/articleGender/articleGenderSession.ts'
 
@@ -13,11 +13,21 @@ const props = defineProps<{
 
 const emit = defineEmits<{ answer: [article: NominativeArticle]; advance: [] }>()
 const promptHeading = useTemplateRef<HTMLHeadingElement>('promptHeading')
+const nextAction = useTemplateRef<HTMLButtonElement>('nextAction')
 const genderNames: Record<NominativeArticle, string> = { ο: 'мужского', η: 'женского', το: 'среднего' }
 const displayArticles = NOMINATIVE_ARTICLES
 
+watch(() => props.question.answered, (answered) => {
+  if (answered) nextAction.value?.focus()
+}, { flush: 'post' })
+
 function focusPrompt(): void {
   promptHeading.value?.focus()
+}
+
+function selectArticle(article: NominativeArticle): void {
+  if (props.question.answered) return
+  emit('answer', article)
 }
 
 defineExpose({ focusPrompt })
@@ -51,11 +61,9 @@ defineExpose({ focusPrompt })
         type="button"
         :disabled="question.answered"
         :aria-pressed="question.selectedArticle === article"
-        :aria-label="`Артикль ${article}`"
-        lang="el"
-        @click="emit('answer', article)"
+        @click="selectArticle(article)"
       >
-        {{ article }}
+        <span class="article-gender-visually-hidden" lang="ru">Артикль </span><span lang="el">{{ article }}</span>
       </button>
     </div>
 
@@ -66,7 +74,7 @@ defineExpose({ focusPrompt })
       <p v-if="question.noun.noteRu" class="article-gender-note">{{ question.noun.noteRu }}</p>
     </div>
 
-    <button v-if="question.answered" class="article-gender-next" type="button" @click="emit('advance')">
+    <button v-if="question.answered" ref="nextAction" class="article-gender-next" type="button" @click="emit('advance')">
       {{ questionNumber === totalQuestions ? 'Посмотреть результат' : questionNumber % 4 === 0 ? 'Следующий раунд' : 'Следующее слово' }}
     </button>
   </div>
@@ -84,6 +92,7 @@ defineExpose({ focusPrompt })
 .article-gender-translation { margin: 9px 0 0; color: #686b61; font-size: 15px; }
 .article-gender-instruction { margin: 25px 0 0; color: #85877d; font-size: 12px; }
 .article-gender-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 430px; margin: 0 auto; }
+.article-gender-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 .article-gender-option { min-width: 0; min-height: 66px; border: 1px solid #dfe4d9; border-radius: 12px; background: #fff; color: #384432; cursor: pointer; font: 700 27px/1 'Noto Sans Greek', sans-serif; transition: background-color .15s ease, border-color .15s ease, transform .15s ease; }
 .article-gender-option:hover:not(:disabled) { transform: translateY(-1px); border-color: #aab89f; background: #f5f7f2; }
 .article-gender-option:focus-visible, .article-gender-next:focus-visible { outline: 3px solid #9aaf8f; outline-offset: 3px; }

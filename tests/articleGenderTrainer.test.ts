@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { createRouter, createMemoryHistory } from 'vue-router'
-import { createSSRApp } from 'vue'
+import { createRenderer, createSSRApp, defineComponent, h, nextTick, reactive } from 'vue'
 import { renderToString } from '@vue/server-renderer'
 import { compileScript, parse } from '@vue/compiler-sfc'
 import ts from 'typescript'
@@ -57,6 +57,79 @@ class MemoryStorage implements ArticleGenderStorage {
 
 function flatQuestions(session: ReturnType<typeof createArticleGenderSession>) {
   return session.rounds.flatMap((round) => round.questions)
+}
+
+interface TestRendererNode {
+  tag: string
+  props: Record<string, unknown>
+  children: TestRendererNode[]
+  parent: TestRendererNode | null
+  text: string
+  focus: () => void
+}
+
+function createAccessibilityRenderer() {
+  let focusedNode: TestRendererNode | null = null
+  const renderer = createRenderer<TestRendererNode, TestRendererNode>({
+    createElement(tag) {
+      const node: TestRendererNode = {
+        tag,
+        props: {},
+        children: [],
+        parent: null,
+        text: '',
+        focus() { focusedNode = node },
+      }
+      return node
+    },
+    createText(text) {
+      return { tag: '#text', props: {}, children: [], parent: null, text, focus() {} }
+    },
+    createComment(text) {
+      return { tag: '#comment', props: {}, children: [], parent: null, text, focus() {} }
+    },
+    setText(node, text) { node.text = text },
+    setElementText(node, text) {
+      node.children = []
+      node.text = text
+    },
+    patchProp(node, key, _previous, next) {
+      if (next === null || next === undefined) delete node.props[key]
+      else node.props[key] = next
+    },
+    insert(node, parent, anchor = null) {
+      if (node.parent) {
+        const previousIndex = node.parent.children.indexOf(node)
+        if (previousIndex >= 0) node.parent.children.splice(previousIndex, 1)
+      }
+      const anchorIndex = anchor ? parent.children.indexOf(anchor) : -1
+      if (anchorIndex < 0) parent.children.push(node)
+      else parent.children.splice(anchorIndex, 0, node)
+      node.parent = parent
+    },
+    remove(node) {
+      if (!node.parent) return
+      const index = node.parent.children.indexOf(node)
+      if (index >= 0) node.parent.children.splice(index, 1)
+      node.parent = null
+    },
+    parentNode: (node) => node.parent,
+    nextSibling(node) {
+      if (!node.parent) return null
+      return node.parent.children[node.parent.children.indexOf(node) + 1] ?? null
+    },
+  })
+
+  return { renderer, getFocusedNode: () => focusedNode }
+}
+
+function findRendererNodes(root: TestRendererNode, predicate: (node: TestRendererNode) => boolean): TestRendererNode[] {
+  const matches = predicate(root) ? [root] : []
+  return root.children.reduce((all, child) => all.concat(findRendererNodes(child, predicate)), matches)
+}
+
+function rendererText(node: TestRendererNode): string {
+  return node.text + node.children.map(rendererText).join('')
 }
 
 test('T10 bank contains 90 reviewed dictionary nouns with balanced article counts', async () => {
@@ -373,4 +446,107 @@ test('T10 route, catalog entry, and button-only accessible UI are registered', a
   assert.ok(resultView.includes(question.noun.russian))
   assert.ok(resultView.includes(wrong))
   assert.ok(resultView.includes('95%'))
+})
+
+test('article choice names separate Russian from Greek and focus moves to the available next action', async () => {
+  const exercisePath = new URL('../src/components/trainers/ArticleGenderExercise.vue', import.meta.url)
+  const exerciseSource = await readFile(exercisePath, 'utf8')
+  const { descriptor } = parse(exerciseSource, { filename: exercisePath.pathname })
+  const compiled = compileScript(descriptor, { id: 'article-gender-accessibility', inlineTemplate: true })
+  let code = ts.transpileModule(compiled.content, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+  }).outputText
+  code = code
+    .replaceAll('"vue"', JSON.stringify(import.meta.resolve('vue')))
+    .replaceAll("'vue'", JSON.stringify(import.meta.resolve('vue')))
+    .replaceAll("'../../lib/trainers/articleGender/articleGenderTypes.ts'", JSON.stringify(new URL('../src/lib/trainers/articleGender/articleGenderTypes.ts', import.meta.url).href))
+  const component = (await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`)).default
+  const session = createArticleGenderSession(
+    articleGenderNouns,
+    createArticleGenderHistory(articleGenderNouns.map((noun) => noun.wordId), seeded(71)),
+    seeded(72),
+  )
+  const question = reactive({ ...currentArticleGenderQuestion(session)! })
+  let answerCount = 0
+  let advanceCount = 0
+  const wrapper = defineComponent({
+    setup: () => () => h(component, {
+      question,
+      questionNumber: 1,
+      roundNumber: 1,
+      totalQuestions: 20,
+      totalRounds: 5,
+      onAnswer: (article: typeof NOMINATIVE_ARTICLES[number]) => {
+        answerCount += 1
+        question.selectedArticle = article
+        question.answered = true
+        question.isCorrect = article === question.noun.article
+      },
+      onAdvance: () => { advanceCount += 1 },
+    }),
+  })
+  const { renderer, getFocusedNode } = createAccessibilityRenderer()
+  const root: TestRendererNode = { tag: 'root', props: {}, children: [], parent: null, text: '', focus() {} }
+  const app = renderer.createApp(wrapper)
+  app.mount(root)
+
+  const optionButtons = () => findRendererNodes(root, (node) => node.tag === 'button' && String(node.props.class).includes('article-gender-option'))
+  const options = optionButtons()
+  assert.equal(options.length, 3)
+  for (const option of options) {
+    assert.equal(option.props.type, 'button')
+    assert.equal(option.props.lang, undefined)
+    assert.equal(option.props['aria-label'], undefined)
+    const russianLabel = option.children.find((node) => String(node.props.class).includes('article-gender-visually-hidden'))
+    const greekArticle = option.children.find((node) => node.props.lang === 'el')
+    assert.ok(russianLabel)
+    assert.equal(russianLabel.props.lang, 'ru')
+    assert.equal(rendererText(russianLabel), 'Артикль ')
+    assert.ok(greekArticle)
+    const articleText = rendererText(greekArticle)
+    assert.ok(NOMINATIVE_ARTICLES.includes(articleText as typeof NOMINATIVE_ARTICLES[number]))
+    assert.equal(rendererText(option), `Артикль ${articleText}`)
+  }
+  assert.match(exerciseSource, /\.article-gender-visually-hidden\s*\{[^}]*clip-path:\s*inset\(50%\)/s)
+
+  const wrongChoice = options.find((option) => {
+    const article = option.children.find((node) => node.props.lang === 'el')
+    return article && rendererText(article) !== question.noun.article
+  })!
+  const selectedArticleNode = wrongChoice.children.find((node) => node.props.lang === 'el')!
+  const selectedArticle = rendererText(selectedArticleNode) as typeof NOMINATIVE_ARTICLES[number]
+  const selectWrongAnswer = wrongChoice.props.onClick as () => void
+  selectWrongAnswer()
+  await nextTick()
+
+  assert.equal(answerCount, 1)
+  assert.equal(question.selectedArticle, selectedArticle)
+  assert.equal(question.answered, true)
+  const feedback = findRendererNodes(root, (node) => node.props.role === 'status')[0]
+  assert.ok(feedback)
+  assert.equal(feedback.props['aria-live'], 'polite')
+  assert.match(rendererText(feedback), /Правильный артикль/)
+  assert.ok(rendererText(feedback).includes(question.noun.article))
+
+  const nextButton = findRendererNodes(root, (node) => node.tag === 'button' && String(node.props.class).includes('article-gender-next'))[0]
+  assert.ok(nextButton)
+  assert.equal(nextButton.props.type, 'button')
+  assert.equal(nextButton.props.disabled, undefined)
+  assert.equal(nextButton.props.tabindex, undefined)
+  assert.equal(getFocusedNode(), nextButton)
+  assert.equal(rendererText(nextButton), 'Следующее слово')
+  assert.equal(nextButton.parent, feedback.parent, 'focus moves outside the live region while its announcement remains available')
+
+  for (const option of optionButtons()) assert.equal(option.props.disabled, true)
+  const originalSelection = question.selectedArticle
+  const otherOption = optionButtons().find((option) => option.children.some((node) => node.props.lang === 'el' && rendererText(node) !== originalSelection))!
+  const tryChangingAnswer = otherOption.props.onClick as () => void
+  tryChangingAnswer()
+  assert.equal(answerCount, 1)
+  assert.equal(question.selectedArticle, originalSelection)
+
+  const advance = nextButton.props.onClick as () => void
+  advance()
+  assert.equal(advanceCount, 1)
+  app.unmount()
 })
