@@ -45,6 +45,21 @@ const vocabularyWordCount = adaptWordsToTrainerPairs(words).length
       </article>
     </section>
 
+    <section class="reading-training" aria-labelledby="reading-training-title">
+      <div class="dictionary-training-heading">
+        <h2 id="reading-training-title">Тренировка чтения</h2>
+      </div>
+      <article class="reading-training-card">
+        <div class="dictionary-training-copy">
+          <span class="dictionary-training-eyebrow">ЧТЕНИЕ И ПОНИМАНИЕ</span>
+          <h3>Прочитай и пойми</h3>
+          <p>Читай короткие тексты на греческом и отвечай на вопросы по их содержанию.</p>
+          <span class="dictionary-training-count">5 текстов · 10 вопросов</span>
+        </div>
+        <RouterLink class="reading-training-button" to="/trainers/reading-comprehension">Начать тренировку</RouterLink>
+      </article>
+    </section>
+
     <div class="trainer-catalog-heading">
       <div>
         <h2>Учебные темы</h2>
@@ -65,6 +80,7 @@ const vocabularyWordCount = adaptWordsToTrainerPairs(words).length
 .trainer-intro h1 { margin-top: 13px; }
 .dictionary-training { margin-bottom: 25px; }
 .dialogue-training { margin-bottom: 27px; }
+.reading-training { margin-bottom: 27px; }
 .dictionary-training-heading { margin: 0 1px 10px; }
 .dictionary-training-heading h2 { margin: 0; font: 700 15px 'Manrope', sans-serif; }
 .dictionary-training-card { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px 18px; border: 1px solid #dfe5d9; border-radius: 15px; background: #f4f7f1; }
@@ -78,6 +94,9 @@ const vocabularyWordCount = adaptWordsToTrainerPairs(words).length
 .dialogue-training-card { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px 18px; border: 1px solid #e5e3d8; border-radius: 15px; background: #f8f7f1; }
 .dialogue-training-button { flex: 0 0 auto; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border-radius: 9px; background: #52654a; color: #fff; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; }
 .dialogue-training-button:hover { background: #40533a; }
+.reading-training-card { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px 18px; border: 1px solid #dce5eb; border-radius: 15px; background: #f2f6f8; }
+.reading-training-button { flex: 0 0 auto; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border-radius: 9px; background: #52654a; color: #fff; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; }
+.reading-training-button:hover { background: #40533a; }
 .trainer-catalog-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: 0 1px 13px; }
 .trainer-catalog-heading h2 { margin: 0 0 4px; font: 700 15px 'Manrope', sans-serif; }
 .trainer-catalog-heading p { margin: 0; color: #92938a; font-size: 11px; line-height: 1.5; }
@@ -94,5 +113,7 @@ const vocabularyWordCount = adaptWordsToTrainerPairs(words).length
   .dictionary-training-button { width: 100%; }
   .dialogue-training-card { align-items: stretch; flex-direction: column; }
   .dialogue-training-button { width: 100%; }
+  .reading-training-card { align-items: stretch; flex-direction: column; }
+  .reading-training-button { width: 100%; }
 }
 </style>
