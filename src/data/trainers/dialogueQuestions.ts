@@ -105,11 +105,11 @@ export const dialogueQuestions: DialogueQuestion[] = [
       { speaker: 'Νίκος', greek: 'Πόσα αδέλφια έχεις;', translation: 'Сколько у тебя братьев и сестёр?' },
     ],
     options: [
-      { id: 'siblings', greek: 'Έχω δύο αδέλφια: έναν αδελφό και μία αδελφή.', translation: 'У меня двое: брат и сестра.', explanation: 'Это называет обоих братьев и сестёр, которых упомянули в разговоре.' },
-      { id: 'one-brother', greek: 'Έχω μόνο έναν αδελφό.', translation: 'У меня только один брат.', explanation: 'В разговоре ты также назвал сестру.' },
-      { id: 'only-child', greek: 'Είμαι μοναχοπαίδι.', translation: 'Я единственный ребёнок в семье.', explanation: 'Это противоречит сказанному о брате и сестре.' },
+      { id: 'siblings', greek: 'Έχω έναν αδελφό και μία αδελφή.', translation: 'У меня есть брат и сестра.', explanation: 'Это отвечает на вопрос, называя число братьев и сестёр.' },
+      { id: 'brother-study', greek: 'Ο αδελφός μου σπουδάζει ιατρική.', translation: 'Мой брат изучает медицину.', explanation: 'Это рассказывает об учёбе брата, но не отвечает на вопрос о числе братьев и сестёр.' },
+      { id: 'sister-work', greek: 'Η αδελφή μου εργάζεται σε ένα σχολείο.', translation: 'Моя сестра работает в школе.', explanation: 'Это рассказывает о работе сестры, но не отвечает на вопрос о количестве.' },
     ],
-    correctOptionId: 'siblings', explanation: 'Вопрос «Έχεις αδέλφια;» — о братьях и сёстрах.',
+    correctOptionId: 'siblings', explanation: 'Никос спрашивает, сколько у собеседника братьев и сестёр; ответ называет брата и сестру.',
   },
   {
     id: 'd-self-03', level: 'A2', categoryId: 'about-yourself', situationId: 'sisters-job', intentId: 'give-personal-information', replySpeaker: 'Ελένη',
@@ -203,17 +203,17 @@ export const dialogueQuestions: DialogueQuestion[] = [
     correctOptionId: 'help', explanation: 'Никос просит предупредить, когда выходить; Элени соглашается помочь.',
   },
   {
-    id: 'd-everyday-04', level: 'A2', categoryId: 'everyday-talk', situationId: 'missed-shop-closing', intentId: 'correct-assumption', replySpeaker: 'Μαρία',
+    id: 'd-everyday-04', level: 'A2', categoryId: 'everyday-talk', situationId: 'bread-unavailable-at-shop', intentId: 'explain-unavailable-item', replySpeaker: 'Μαρία',
     context: [
-      { speaker: 'Μαρία', greek: 'Το κατάστημα ήταν ανοιχτό όταν πήγα, αλλά δεν αγόρασα ψωμί.', translation: 'Когда я пришла, магазин был открыт, но я не купила хлеб.' },
-      { speaker: 'Άννα', greek: 'Γιατί δεν αγόρασες ψωμί;', translation: 'Почему ты не купила хлеб?' },
+      { speaker: 'Μαρία', greek: 'Πήγα στο κατάστημα για ψωμί. Ήταν ανοιχτό, αλλά το ράφι με το ψωμί ήταν άδειο.', translation: 'Я пошла в магазин за хлебом. Он был открыт, но полка с хлебом была пуста.' },
+      { speaker: 'Άννα', greek: 'Και τι έγινε; Γιατί δεν πήρες ψωμί;', translation: 'И что случилось? Почему ты не взяла хлеб?' },
     ],
     options: [
-      { id: 'store-closed', greek: 'Το κατάστημα ήταν ήδη κλειστό.', translation: 'Магазин уже был закрыт.', explanation: 'Мария прямо сказала, что магазин был открыт.' },
-      { id: 'bread', greek: 'Όχι, ήταν ανοιχτό, αλλά δεν υπήρχε πια ψωμί.', translation: 'Нет, он был открыт, но хлеба уже не было.', explanation: 'Отвечает на предположение о закрытии и называет другую причину.' },
-      { id: 'apples', greek: 'Δεν υπήρχαν πια μήλα.', translation: 'Яблок уже не было.', explanation: 'Отсутствие яблок не объясняет, почему не куплен хлеб.' },
+      { id: 'store-closed', greek: 'Το κατάστημα ήταν ήδη κλειστό.', translation: 'Магазин уже был закрыт.', explanation: 'В контексте прямо сказано, что магазин был открыт.' },
+      { id: 'bread', greek: 'Δεν υπήρχε πια ψωμί.', translation: 'Хлеба уже не было.', explanation: 'На полке с хлебом было пусто, поэтому Мария не смогла его купить.' },
+      { id: 'apples', greek: 'Δεν υπήρχαν πια μήλα.', translation: 'Яблок уже не было.', explanation: 'Вопрос о хлебе; отсутствие яблок не объясняет ситуацию.' },
     ],
-    correctOptionId: 'bread', explanation: 'Мария опровергает предположение о закрытии: магазин работал, но хлеб закончился.',
+    correctOptionId: 'bread', explanation: 'Хлеба не было: полка с хлебом была пустой, хотя магазин работал.',
   },
   {
     id: 'd-everyday-05', level: 'A2', categoryId: 'everyday-talk', situationId: 'saturday-trip-to-mountains', intentId: 'repeat-missed-information', replySpeaker: 'Νίκος',
@@ -297,16 +297,17 @@ export const dialogueQuestions: DialogueQuestion[] = [
     correctOptionId: 'return', explanation: 'В реплике сказано, что поездка будет туда и обратно.',
   },
   {
-    id: 'd-place-05', level: 'A2', categoryId: 'places-travel', situationId: 'bus-route-appointment-address', intentId: 'correct-assumption', replySpeaker: 'Ελένη',
+    id: 'd-place-05', level: 'A2', categoryId: 'places-travel', situationId: 'bus-route-appointment-address', intentId: 'confirm-route-detail', replySpeaker: 'Μαρία',
     context: [
-      { speaker: 'Μαρία', greek: 'Έχω ραντεβού στην οδό Αθηνάς 12. Περνάει το λεωφορείο 3 από εκεί;', translation: 'У меня встреча на улице Афинас, 12. Автобус № 3 там проходит?' },
+      { speaker: 'Μαρία', greek: 'Έχω ραντεβού στην οδό Αθηνάς 12. Ο χάρτης της άσκησης δείχνει τη γραμμή 3 στην οδό Κύπρου, όχι στην οδό Αθηνάς.', translation: 'У меня встреча на улице Афинас, 12. На карте в задании маршрут № 3 показан на улице Кипру, а не на улице Афинас.' },
+      { speaker: 'Ελένη', greek: 'Τότε να ψάξουμε άλλη γραμμή για να πάμε στο ραντεβού σου;', translation: 'Тогда нам поискать другой маршрут, чтобы добраться до твоей встречи?' },
     ],
     options: [
-      { id: 'route', greek: 'Όχι, περνάει από την οδό Κύπρου.', translation: 'Нет, он проходит по улице Кипру.', explanation: 'Это отвечает о маршруте, указанном на карте.' },
-      { id: 'appointment', greek: 'Το ραντεβού μου είναι στις δώδεκα.', translation: 'Моя встреча в двенадцать.', explanation: 'Это сообщает время встречи, а не отвечает, где проходит автобус.' },
-      { id: 'map', greek: 'Ο χάρτης είναι πάνω στο τραπέζι.', translation: 'Карта лежит на столе.', explanation: 'Это говорит, где лежит карта, а не что на ней показано.' },
+      { id: 'route', greek: 'Ναι, καλύτερα να κοιτάξουμε άλλη γραμμή για την οδό Αθηνάς.', translation: 'Да, лучше нам посмотреть другой маршрут до улицы Афинас.', explanation: 'Подтверждает, что для улицы Афинас нужно проверить другой маршрут: на карте задания линия 3 проходит по улице Кипру.' },
+      { id: 'appointment', greek: 'Το ραντεβού μου είναι αύριο το πρωί.', translation: 'Моя встреча завтра утром.', explanation: 'Сообщает время встречи, но не отвечает, стоит ли искать другой маршрут.' },
+      { id: 'wrong-street', greek: 'Όχι, πάρε τη γραμμή 3 για την οδό Αθηνάς.', translation: 'Нет, поезжай на автобусе № 3 до улицы Афинас.', explanation: 'Не соответствует карте учебного задания: линия 3 показана на улице Кипру, а не на улице Афинас.' },
     ],
-    correctOptionId: 'route', explanation: 'Элени исправляет предположение о маршруте: автобус проходит по улице Кипру.',
+    correctOptionId: 'route', explanation: 'Мария советует искать другой маршрут, потому что на карте учебного задания линия 3 проходит по Кипру, а не по Афинас.',
   },
   {
     id: 'd-place-06', level: 'A2', categoryId: 'places-travel', situationId: 'hotel-elevator-location', intentId: 'acknowledge-hotel-directions', replySpeaker: 'Εσύ',

@@ -59,7 +59,7 @@ test('dialogue bank meets its reviewed structure and coverage targets', () => {
   assert.equal(new Set(dialogueQuestions.map((question) => question.situationId)).size, dialogueQuestions.length)
   assert.ok(new Set(dialogueQuestions.map((question) => question.intentId)).size >= 10)
   assert.ok(dialogueQuestions.filter((question) => question.level === 'A2').length >= 10)
-  assert.equal(dialogueQuestions.filter((question) => question.context.length >= 2).length, 25)
+  assert.equal(dialogueQuestions.filter((question) => question.context.length >= 2).length, 26)
 
   for (const category of dialogueCategories) {
     assert.ok(dialogueQuestions.filter((question) => question.categoryId === category.id).length >= 5, category.id)
@@ -75,6 +75,58 @@ test('dialogue bank meets its reviewed structure and coverage targets', () => {
     assert.ok(question.context.every((line) => line.greek.trim() && line.translation.trim()), question.id)
     assert.ok(question.options.every((option) => option.greek.trim() && option.translation.trim() && option.explanation.trim()), question.id)
   }
+})
+
+test('the three T6.2 revisions have one context-supported continuation each', () => {
+  const byId = (id: string) => dialogueQuestions.find((question) => question.id === id)!
+  const siblings = byId('d-self-02')
+  assert.equal(siblings.replySpeaker, 'Εσύ')
+  assert.match(siblings.context.at(-1)!.greek, /Πόσα αδέλφια/)
+  const siblingsAnswer = siblings.options.find((option) => option.id === siblings.correctOptionId)!
+  assert.equal(siblingsAnswer.greek, 'Έχω έναν αδελφό και μία αδελφή.')
+  const siblingDistractors = siblings.options.filter((option) => option.id !== siblings.correctOptionId)
+  assert.deepEqual(siblingDistractors.map((option) => option.greek), [
+    'Ο αδελφός μου σπουδάζει ιατρική.',
+    'Η αδελφή μου εργάζεται σε ένα σχολείο.',
+  ])
+  const siblingCountReply = /έχω.*(?:αδελφ|αδέλφ)|είμαι\s+μοναχοπαίδι/i
+  assert.match(siblingsAnswer.greek, siblingCountReply)
+  assert.ok(siblingDistractors.every((option) => !siblingCountReply.test(option.greek)))
+  assert.ok(siblingDistractors.every((option) => /αδελφός|αδελφή/i.test(option.greek)))
+  assert.ok(siblingDistractors.every((option) => /не отвечает на вопрос о (?:числе|количестве)/i.test(option.explanation)))
+
+  const bread = byId('d-everyday-04')
+  assert.equal(bread.replySpeaker, 'Μαρία')
+  assert.equal(bread.intentId, 'explain-unavailable-item')
+  assert.equal(bread.context[0]!.speaker, 'Μαρία')
+  assert.match(bread.context[0]!.greek, /ανοιχτό/)
+  assert.match(bread.context[0]!.greek, /ράφι με το ψωμί.*άδειο/)
+  assert.match(bread.context.at(-1)!.greek, /Γιατί.*ψωμί/)
+  const breadAnswer = bread.options.find((option) => option.id === bread.correctOptionId)!
+  assert.equal(breadAnswer.greek, 'Δεν υπήρχε πια ψωμί.')
+  assert.ok(!/^Όχι\b/.test(breadAnswer.greek))
+  assert.match(breadAnswer.explanation, /полке с хлебом было пусто/)
+  assert.match(bread.explanation, /полка с хлебом была пустой/)
+  assert.deepEqual(bread.options.filter((option) => option.id !== bread.correctOptionId).map((option) => option.greek), [
+    'Το κατάστημα ήταν ήδη κλειστό.',
+    'Δεν υπήρχαν πια μήλα.',
+  ])
+  assert.match(bread.options.find((option) => option.id === 'store-closed')!.explanation, /магазин был открыт/)
+  assert.match(bread.options.find((option) => option.id === 'apples')!.explanation, /хлебе/)
+
+  const route = byId('d-place-05')
+  assert.equal(route.replySpeaker, 'Μαρία')
+  assert.match(route.context[0]!.greek, /χάρτης της άσκησης/)
+  assert.match(route.context[0]!.greek, /γραμμή 3.*Κύπρου.*όχι.*Αθηνάς/)
+  assert.match(route.context.at(-1)!.greek, /άλλη γραμμή.*ραντεβού σου/)
+  assert.match(route.context[0]!.translation, /маршрут № 3 показан на улице Кипру, а не на улице Афинас/)
+  const routeAnswer = route.options.find((option) => option.id === route.correctOptionId)!
+  assert.equal(routeAnswer.greek, 'Ναι, καλύτερα να κοιτάξουμε άλλη γραμμή για την οδό Αθηνάς.')
+  assert.match(routeAnswer.explanation, /карте задания линия 3 проходит по улице Кипру/)
+  assert.match(route.explanation, /карте учебного задания линия 3 проходит по Кипру, а не по Афинас/)
+  assert.equal(route.options.find((option) => option.id === 'appointment')!.greek, 'Το ραντεβού μου είναι αύριο το πρωί.')
+  assert.equal(route.options.find((option) => option.id === 'wrong-street')!.greek, 'Όχι, πάρε τη γραμμή 3 για την οδό Αθηνάς.')
+  assert.match(route.options.find((option) => option.id === 'wrong-street')!.explanation, /карте учебного задания/)
 })
 
 test('T6 creates five rounds of two unique questions with broad topic coverage', () => {
@@ -277,7 +329,7 @@ test('history records only checked answers across early exit and re-entry', () =
 })
 
 test('reply roles match reviewed participants rather than a blanket user label', () => {
-  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Ελένη','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ' ]
+  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ' ]
   assert.deepEqual(dialogueQuestions.map(q => q.replySpeaker), roles)
 })
 
@@ -292,11 +344,12 @@ test('rendered panel names the reply speaker before answering and reveals every 
   const component = (await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`)).default
   const session = createDialogueSession(dialogueQuestions, seeded(8))
   const item = session.rounds[0]!.questions[0]!
-  item.question = dialogueQuestions.find(q => q.id === 'd-place-03')!
+  item.question = dialogueQuestions.find(q => q.id === 'd-place-05')!
   item.optionOrder = item.question.options.map(o => o.id)
   const props = { questionState: item, roundNumber: 1, totalRounds: 5, questionNumber: 1, totalQuestions: 10 }
   const before = await renderToString(createSSRApp(component, props))
-  assert.ok(before.includes('Οδηγός'))
+  assert.ok(before.includes('Μαρία'))
+  assert.ok(!before.includes('На карте в задании маршрут № 3 показан на улице Кипру, а не на улице Афинас.'))
   assert.ok(!before.includes('Переводы и разбор'))
   for (const option of item.question.options) assert.ok(!before.includes(option.translation))
   item.checked = true
