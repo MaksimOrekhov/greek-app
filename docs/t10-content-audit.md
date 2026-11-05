@@ -1,0 +1,117 @@
+# T10 — аудит слов и артиклей
+
+## Результат отбора
+
+В исходном словаре GreekApp найдено **233 записей** с тегом существительного. Для T10 вручную проверено и включено **90** подходящих лемм; **143** записей не включено. Данные для показа и перевод берутся из `src/data/words.ts`; этот документ и отдельный список артиклей не создают второго словаря.
+
+Распределение: **ο — 27**, **η — 32**, **το — 31**. Все три группы превышают минимум 25 слов.
+
+Основные причины исключения оставшихся записей: множественные формы без предъявляемой леммы единственного числа; формы не в именительном падеже (например, `κύριε`) или словоформы из выражений (например, `χρονών`); собственные географические названия; несколько частей речи без однозначного существительного значения; общий или меняющийся род; а также кандидаты, не прошедшие отбор по полезности и однозначности. В частности, `γιατρός` имеет один и тот же вид для обозначения мужчины и женщины. Названия национальностей и производные формы `Έλληνας`, `Ελληνίδα`, `Αμερικανός`, `Αμερικανίδα`, `Γάλλος`, `Γαλλίδα` исключены: первая версия сосредоточена на обычных нарицательных существительных. Число причин не складывается в отдельную статистику: у одной записи могло быть несколько оснований для исключения.
+
+## Проверенные записи банка
+
+Артикль в таблице транскрибирован из словарного заголовка Центра греческого языка. Варианты женского рода, указанные при мужской лемме, имеют прямую ссылку на эту запись. Переводы и написание для интерфейса берутся из словаря приложения и сверены с описанным значением.
+
+| Слово | Перевод GreekApp | Артикль | Словарный источник | Статус | Примечание |
+|---|---|---|---|---|---|
+| καφές | кофе | ο | [Лемма «καφές»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CE%B1%CF%86%CE%AD%CF%82) | Сверено с записью | — |
+| φίλος | друг | ο | [Лемма «φίλος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%86%CE%AF%CE%BB%CE%BF%CF%82) | Сверено с записью | — |
+| φοιτητής | студент (мужчина) | ο | [Лемма «φοιτητής»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%86%CE%BF%CE%B9%CF%84%CE%B7%CF%84%CE%AE%CF%82) | Сверено с записью | — |
+| άντρας | мужчина / муж | ο | [Лемма «άντρας»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%AC%CE%BD%CF%84%CF%81%CE%B1%CF%82) | Сверено с записью | — |
+| χυμός | сок | ο | [Лемма «χυμός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%87%CF%85%CE%BC%CF%8C%CF%82) | Сверено с записью | — |
+| γύρος | гирос (блюдо) | ο | [Лемма «γύρος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CF%8D%CF%81%CE%BF%CF%82) | Сверено с записью | — |
+| χάρτης | карта | ο | [Лемма «χάρτης»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%87%CE%AC%CF%81%CF%84%CE%B7%CF%82) | Сверено с записью | — |
+| φούρνος | пекарня / духовка | ο | [Лемма «φούρνος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%86%CE%BF%CF%8D%CF%81%CE%BD%CE%BF%CF%82) | Сверено с записью | — |
+| λογαριασμός | счёт (например, в кафе) / аккаунт | ο | [Лемма «λογαριασμός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BB%CE%BF%CE%B3%CE%B1%CF%81%CE%B9%CE%B1%CF%83%CE%BC%CF%8C%CF%82) | Сверено с записью | — |
+| δρόμος | дорога / улица | ο | [Лемма «δρόμος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B4%CF%81%CF%8C%CE%BC%CE%BF%CF%82) | Сверено с записью | — |
+| πατέρας | отец | ο | [Лемма «πατέρας»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%B1%CF%84%CE%AD%CF%81%CE%B1%CF%82) | Сверено с записью | — |
+| αριθμός | число / номер | ο | [Лемма «αριθμός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82) | Сверено с записью | — |
+| αδελφός | брат | ο | [Лемма «αδελφός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B1%CE%B4%CE%B5%CE%BB%CF%86%CF%8C%CF%82) | Сверено с записью | — |
+| θείος | дядя | ο | [Лемма «θείος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B8%CE%B5%CE%AF%CE%BF%CF%82) | Сверено с записью | — |
+| μπαμπάς | папа (разговорное) | ο | [Лемма «μπαμπάς»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CF%80%CE%B1%CE%BC%CF%80%CE%AC%CF%82) | Сверено с записью | — |
+| κινηματογράφος | кинотеатр | ο | [Лемма «κινηματογράφος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CE%B9%CE%BD%CE%B7%CE%BC%CE%B1%CF%84%CE%BF%CE%B3%CF%81%CE%AC%CF%86%CE%BF%CF%82) | Сверено с записью | — |
+| χορός | танец | ο | [Лемма «χορός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%87%CE%BF%CF%81%CF%8C%CF%82) | Сверено с записью | — |
+| μουσακάς | мусака (греческое блюдо) | ο | [Лемма «μουσακάς»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%BF%CF%85%CF%83%CE%B1%CE%BA%CE%AC%CF%82) | Сверено с записью | — |
+| καθηγητής | преподаватель / учитель (мужчина) | ο | [Лемма «καθηγητής»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CE%B1%CE%B8%CE%B7%CE%B3%CE%B7%CF%84%CE%AE%CF%82) | Сверено с записью | — |
+| καιρός | погода; время | ο | [Лемма «καιρός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CE%B1%CE%B9%CF%81%CF%8C%CF%82) | Сверено с записью | — |
+| χρόνος | время / год | ο | [Лемма «χρόνος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%87%CF%81%CF%8C%CE%BD%CE%BF%CF%82) | Сверено с записью | — |
+| μήνας | месяц | ο | [Лемма «μήνας»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%AE%CE%BD%CE%B1%CF%82) | Сверено с записью | — |
+| γιος | сын | ο | [Лемма «γιος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CE%B9%CE%BF%CF%82) | Сверено с записью | — |
+| κόσμος | мир / люди | ο | [Лемма «κόσμος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CF%8C%CF%83%CE%BC%CE%BF%CF%82) | Сверено с записью | — |
+| ωκεανός | океан | ο | [Лемма «ωκεανός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%89%CE%BA%CE%B5%CE%B1%CE%BD%CF%8C%CF%82) | Сверено с записью | — |
+| τύπος | тип; мужчина (разговорное) | ο | [Лемма «τύπος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CF%8D%CF%80%CE%BF%CF%82) | Сверено с записью | — |
+| χαρακτήρας | характер / персонаж | ο | [Лемма «χαρακτήρας»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%87%CE%B1%CF%81%CE%B1%CE%BA%CF%84%CE%AE%CF%81%CE%B1%CF%82) | Сверено с записью | — |
+| μαμά | мама | η | [Лемма «μαμά»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%B1%CE%BC%CE%AC) | Сверено с записью | — |
+| μπίρα | пиво | η | [Лемма «μπίρα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CF%80%CE%AF%CF%81%CE%B1) | Сверено с записью | — |
+| σαλάτα | салат | η | [Лемма «σαλάτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%83%CE%B1%CE%BB%CE%AC%CF%84%CE%B1) | Сверено с записью | — |
+| σοκολάτα | шоколад | η | [Лемма «σοκολάτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%83%CE%BF%CE%BA%CE%BF%CE%BB%CE%AC%CF%84%CE%B1) | Сверено с записью | — |
+| ντομάτα | помидор | η | [Лемма «ντομάτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BD%CF%84%CE%BF%CE%BC%CE%AC%CF%84%CE%B1) | Сверено с записью | — |
+| ώρα | час / время | η | [Лемма «ώρα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%8E%CF%81%CE%B1) | Сверено с записью | — |
+| καρέκλα | стул | η | [Лемма «καρέκλα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CE%B1%CF%81%CE%AD%CE%BA%CE%BB%CE%B1) | Сверено с записью | — |
+| τράπεζα | банк | η | [Лемма «τράπεζα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CF%81%CE%AC%CF%80%CE%B5%CE%B6%CE%B1) | Сверено с записью | — |
+| κυρία | госпожа / мадам | η | [Лемма «κύριος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CF%8D%CF%81%CE%B9%CE%BF%CF%82) | Сверено с записью | Форма указана в записи «κύριος». |
+| φίλη | подруга | η | [Лемма «φίλος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%86%CE%AF%CE%BB%CE%BF%CF%82) | Сверено с записью | Форма указана в записи «φίλος». |
+| κόρη | дочь | η | [Лемма «κόρη»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CF%8C%CF%81%CE%B7) | Сверено с записью | — |
+| σελίδα | страница | η | [Лемма «σελίδα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%83%CE%B5%CE%BB%CE%AF%CE%B4%CE%B1) | Сверено с записью | — |
+| στάση | остановка (транспорта) | η | [Лемма «στάση»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%83%CF%84%CE%AC%CF%83%CE%B7) | Сверено с записью | — |
+| πορτοκαλάδα | апельсиновый лимонад / напиток | η | [Лемма «πορτοκαλάδα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%BF%CF%81%CF%84%CE%BF%CE%BA%CE%B1%CE%BB%CE%AC%CE%B4%CE%B1) | Сверено с записью | — |
+| λεμονάδα | лимонад | η | [Лемма «λεμονάδα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BB%CE%B5%CE%BC%CE%BF%CE%BD%CE%AC%CE%B4%CE%B1) | Сверено с записью | — |
+| πίτσα | пицца | η | [Лемма «πίτσα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%AF%CF%84%CF%83%CE%B1) | Сверено с записью | — |
+| τυρόπιτα | пирог с сыром | η | [Лемма «τυρόπιτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CF%85%CF%81%CF%8C%CF%80%CE%B9%CF%84%CE%B1) | Сверено с записью | — |
+| σπανακόπιτα | пирог со шпинатом | η | [Лемма «σπανακόπιτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%83%CF%80%CE%B1%CE%BD%CE%B1%CE%BA%CF%8C%CF%80%CE%B9%CF%84%CE%B1) | Сверено с записью | — |
+| γαλοπούλα | индейка | η | [Лемма «γαλοπούλα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CE%B1%CE%BB%CE%BF%CF%80%CE%BF%CF%8D%CE%BB%CE%B1) | Сверено с записью | — |
+| ζακέτα | кофта / кардиган | η | [Лемма «ζακέτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B6%CE%B1%CE%BA%CE%AD%CF%84%CE%B1) | Сверено с записью | — |
+| γυναίκα | женщина / жена | η | [Лемма «γυναίκα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CF%85%CE%BD%CE%B1%CE%AF%CE%BA%CE%B1) | Сверено с записью | — |
+| ταβέρνα | таверна | η | [Лемма «ταβέρνα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CE%B1%CE%B2%CE%AD%CF%81%CE%BD%CE%B1) | Сверено с записью | — |
+| Κυριακή | воскресенье | η | [Лемма «Κυριακή»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%9A%CF%85%CF%81%CE%B9%CE%B1%CE%BA%CE%AE) | Сверено с записью | — |
+| φοιτήτρια | студентка | η | [Лемма «φοιτητής»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%86%CE%BF%CE%B9%CF%84%CE%B7%CF%84%CE%AE%CF%82) | Сверено с записью | Форма указана в записи «φοιτητής». |
+| μέρα | день | η | [Лемма «μέρα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%AD%CF%81%CE%B1) | Сверено с записью | — |
+| μητέρα | мать | η | [Лемма «μητέρα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%B7%CF%84%CE%AD%CF%81%CE%B1) | Сверено с записью | — |
+| αδελφή | сестра | η | [Лемма «αδελφός»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B1%CE%B4%CE%B5%CE%BB%CF%86%CF%8C%CF%82) | Сверено с записью | Форма указана в записи «αδελφός». |
+| γάτα | кошка | η | [Лемма «γάτα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CE%AC%CF%84%CE%B1) | Сверено с записью | — |
+| θάλασσα | море | η | [Лемма «θάλασσα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B8%CE%AC%CE%BB%CE%B1%CF%83%CF%83%CE%B1) | Сверено с записью | — |
+| μουσική | музыка | η | [Лемма «μουσική»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%BF%CF%85%CF%83%CE%B9%CE%BA%CE%AE) | Сверено с записью | — |
+| περίοδος | период | η | [Лемма «περίοδος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%B5%CF%81%CE%AF%CE%BF%CE%B4%CE%BF%CF%82) | Сверено с записью | Слово заканчивается на -ος, но оно женского рода. Запоминай сочетание целиком: η περίοδος. |
+| παράγραφος | абзац | η | [Лемма «παράγραφος»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%B1%CF%81%CE%AC%CE%B3%CF%81%CE%B1%CF%86%CE%BF%CF%82) | Сверено с записью | Слово заканчивается на -ος, но оно женского рода. Запоминай сочетание целиком: η παράγραφος. |
+| γάλα | молоко | το | [Лемма «γάλα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CE%AC%CE%BB%CE%B1) | Сверено с записью | — |
+| νερό | вода | το | [Лемма «νερό»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BD%CE%B5%CF%81%CF%8C) | Сверено с записью | — |
+| κρασί | вино | το | [Лемма «κρασί»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CF%81%CE%B1%CF%83%CE%AF) | Сверено с записью | — |
+| τζατζίκι | дзадзики | το | [Лемма «τζατζίκι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CE%B6%CE%B1%CF%84%CE%B6%CE%AF%CE%BA%CE%B9) | Сверено с записью | — |
+| ταξί | такси | το | [Лемма «ταξί»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CE%B1%CE%BE%CE%AF) | Сверено с записью | — |
+| αεροπλάνο | самолёт | το | [Лемма «αεροπλάνο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B1%CE%B5%CF%81%CE%BF%CF%80%CE%BB%CE%AC%CE%BD%CE%BF) | Сверено с записью | — |
+| αυτοκίνητο | автомобиль | το | [Лемма «αυτοκίνητο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B1%CF%85%CF%84%CE%BF%CE%BA%CE%AF%CE%BD%CE%B7%CF%84%CE%BF) | Сверено с записью | — |
+| τηλέφωνο | телефон | το | [Лемма «τηλέφωνο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CE%B7%CE%BB%CE%AD%CF%86%CF%89%CE%BD%CE%BF) | Сверено с записью | — |
+| διαβατήριο | паспорт | το | [Лемма «διαβατήριο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B4%CE%B9%CE%B1%CE%B2%CE%B1%CF%84%CE%AE%CF%81%CE%B9%CE%BF) | Сверено с записью | — |
+| πρόβλημα | проблема | το | [Лемма «πρόβλημα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CF%81%CF%8C%CE%B2%CE%BB%CE%B7%CE%BC%CE%B1) | Сверено с записью | Окончание -α здесь не означает женский род. Запоминай сочетание целиком: το πρόβλημα. |
+| αεροδρόμιο | аэропорт | το | [Лемма «αεροδρόμιο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B1%CE%B5%CF%81%CE%BF%CE%B4%CF%81%CF%8C%CE%BC%CE%B9%CE%BF) | Сверено с записью | — |
+| θαύμα | чудо | το | [Лемма «θαύμα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B8%CE%B1%CF%8D%CE%BC%CE%B1) | Сверено с записью | — |
+| σπίτι | дом | το | [Лемма «σπίτι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%83%CF%80%CE%AF%CF%84%CE%B9) | Сверено с записью | — |
+| μολύβι | карандаш | το | [Лемма «μολύβι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%BF%CE%BB%CF%8D%CE%B2%CE%B9) | Сверено с записью | — |
+| βιβλίο | книга | το | [Лемма «βιβλίο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B2%CE%B9%CE%B2%CE%BB%CE%AF%CE%BF) | Сверено с записью | — |
+| τραπέζι | стол | το | [Лемма «τραπέζι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%84%CF%81%CE%B1%CF%80%CE%AD%CE%B6%CE%B9) | Сверено с записью | — |
+| ξενοδοχείο | гостиница / отель | το | [Лемма «ξενοδοχείο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BE%CE%B5%CE%BD%CE%BF%CE%B4%CE%BF%CF%87%CE%B5%CE%AF%CE%BF) | Сверено с записью | — |
+| παιδί | ребёнок | το | [Лемма «παιδί»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%B1%CE%B9%CE%B4%CE%AF) | Сверено с записью | — |
+| γιαούρτι | йогурт | το | [Лемма «γιαούρτι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CE%B9%CE%B1%CE%BF%CF%8D%CF%81%CF%84%CE%B9) | Сверено с записью | — |
+| γράμμα | буква / письмо | το | [Лемма «γράμμα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B3%CF%81%CE%AC%CE%BC%CE%BC%CE%B1) | Сверено с записью | — |
+| μάθημα | урок / занятие | το | [Лемма «μάθημα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%AC%CE%B8%CE%B7%CE%BC%CE%B1) | Сверено с записью | — |
+| λεωφορείο | автобус | το | [Лемма «λεωφορείο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BB%CE%B5%CF%89%CF%86%CE%BF%CF%81%CE%B5%CE%AF%CE%BF) | Сверено с записью | — |
+| δέμα | посылка / свёрток | το | [Лемма «δέμα»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B4%CE%AD%CE%BC%CE%B1) | Сверено с записью | — |
+| ποτήρι | стакан / бокал | το | [Лемма «ποτήρι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%BF%CF%84%CE%AE%CF%81%CE%B9) | Сверено с записью | — |
+| πιάτο | тарелка / блюдо | το | [Лемма «πιάτο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%B9%CE%AC%CF%84%CE%BF) | Сверено с записью | — |
+| μπαλκόνι | балкон | το | [Лемма «μπαλκόνι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CF%80%CE%B1%CE%BB%CE%BA%CF%8C%CE%BD%CE%B9) | Сверено с записью | — |
+| δωμάτιο | комната | το | [Лемма «δωμάτιο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%B4%CF%89%CE%BC%CE%AC%CF%84%CE%B9%CE%BF) | Сверено с записью | — |
+| κορίτσι | девочка / девушка | το | [Лемма «κορίτσι»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BA%CE%BF%CF%81%CE%AF%CF%84%CF%83%CE%B9) | Сверено с записью | — |
+| μουσείο | музей | το | [Лемма «μουσείο»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CE%BC%CE%BF%CF%85%CF%83%CE%B5%CE%AF%CE%BF) | Сверено с записью | — |
+| παγωτό | мороженое | το | [Лемма «παγωτό»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%80%CE%B1%CE%B3%CF%89%CF%84%CF%8C) | Сверено с записью | — |
+| ψωμί | хлеб | το | [Лемма «ψωμί»](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=%CF%88%CF%89%CE%BC%CE%AF) | Сверено с записью | — |
+
+## Лингвистические решения
+
+- Словарь: [Лексикон стандартного современного греческого языка имени Триандафиллидиса](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/). Для каждой строки выше открыта отдельная поисковая запись; словарь маркирует род артиклем при лемме. [Условные обозначения словаря](https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/lemmas.html) подтверждают, что заголовочная форма существительного — именительный падеж единственного числа, кроме специально помеченных исключений.
+- Отдельно сверено, что система новогреческого языка различает три грамматических рода, по материалам [Центра греческого языка](https://www.greek-language.gr/digitalResources/modern_greek/tools/lexica/glossology_edu/iframe.html?heading=2&id=111).
+- Включены не выводимые по простому окончанию формы: **η περίοδος**, **η παράγραφος** (окончание `-ος`) и **το πρόβλημα** (окончание `-α`). Они подтверждены прямыми словарными записями и получают отдельные краткие пояснения.
+- `ταξί` — неизменяемое заимствование; словарь указывает его как `το ταξί`. Окончание не использовалось для назначения рода.
+- У `άντρας` словарь указывает также вариант написания `άνδρας`; оба варианта мужского рода, в банке используется форма из GreekApp. У `τύπος` проверенные омонимичные словарные записи также имеют `ο`, поэтому ответ не зависит от выбора между значениями «тип» и разговорным «мужчина».
+- У сомнительных форм, переменного рода или альтернативного артикля для значения, показанного без контекста, в банке ничего не осталось. Ответы не генерируются из окончания.
+
+**Проверка:** 90 из 90 включённых слов имеют источник и независимо сверены с отдельной таблицей в `tests/fixtures/articleGenderReference.ts`. Автоматические тесты защищают это соответствие от случайного изменения, но не заменяют ручное чтение словарных статей.
