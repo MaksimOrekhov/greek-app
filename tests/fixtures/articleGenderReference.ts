@@ -3,6 +3,7 @@ export const ARTICLE_GENDER_REFERENCE: Readonly<Record<string, 'ο' | 'η' | 'τ
   `καφές|ο
 φίλος|ο
 φοιτητής|ο
+μαθητής|ο
 άντρας|ο
 χυμός|ο
 γύρος|ο
@@ -21,6 +22,7 @@ export const ARTICLE_GENDER_REFERENCE: Readonly<Record<string, 'ο' | 'η' | 'τ
 καθηγητής|ο
 καιρός|ο
 χρόνος|ο
+σκύλος|ο
 μήνας|ο
 γιος|ο
 κόσμος|ο
@@ -89,7 +91,15 @@ export const ARTICLE_GENDER_REFERENCE: Readonly<Record<string, 'ο' | 'η' | 'τ
 κορίτσι|το
 μουσείο|το
 παγωτό|το
-ψωμί|το`
+ψωμί|το
+τηλεκάρτα|η
+τσιγάρο|το
+πακέτο|το
+πανεπιστήμιο|το
+στάδιο|το
+πιρούνι|το
+περιπτεράς|ο
+καφετζής|ο`
     .split('\n')
     .map((row) => row.split('|') as [string, 'ο' | 'η' | 'το']),
 )

@@ -49,15 +49,14 @@ class MemoryStorage implements ReadingHistoryStorage {
   }
 }
 
-test('T7 bank contains 15 reviewed texts, 45 questions, and evidence inside each passage', () => {
-  assert.equal(readingTexts.length, 15)
-  assert.equal(readingTexts.filter((text) => text.level === 'A1').length, 6)
-  assert.equal(readingTexts.filter((text) => text.level === 'A2').length, 9)
-  assert.equal(new Set(readingTexts.map((text) => text.id)).size, 15)
-  assert.equal(new Set(readingTexts.map((text) => text.genreId)).size, 14)
-  assert.equal(Object.keys(readingGenreLabels).length, 14)
-  assert.equal(readingTexts.flatMap((text) => text.questions).length, 45)
-  assert.equal(new Set(readingTexts.flatMap((text) => text.questions.map((question) => question.id))).size, 45)
+test('T7 bank matches its reviewed counts and keeps evidence inside each passage', () => {
+  assert.equal(readingTexts.length, READING_TEXT_COUNT)
+  assert.ok(readingTexts.filter((text) => text.level === 'A1').length >= 8)
+  assert.ok(readingTexts.filter((text) => text.level === 'A2').length >= 9)
+  assert.equal(new Set(readingTexts.map((text) => text.id)).size, READING_TEXT_COUNT)
+  assert.equal(new Set(readingTexts.map((text) => text.genreId)).size, Object.keys(readingGenreLabels).length)
+  assert.equal(readingTexts.flatMap((text) => text.questions).length, READING_TEXT_COUNT * 3)
+  assert.equal(new Set(readingTexts.flatMap((text) => text.questions.map((question) => question.id))).size, READING_TEXT_COUNT * 3)
 
   const textSignatures = new Set<string>()
   const questionSignatures = new Set<string>()
@@ -207,7 +206,7 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
     'cause-effect': 9,
     purpose: 4,
     sequence: 3,
-    'specific-information': 29,
+    'specific-information': 35,
   })
 })
 
@@ -313,6 +312,30 @@ test('both answers are required and checked together; selections lock only after
   assert.equal(advanceReadingSession(session).outcome, 'advanced')
   session = advanceReadingSession(session).session
   assert.equal(session.currentRoundIndex, 1)
+})
+
+test('new page 53–55 reading items have three independent A1 questions with checked evidence', () => {
+  const student = readingTexts.find((text) => text.id === 'r-a1-student-after-class')!
+  const kiosk = readingTexts.find((text) => text.id === 'r-a1-kiosk-postage')!
+  assert.ok(student && kiosk)
+  assert.equal(student.level, 'A1')
+  assert.equal(kiosk.level, 'A1')
+  assert.match(student.greek, /πανεπιστήμιο|σπουδάζω|πληρώνω/)
+  assert.match(kiosk.greek, /περίπτερο|γραμματόσημο|ρέστα/)
+  for (const text of [student, kiosk]) {
+    for (const question of text.questions) {
+      assert.ok(question.evidenceEl.every((evidence) => text.greek.includes(evidence)), question.id)
+      assert.equal(question.options.filter((option) => option.id === question.correctOptionId).length, 1, question.id)
+    }
+    const questionFacts = text.questions.map((question) => [question.promptRu, question.options.map((option) => option.textRu).join(' '), question.explanationRu].join(' '))
+    assert.equal(new Set(questionFacts).size, 3, text.id)
+  }
+  assert.equal(student.questions[0]!.correctOptionId, 'near-home')
+  assert.equal(student.questions[1]!.correctOptionId, 'ten')
+  assert.equal(student.questions[2]!.correctOptionId, 'book')
+  assert.equal(kiosk.questions[0]!.correctOptionId, 'no-change')
+  assert.equal(kiosk.questions[1]!.correctOptionId, 'stamp-chocolate')
+  assert.equal(kiosk.questions[2]!.correctOptionId, 'twenty-cents')
 })
 
 test('a text round can score zero, one, or two correct and a full session reports ten questions', () => {
@@ -454,21 +477,21 @@ test('100 fixed seeds and ten history-backed sessions cover the bank without wit
       session = advanceReadingSession(session).session
     }
   }
-  assert.equal(textOccurrences.size, 15)
-  assert.equal(questionIds.size, 45)
+  assert.equal(textOccurrences.size, READING_TEXT_COUNT)
+  assert.equal(questionIds.size, READING_TEXT_COUNT * 3)
   assert.deepEqual(levelCoverage, new Set(['A1', 'A2']))
-  assert.equal(genreCoverage.size, 14)
+  assert.equal(genreCoverage.size, Object.keys(readingGenreLabels).length)
   assert.equal(repeatsInsideSession, 0)
-  assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 35)
+  assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 50 - READING_TEXT_COUNT)
 })
 
-test('history rotation covers all 15 texts in the first three sessions across 100 fixed seeds', () => {
+test('history rotation covers the full text bank within four sessions across 100 fixed seeds', () => {
   for (let seed = 0; seed < 100; seed += 1) {
     let history = emptyReadingHistory()
     const random = seeded(seed + 7000)
     const seenTextIds = new Set<string>()
 
-    for (let launch = 0; launch < 3; launch += 1) {
+    for (let launch = 0; launch < Math.ceil(READING_TEXT_COUNT / 5); launch += 1) {
       let session = createReadingSession(readingTexts, random, history)
       for (let roundIndex = 0; roundIndex < 5; roundIndex += 1) {
         const round = session.rounds[session.currentRoundIndex]!

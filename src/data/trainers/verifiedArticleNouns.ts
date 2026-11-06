@@ -19,6 +19,7 @@ export const verifiedArticleNounRecords: readonly VerifiedArticleNoun[] = [
   { wordId: 'καφές', article: 'ο', sourceUrl: sourceUrl('καφές') },
   { wordId: 'φίλος', article: 'ο', sourceUrl: sourceUrl('φίλος') },
   { wordId: 'φοιτητής', article: 'ο', sourceUrl: sourceUrl('φοιτητής') },
+  { wordId: 'μαθητής', article: 'ο', sourceUrl: sourceUrl('μαθητής') },
   { wordId: 'άντρας', article: 'ο', sourceUrl: sourceUrl('άντρας') },
   { wordId: 'χυμός', article: 'ο', sourceUrl: sourceUrl('χυμός') },
   { wordId: 'γύρος', article: 'ο', sourceUrl: sourceUrl('γύρος') },
@@ -37,6 +38,7 @@ export const verifiedArticleNounRecords: readonly VerifiedArticleNoun[] = [
   { wordId: 'καθηγητής', article: 'ο', sourceUrl: sourceUrl('καθηγητής') },
   { wordId: 'καιρός', article: 'ο', sourceUrl: sourceUrl('καιρός') },
   { wordId: 'χρόνος', article: 'ο', sourceUrl: sourceUrl('χρόνος') },
+  { wordId: 'σκύλος', article: 'ο', sourceUrl: sourceUrl('σκύλος') },
   { wordId: 'μήνας', article: 'ο', sourceUrl: sourceUrl('μήνας') },
   { wordId: 'γιος', article: 'ο', sourceUrl: sourceUrl('γιος') },
   { wordId: 'κόσμος', article: 'ο', sourceUrl: sourceUrl('κόσμος') },
@@ -108,6 +110,14 @@ export const verifiedArticleNounRecords: readonly VerifiedArticleNoun[] = [
   { wordId: 'μουσείο', article: 'το', sourceUrl: sourceUrl('μουσείο') },
   { wordId: 'παγωτό', article: 'το', sourceUrl: sourceUrl('παγωτό') },
   { wordId: 'ψωμί', article: 'το', sourceUrl: sourceUrl('ψωμί') },
+  { wordId: 'τηλεκάρτα', article: 'η', sourceUrl: sourceUrl('τηλεκάρτα'), noteRu: 'Карта для таксофона; слово из учебного материала.' },
+  { wordId: 'τσιγάρο', article: 'το', sourceUrl: sourceUrl('τσιγάρο') },
+  { wordId: 'πακέτο', article: 'το', sourceUrl: sourceUrl('πακέτο') },
+  { wordId: 'πανεπιστήμιο', article: 'το', sourceUrl: sourceUrl('πανεπιστήμιο') },
+  { wordId: 'στάδιο', article: 'το', sourceUrl: sourceUrl('στάδιο') },
+  { wordId: 'πιρούνι', article: 'το', sourceUrl: sourceUrl('πιρούνι') },
+  { wordId: 'περιπτεράς', article: 'ο', sourceUrl: sourceUrl('περίπτερο'), noteRu: 'В словарной статье περίπτερο указано как разговорное название владельца киоска; женская форма — περιπτερού.' },
+  { wordId: 'καφετζής', article: 'ο', sourceUrl: sourceUrl('καφετζής'), noteRu: 'Разговорное название владельца или работника традиционной кофейни.' },
 ]
 
 const dictionaryWords = new Map(words.map((word) => [word.greek, word]))

@@ -477,4 +477,17 @@ export const dialogueQuestions: DialogueQuestion[] = [
     ],
     correctOptionId: 'field', explanation: 'Сотрудник объяснил слово в анкете; теперь нужно уточнить, где вписать фамилию.',
   },
+  {
+    id: 'd-everyday-07', level: 'A1', categoryId: 'everyday-talk', situationId: 'calculate-kiosk-change', intentId: 'calculate-change', replySpeaker: 'Περιπτεράς',
+    context: [
+      { speaker: 'Περιπτεράς', greek: 'Η σοκολάτα κάνει δύο ευρώ και είκοσι λεπτά και το μολύβι τριάντα λεπτά.', translation: 'Шоколадка стоит 2 евро 20 центов, а карандаш — 30 центов.' },
+      { speaker: 'Πελάτης', greek: 'Ορίστε πέντε ευρώ. Πόσα είναι τα ρέστα;', translation: 'Вот 5 евро. Сколько сдачи?' },
+    ],
+    options: [
+      { id: 'two-fifty', greek: 'Δύο ευρώ και πενήντα λεπτά.', translation: '2 евро 50 центов.', explanation: 'Покупка стоит 2,50 евро; из 5 евро нужно вернуть 2,50.' },
+      { id: 'three-fifty', greek: 'Τρία ευρώ και πενήντα λεπτά.', translation: '3 евро 50 центов.', explanation: 'При таком ответе общая сумма покупки оказалась бы 1,50 евро, а в разговоре указано 2,50.' },
+      { id: 'one-fifty', greek: 'Ένα ευρώ και πενήντα λεπτά.', translation: '1 евро 50 центов.', explanation: 'При таком ответе общая сумма покупки оказалась бы 3,50 евро, а в разговоре указано 2,50.' },
+    ],
+    correctOptionId: 'two-fifty', explanation: 'Шоколадка и карандаш вместе стоят 2,50 евро. Из 5 евро покупатель должен получить 2,50 сдачи.',
+  },
 ]

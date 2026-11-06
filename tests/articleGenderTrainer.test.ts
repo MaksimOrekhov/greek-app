@@ -132,13 +132,14 @@ function rendererText(node: TestRendererNode): string {
   return node.text + node.children.map(rendererText).join('')
 }
 
-test('T10 bank contains 90 reviewed dictionary nouns with balanced article counts', async () => {
+test('T10 bank contains reviewed dictionary nouns with balanced article counts', async () => {
   const candidateCount = words.filter((word) => word.partOfSpeech.includes('noun')).length
-  assert.equal(candidateCount, 233)
-  assert.equal(verifiedArticleNounRecords.length, 90)
-  assert.equal(articleGenderNouns.length, 90)
+  assert.ok(candidateCount >= verifiedArticleNounRecords.length)
+  assert.equal(verifiedArticleNounRecords.length, Object.keys(ARTICLE_GENDER_REFERENCE).length)
+  assert.ok(verifiedArticleNounRecords.length >= 90)
+  assert.equal(articleGenderNouns.length, verifiedArticleNounRecords.length)
   assert.deepEqual(articleGenderNouns.map((noun) => noun.wordId), verifiedArticleNounRecords.map((noun) => noun.wordId))
-  assert.equal(new Set(verifiedArticleNounRecords.map((noun) => noun.wordId)).size, 90)
+  assert.equal(new Set(verifiedArticleNounRecords.map((noun) => noun.wordId)).size, verifiedArticleNounRecords.length)
 
   for (const noun of articleGenderNouns) {
     const word = words.find((entry) => entry.greek === noun.wordId)
@@ -158,15 +159,21 @@ test('T10 bank contains 90 reviewed dictionary nouns with balanced article count
     article,
     articleGenderNouns.filter((noun) => noun.article === article).length,
   ]))
-  assert.deepEqual(distribution, { ο: 27, η: 32, το: 31 })
+  assert.deepEqual(distribution, { ο: 31, η: 33, το: 36 })
   assert.ok(Object.values(distribution).every((count) => count >= 25))
   assert.deepEqual(
     Object.fromEntries(Object.entries(ARTICLE_GENDER_REFERENCE).sort()),
     Object.fromEntries(verifiedArticleNounRecords.map(({ wordId, article }) => [wordId, article]).sort(([a], [b]) => a.localeCompare(b, 'el'))),
   )
-  assert.equal(Object.keys(ARTICLE_GENDER_REFERENCE).length, 90)
+  assert.equal(Object.keys(ARTICLE_GENDER_REFERENCE).length, articleGenderNouns.length)
+  assert.equal(articleGenderNouns.find((noun) => noun.wordId === 'περιπτεράς')?.article, 'ο')
+  assert.equal(articleGenderNouns.find((noun) => noun.wordId === 'καφετζής')?.article, 'ο')
+  assert.equal(articleGenderNouns.find((noun) => noun.wordId === 'στάδιο')?.article, 'το')
+  assert.equal(articleGenderNouns.find((noun) => noun.wordId === 'μαθητής')?.article, 'ο')
+  assert.equal(articleGenderNouns.find((noun) => noun.wordId === 'σκύλος')?.article, 'ο')
+  assert.equal(articleGenderNouns.find((noun) => noun.wordId === 'πιρούνι')?.article, 'το')
   const audit = await readFile(new URL('../docs/t10-content-audit.md', import.meta.url), 'utf8')
-  assert.equal((audit.match(/^\| [^|]+ \| [^|]+ \| (?:ο|η|το) \|/gm) ?? []).length, 90)
+  assert.equal((audit.match(/^\| [^|]+ \| [^|]+ \| (?:ο|η|το) \|/gm) ?? []).length, articleGenderNouns.length)
   for (const noun of articleGenderNouns) {
     assert.ok(audit.includes(noun.greek), noun.wordId)
     assert.ok(audit.includes(noun.sourceUrl), noun.wordId)
@@ -174,6 +181,10 @@ test('T10 bank contains 90 reviewed dictionary nouns with balanced article count
   assert.equal(ARTICLE_GENDER_REFERENCE['περίοδος'], 'η')
   assert.equal(ARTICLE_GENDER_REFERENCE['παράγραφος'], 'η')
   assert.equal(ARTICLE_GENDER_REFERENCE['πρόβλημα'], 'το')
+  assert.equal(ARTICLE_GENDER_REFERENCE['τηλεκάρτα'], 'η')
+  assert.equal(ARTICLE_GENDER_REFERENCE['τσιγάρο'], 'το')
+  assert.equal(ARTICLE_GENDER_REFERENCE['πακέτο'], 'το')
+  assert.equal(ARTICLE_GENDER_REFERENCE['πανεπιστήμιο'], 'το')
   assert.ok(articleGenderNouns.find((noun) => noun.wordId === 'ταξί')?.sourceUrl.includes('lq=%CF%84%CE%B1%CE%BE%CE%AF'))
 
   const excluded = new Set(verifiedArticleNounRecords.map((noun) => noun.wordId))
@@ -269,7 +280,7 @@ test('history changes only for answered nouns, prioritizes at most four queued e
 test('versioned history tolerates invalid or unavailable storage and reconciles dictionary changes', () => {
   const storage = new MemoryStorage()
   const first = loadArticleGenderHistory(articleGenderNouns, seeded(40), storage)
-  assert.equal(first.order.length, 90)
+  assert.equal(first.order.length, articleGenderNouns.length)
   assert.equal(storage.values.size, 0)
   storage.values.set(ARTICLE_GENDER_HISTORY_KEY, '{broken')
   assert.doesNotThrow(() => loadArticleGenderHistory(articleGenderNouns, seeded(41), storage))
@@ -306,9 +317,9 @@ test('ten sequential sessions cover the whole bank; 100 fixed seeds preserve bal
         beginsSession: question === session.rounds[0]!.questions[0],
       })
     }
-    if (run === 4) assert.equal(seen.size, 90, 'five sessions should complete one full cycle')
+    if (run === 5) assert.equal(seen.size, ids.length, 'six sessions should complete one full cycle')
   }
-  assert.equal(seen.size, 90)
+  assert.equal(seen.size, ids.length)
   assert.ok(history.sessionCount >= 10)
   assert.ok(history.cycle >= 1)
 
