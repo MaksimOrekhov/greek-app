@@ -478,16 +478,16 @@ export const dialogueQuestions: DialogueQuestion[] = [
     correctOptionId: 'field', explanation: 'Сотрудник объяснил слово в анкете; теперь нужно уточнить, где вписать фамилию.',
   },
   {
-    id: 'd-everyday-07', level: 'A1', categoryId: 'everyday-talk', situationId: 'calculate-kiosk-change', intentId: 'calculate-change', replySpeaker: 'Περιπτεράς',
+    id: 'd-everyday-07', level: 'A1', categoryId: 'everyday-talk', situationId: 'calculate-kiosk-change', intentId: 'respond-to-change-request', replySpeaker: 'Πελάτης',
     context: [
-      { speaker: 'Περιπτεράς', greek: 'Η σοκολάτα κάνει δύο ευρώ και είκοσι λεπτά και το μολύβι τριάντα λεπτά.', translation: 'Шоколадка стоит 2 евро 20 центов, а карандаш — 30 центов.' },
-      { speaker: 'Πελάτης', greek: 'Ορίστε πέντε ευρώ. Πόσα είναι τα ρέστα;', translation: 'Вот 5 евро. Сколько сдачи?' },
+      { speaker: 'Πελάτης', greek: 'Ένα πακέτο, παρακαλώ. Έχω ένα χαρτονόμισμα των πέντε ευρώ.', translation: 'Пачку, пожалуйста. У меня есть купюра в пять евро.' },
+      { speaker: 'Περιπτεράς', greek: 'Το πακέτο κάνει δύο ευρώ. Δεν έχω ρέστα για πέντε ευρώ. Μήπως έχετε ψιλά;', translation: 'Пачка стоит 2 евро. У меня нет сдачи с 5 евро. У вас случайно есть мелочь?' },
     ],
     options: [
-      { id: 'two-fifty', greek: 'Δύο ευρώ και πενήντα λεπτά.', translation: '2 евро 50 центов.', explanation: 'Покупка стоит 2,50 евро; из 5 евро нужно вернуть 2,50.' },
-      { id: 'three-fifty', greek: 'Τρία ευρώ και πενήντα λεπτά.', translation: '3 евро 50 центов.', explanation: 'При таком ответе общая сумма покупки оказалась бы 1,50 евро, а в разговоре указано 2,50.' },
-      { id: 'one-fifty', greek: 'Ένα ευρώ και πενήντα λεπτά.', translation: '1 евро 50 центов.', explanation: 'При таком ответе общая сумма покупки оказалась бы 3,50 евро, а в разговоре указано 2,50.' },
+      { id: 'two-euro-coin', greek: 'Έχω κι ένα κέρμα των δύο ευρώ. Ορίστε.', translation: 'У меня ещё есть монета в 2 евро. Вот.', explanation: 'Покупатель отвечает на просьбу о мелочи и предлагает монету на точную сумму покупки.' },
+      { id: 'change-reversed', greek: 'Ναι, ορίστε τα ρέστα σας.', translation: 'Да, вот ваша сдача.', explanation: 'Сдачу отдаёт продавец покупателю; здесь покупатель отвечает продавцу.' },
+      { id: 'repeat-price', greek: 'Πόσο κάνει το πακέτο;', translation: 'Сколько стоит пачка?', explanation: 'Продавец уже назвал цену; вопрос не отвечает, есть ли у покупателя мелочь.' },
     ],
-    correctOptionId: 'two-fifty', explanation: 'Шоколадка и карандаш вместе стоят 2,50 евро. Из 5 евро покупатель должен получить 2,50 сдачи.',
+    correctOptionId: 'two-euro-coin', explanation: 'Продавец просит мелочь, а покупатель сообщает, что может отдать монету ровно в 2 евро, и передаёт её.',
   },
 ]

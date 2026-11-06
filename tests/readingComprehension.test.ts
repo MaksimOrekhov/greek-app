@@ -322,6 +322,7 @@ test('new page 53–55 reading items have three independent A1 questions with ch
   assert.equal(kiosk.level, 'A1')
   assert.match(student.greek, /πανεπιστήμιο|σπουδάζω|πληρώνω/)
   assert.match(kiosk.greek, /περίπτερο|γραμματόσημο|ρέστα/)
+  assert.match(student.greek, /κοντά στο σπίτι μου, αλλά μακριά από τον σταθμό/)
   for (const text of [student, kiosk]) {
     for (const question of text.questions) {
       assert.ok(question.evidenceEl.every((evidence) => text.greek.includes(evidence)), question.id)
@@ -331,11 +332,41 @@ test('new page 53–55 reading items have three independent A1 questions with ch
     assert.equal(new Set(questionFacts).size, 3, text.id)
   }
   assert.equal(student.questions[0]!.correctOptionId, 'near-home')
+  assert.equal(student.questions[0]!.options.find((option) => option.id === 'near-station')!.textRu, 'Рядом с вокзалом.')
+  assert.deepEqual(student.questions[0]!.evidenceEl, ['Το πανεπιστήμιο είναι κοντά στο σπίτι μου, αλλά μακριά από τον σταθμό.'])
   assert.equal(student.questions[1]!.correctOptionId, 'ten')
   assert.equal(student.questions[2]!.correctOptionId, 'book')
+  assert.doesNotMatch(student.questions[1]!.options.map((option) => option.textRu).join(' '), /дом|вокзал/)
+  assert.doesNotMatch(student.questions[2]!.options.map((option) => option.textRu).join(' '), /дом|вокзал|десять/)
   assert.equal(kiosk.questions[0]!.correctOptionId, 'no-change')
   assert.equal(kiosk.questions[1]!.correctOptionId, 'stamp-chocolate')
-  assert.equal(kiosk.questions[2]!.correctOptionId, 'twenty-cents')
+  assert.equal(kiosk.questions[2]!.correctOptionId, 'two-euro-twenty')
+  assert.doesNotMatch(kiosk.questions[1]!.options.map((option) => option.textRu).join(' '), /мелочь|сдач|евро|центов/)
+  assert.equal(kiosk.questions[2]!.explanationRu, '0,80 + 2,00 = 2,80 евро; 5,00 − 2,80 = 2,20 евро сдачи.')
+  assert.deepEqual(kiosk.questions[2]!.options.map((option) => option.textRu), [
+    'Два евро двадцать центов.', 'Два евро восемьдесят центов.', 'Два евро десять центов.',
+  ])
+  assert.equal(kiosk.translationRu, 'Анна идёт в киоск. Она покупает почтовую марку и шоколадку. Марка стоит 80 центов, а шоколадка — 2 евро. У Анны нет мелочи. Она даёт 5 евро и получает 2 евро 20 центов сдачи. Потом она идёт на почту.')
+})
+
+test('kiosk story prices, payment, and change form a consistent independent calculation', () => {
+  const postageCents = 80
+  const chocolateCents = 200
+  const paidCents = 500
+  const totalCents = postageCents + chocolateCents
+  const changeCents = paidCents - totalCents
+  const kiosk = readingTexts.find((text) => text.id === 'r-a1-kiosk-postage')!
+  const q3 = kiosk.questions[2]!
+
+  assert.equal(totalCents, 280)
+  assert.equal(changeCents, 220)
+  assert.match(kiosk.greek, /Το γραμματόσημο κάνει ογδόντα λεπτά και η σοκολάτα δύο ευρώ\./)
+  assert.match(kiosk.greek, /Δίνει πέντε ευρώ και παίρνει δύο ευρώ και είκοσι λεπτά ρέστα\./)
+  assert.equal(q3.correctOptionId, 'two-euro-twenty')
+  assert.ok(q3.evidenceEl.every((evidence) => kiosk.greek.includes(evidence)))
+  assert.equal(kiosk.questions[0]!.evidenceEl.join(' '), 'Δεν έχει ψιλά.')
+  assert.equal(kiosk.questions[1]!.evidenceEl.join(' '), 'Αγοράζει ένα γραμματόσημο και μία σοκολάτα.')
+  assert.equal(q3.evidenceEl.join(' '), 'Δίνει πέντε ευρώ και παίρνει δύο ευρώ και είκοσι λεπτά ρέστα.')
 })
 
 test('a text round can score zero, one, or two correct and a full session reports ten questions', () => {

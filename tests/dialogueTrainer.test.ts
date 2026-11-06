@@ -77,14 +77,16 @@ test('dialogue bank meets its reviewed structure and coverage targets', () => {
   }
 })
 
-test('page 53 kiosk question checks the change amount from the stated prices', () => {
+test('page 53 kiosk dialogue uses the new purchase and change vocabulary', () => {
   const question = dialogueQuestions.find((item) => item.id === 'd-everyday-07')
   assert.ok(question)
   assert.equal(question.level, 'A1')
   assert.equal(question.situationId, 'calculate-kiosk-change')
-  assert.match(question.context[0]!.greek, /δύο ευρώ και είκοσι λεπτά/)
-  assert.match(question.context[0]!.greek, /τριάντα λεπτά/)
-  assert.equal(question.options.find((option) => option.id === question.correctOptionId)?.greek, 'Δύο ευρώ και πενήντα λεπτά.')
+  assert.match(question.context[0]!.greek, /πακέτο/)
+  assert.match(question.context[0]!.greek, /χαρτονόμισμα/)
+  assert.match(question.context[1]!.greek, /ρέστα.*ψιλά/)
+  assert.match(question.options.find((option) => option.id === question.correctOptionId)!.greek, /κέρμα των δύο ευρώ/)
+  assert.doesNotMatch(question.context.map((line) => line.greek).join(' '), /και είκοσι λεπτά|τριάντα λεπτά/)
   assert.equal(new Set(question.options.map((option) => option.greek)).size, 3)
 })
 
@@ -153,6 +155,35 @@ test('T6 creates five rounds of two unique questions with broad topic coverage',
     assert.ok(new Set(questions.map((item) => item.question.intentId)).size >= 7)
     assert.ok(questions.every((item) => item.optionOrder.length === 3))
   }
+})
+
+test('d-everyday-07 is a role-correct kiosk exchange about payment, not a change calculation', () => {
+  const question = dialogueQuestions.find((item) => item.id === 'd-everyday-07')!
+  assert.ok(question)
+  assert.equal(question.level, 'A1')
+  assert.equal(question.categoryId, 'everyday-talk')
+  assert.equal(question.situationId, 'calculate-kiosk-change')
+  assert.equal(question.intentId, 'respond-to-change-request')
+  assert.equal(question.replySpeaker, 'Πελάτης')
+  assert.deepEqual(question.context.map(({ speaker, greek, translation }) => ({ speaker, greek, translation })), [
+    {
+      speaker: 'Πελάτης',
+      greek: 'Ένα πακέτο, παρακαλώ. Έχω ένα χαρτονόμισμα των πέντε ευρώ.',
+      translation: 'Пачку, пожалуйста. У меня есть купюра в пять евро.',
+    },
+    {
+      speaker: 'Περιπτεράς',
+      greek: 'Το πακέτο κάνει δύο ευρώ. Δεν έχω ρέστα για πέντε ευρώ. Μήπως έχετε ψιλά;',
+      translation: 'Пачка стоит 2 евро. У меня нет сдачи с 5 евро. У вас случайно есть мелочь?',
+    },
+  ])
+  assert.equal(question.options.length, 3)
+  assert.equal(question.options.filter((option) => option.id === question.correctOptionId).length, 1)
+  assert.equal(question.correctOptionId, 'two-euro-coin')
+  assert.equal(question.options.find((option) => option.id === question.correctOptionId)!.greek, 'Έχω κι ένα κέρμα των δύο ευρώ. Ορίστε.')
+  assert.match(question.options.find((option) => option.id === 'change-reversed')!.explanation, /сдачу/i)
+  assert.match(question.options.find((option) => option.id === 'repeat-price')!.explanation, /уже назвал цену/)
+  assert.match(question.explanation, /монету ровно в 2 евро/)
 })
 
 test('answer can change until check, then locks and advances only after feedback', () => {
@@ -340,7 +371,7 @@ test('history records only checked answers across early exit and re-entry', () =
 })
 
 test('reply roles match reviewed participants rather than a blanket user label', () => {
-  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ','Περιπτεράς' ]
+  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ','Πελάτης' ]
   assert.deepEqual(dialogueQuestions.map(q => q.replySpeaker), roles)
 })
 

@@ -135,6 +135,7 @@ function rendererText(node: TestRendererNode): string {
 test('T10 bank contains reviewed dictionary nouns with balanced article counts', async () => {
   const candidateCount = words.filter((word) => word.partOfSpeech.includes('noun')).length
   assert.ok(candidateCount >= verifiedArticleNounRecords.length)
+  assert.equal(verifiedArticleNounRecords.length, 100)
   assert.equal(verifiedArticleNounRecords.length, Object.keys(ARTICLE_GENDER_REFERENCE).length)
   assert.ok(verifiedArticleNounRecords.length >= 90)
   assert.equal(articleGenderNouns.length, verifiedArticleNounRecords.length)

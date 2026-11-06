@@ -222,6 +222,7 @@ test('new textbook vocabulary stays complete, uniquely keyed, and connected to s
     ['Πω, πω!', 'по, по!'], ['στάδιο', 'ста́зио'], ['μαθητής', 'масити́с'],
     ['πιρούνι', 'пиру́ни'], ['σκύλος', 'ски́лос'],
   ] as const
+  assert.equal(words.length, 385)
   assert.equal(new Set(words.map((word) => word.greek)).size, words.length)
   for (const [greek, transliteration] of expected) {
     const word = words.find((item) => item.greek === greek)
@@ -230,6 +231,41 @@ test('new textbook vocabulary stays complete, uniquely keyed, and connected to s
     assert.ok(word.russian.trim(), greek)
     assert.ok(word.examples.length > 0, greek)
     assert.ok(word.examples.every((example) => example.greek.trim() && example.transliteration.trim() && example.russian.trim()), greek)
+  }
+})
+
+test('three shop expressions have contextual examples rather than echoing their headwords', () => {
+  const expected = [
+    {
+      greek: 'Θέλετε τίποτα άλλο;',
+      example: 'Ο περιπτεράς δίνει το πακέτο τσιγάρα. Θέλετε τίποτα άλλο;',
+      transliteration: 'о пэриптэра́с зи́ни то пакэ́то цига́ра. сэ́лэтэ ти́пота а́ло?',
+      russian: 'Киоскёр передаёт пачку сигарет. Хотите что-нибудь ещё?',
+    },
+    {
+      greek: 'Πόσο κάνουν όλα;',
+      example: 'Αγοράζω ένα πακέτο τσιγάρα και μία τηλεκάρτα. Πόσο κάνουν όλα;',
+      transliteration: 'агора́зо э́на пакэ́то цига́ра кэ ми́а тилэка́рта. по́со ка́нун о́ла?',
+      russian: 'Я покупаю пачку сигарет и телефонную карту. Сколько всё вместе стоит?',
+    },
+    {
+      greek: 'Μήπως έχετε ψιλά;',
+      example: 'Ο περιπτεράς δεν έχει ρέστα. Μήπως έχετε ψιλά;',
+      transliteration: 'о пэриптэра́с зэн э́хи рэ́ста. ми́пос э́хэтэ псила́?',
+      russian: 'У киоскёра нет сдачи. У вас случайно есть мелочь?',
+    },
+  ]
+
+  for (const expectedExample of expected) {
+    const card = words.find((item) => item.greek === expectedExample.greek)
+    assert.ok(card, expectedExample.greek)
+    assert.equal(card.examples.length, 1, expectedExample.greek)
+    assert.notEqual(card.examples[0]!.greek, card.greek)
+    assert.deepEqual(card.examples[0], {
+      greek: expectedExample.example,
+      transliteration: expectedExample.transliteration,
+      russian: expectedExample.russian,
+    })
   }
 })
 
