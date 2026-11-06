@@ -190,6 +190,27 @@ test('targeted vocabulary clarifications preserve existing Greek keys and exampl
   }
 })
 
+test('μου αρέσει and μου αρέσουν examples agree with the grammatical number of what is liked', () => {
+  const singular = words.find((word) => word.greek === 'μου αρέσει')
+  const plural = words.find((word) => word.greek === 'μου αρέσουν')
+  assert.ok(singular)
+  assert.ok(plural)
+
+  assert.equal(singular.russian, 'мне нравится')
+  assert.deepEqual(singular.examples[0], {
+    greek: 'Μου αρέσει η μουσική.',
+    transliteration: 'му арэ́си и мусики́',
+    russian: 'Мне нравится музыка.',
+  })
+  assert.equal(plural.russian, 'мне нравятся')
+  assert.equal(approximateReading('βιβλία'), 'вивли́а')
+  assert.deepEqual(plural.examples[0], {
+    greek: 'Μου αρέσουν τα βιβλία.',
+    transliteration: 'му арэ́сун та вивли́а',
+    russian: 'Мне нравятся книги.',
+  })
+})
+
 test('latest lesson vocabulary is available with examples', () => {
   for (const greek of ['συγγνώμη', 'διαβάζω', 'μαχαίρι', 'σκέτος', 'εισιτήριο']) {
     const found = words.find((entry) => entry.greek === greek)
