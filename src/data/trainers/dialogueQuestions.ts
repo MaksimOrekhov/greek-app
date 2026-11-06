@@ -478,16 +478,16 @@ export const dialogueQuestions: DialogueQuestion[] = [
     correctOptionId: 'field', explanation: 'Сотрудник объяснил слово в анкете; теперь нужно уточнить, где вписать фамилию.',
   },
   {
-    id: 'd-everyday-07', level: 'A1', categoryId: 'everyday-talk', situationId: 'calculate-kiosk-change', intentId: 'respond-to-change-request', replySpeaker: 'Πελάτης',
+    id: 'd-everyday-07', level: 'A1', categoryId: 'everyday-talk', situationId: 'kiosk-small-change', intentId: 'respond-to-change-request', replySpeaker: 'Πελάτης',
     context: [
-      { speaker: 'Πελάτης', greek: 'Ένα πακέτο, παρακαλώ. Έχω ένα χαρτονόμισμα των πέντε ευρώ.', translation: 'Пачку, пожалуйста. У меня есть купюра в пять евро.' },
+      { speaker: 'Πελάτης', greek: 'Ένα πακέτο τσιγάρα, παρακαλώ. Έχω πέντε ευρώ.', translation: 'Пачку сигарет, пожалуйста. У меня есть пять евро.' },
       { speaker: 'Περιπτεράς', greek: 'Το πακέτο κάνει δύο ευρώ. Δεν έχω ρέστα για πέντε ευρώ. Μήπως έχετε ψιλά;', translation: 'Пачка стоит 2 евро. У меня нет сдачи с 5 евро. У вас случайно есть мелочь?' },
     ],
     options: [
-      { id: 'two-euro-coin', greek: 'Έχω κι ένα κέρμα των δύο ευρώ. Ορίστε.', translation: 'У меня ещё есть монета в 2 евро. Вот.', explanation: 'Покупатель отвечает на просьбу о мелочи и предлагает монету на точную сумму покупки.' },
+      { id: 'two-euro-cash', greek: 'Ναι, έχω δύο ευρώ. Ορίστε.', translation: 'Да, у меня есть два евро. Вот, пожалуйста.', explanation: 'Покупатель отвечает, что у него есть нужная сумма, и предлагает её продавцу.' },
       { id: 'change-reversed', greek: 'Ναι, ορίστε τα ρέστα σας.', translation: 'Да, вот ваша сдача.', explanation: 'Сдачу отдаёт продавец покупателю; здесь покупатель отвечает продавцу.' },
       { id: 'repeat-price', greek: 'Πόσο κάνει το πακέτο;', translation: 'Сколько стоит пачка?', explanation: 'Продавец уже назвал цену; вопрос не отвечает, есть ли у покупателя мелочь.' },
     ],
-    correctOptionId: 'two-euro-coin', explanation: 'Продавец просит мелочь, а покупатель сообщает, что может отдать монету ровно в 2 евро, и передаёт её.',
+    correctOptionId: 'two-euro-cash', explanation: 'Продавец спрашивает о мелочи, а покупатель отвечает, что у него есть 2 евро, и предлагает их.',
   },
 ]

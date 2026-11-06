@@ -7,6 +7,7 @@ import { renderToString } from '@vue/server-renderer'
 import { parse, compileScript } from '@vue/compiler-sfc'
 import ts from 'typescript'
 import { dialogueCategories, dialogueQuestions } from '../src/data/trainers/dialogueQuestions.ts'
+import { words } from '../src/data/words.ts'
 import { trainerRoutes } from '../src/data/trainers/routes.ts'
 import {
   DIALOGUE_HISTORY_KEY,
@@ -77,16 +78,19 @@ test('dialogue bank meets its reviewed structure and coverage targets', () => {
   }
 })
 
-test('page 53 kiosk dialogue uses the new purchase and change vocabulary', () => {
+test('page 53 kiosk dialogue uses only studied vocabulary for purchase and small change', () => {
   const question = dialogueQuestions.find((item) => item.id === 'd-everyday-07')
   assert.ok(question)
   assert.equal(question.level, 'A1')
-  assert.equal(question.situationId, 'calculate-kiosk-change')
-  assert.match(question.context[0]!.greek, /πακέτο/)
-  assert.match(question.context[0]!.greek, /χαρτονόμισμα/)
+  assert.equal(question.situationId, 'kiosk-small-change')
+  assert.match(question.context[0]!.greek, /πακέτο τσιγάρα/)
+  assert.match(question.context[0]!.greek, /Έχω πέντε ευρώ/)
   assert.match(question.context[1]!.greek, /ρέστα.*ψιλά/)
-  assert.match(question.options.find((option) => option.id === question.correctOptionId)!.greek, /κέρμα των δύο ευρώ/)
+  assert.match(question.options.find((option) => option.id === question.correctOptionId)!.greek, /έχω δύο ευρώ/i)
   assert.doesNotMatch(question.context.map((line) => line.greek).join(' '), /και είκοσι λεπτά|τριάντα λεπτά/)
+  assert.doesNotMatch(question.context.map((line) => line.greek).join(' ') + question.options.map((option) => option.greek).join(' '), /χαρτονόμισμα|κέρμα/)
+  const dictionaryKeys = new Set(words.map((word) => word.greek))
+  for (const studiedWord of ['πακέτο', 'τσιγάρο', 'δύο', 'ευρώ', 'ρέστα', 'ψιλά']) assert.ok(dictionaryKeys.has(studiedWord), studiedWord)
   assert.equal(new Set(question.options.map((option) => option.greek)).size, 3)
 })
 
@@ -162,14 +166,14 @@ test('d-everyday-07 is a role-correct kiosk exchange about payment, not a change
   assert.ok(question)
   assert.equal(question.level, 'A1')
   assert.equal(question.categoryId, 'everyday-talk')
-  assert.equal(question.situationId, 'calculate-kiosk-change')
+  assert.equal(question.situationId, 'kiosk-small-change')
   assert.equal(question.intentId, 'respond-to-change-request')
   assert.equal(question.replySpeaker, 'Πελάτης')
   assert.deepEqual(question.context.map(({ speaker, greek, translation }) => ({ speaker, greek, translation })), [
     {
       speaker: 'Πελάτης',
-      greek: 'Ένα πακέτο, παρακαλώ. Έχω ένα χαρτονόμισμα των πέντε ευρώ.',
-      translation: 'Пачку, пожалуйста. У меня есть купюра в пять евро.',
+      greek: 'Ένα πακέτο τσιγάρα, παρακαλώ. Έχω πέντε ευρώ.',
+      translation: 'Пачку сигарет, пожалуйста. У меня есть пять евро.',
     },
     {
       speaker: 'Περιπτεράς',
@@ -179,11 +183,11 @@ test('d-everyday-07 is a role-correct kiosk exchange about payment, not a change
   ])
   assert.equal(question.options.length, 3)
   assert.equal(question.options.filter((option) => option.id === question.correctOptionId).length, 1)
-  assert.equal(question.correctOptionId, 'two-euro-coin')
-  assert.equal(question.options.find((option) => option.id === question.correctOptionId)!.greek, 'Έχω κι ένα κέρμα των δύο ευρώ. Ορίστε.')
+  assert.equal(question.correctOptionId, 'two-euro-cash')
+  assert.equal(question.options.find((option) => option.id === question.correctOptionId)!.greek, 'Ναι, έχω δύο ευρώ. Ορίστε.')
   assert.match(question.options.find((option) => option.id === 'change-reversed')!.explanation, /сдачу/i)
   assert.match(question.options.find((option) => option.id === 'repeat-price')!.explanation, /уже назвал цену/)
-  assert.match(question.explanation, /монету ровно в 2 евро/)
+  assert.match(question.explanation, /у него есть 2 евро/)
 })
 
 test('answer can change until check, then locks and advances only after feedback', () => {
@@ -286,6 +290,17 @@ test('T6 history is versioned, bounded, reconciles changed banks, and tolerates 
   assert.equal(reconciled.exactQuestionSignatures.includes('removed-question'), false)
   assert.equal(reconciled.situationIds.includes('removed-situation'), false)
   assert.equal(reconciled.intentIds.includes('removed-intent'), false)
+
+  const legacyKioskHistory = reconcileDialogueQuestionHistory({
+    version: DIALOGUE_HISTORY_VERSION,
+    exactQuestionSignatures: [],
+    situationIds: ['calculate-kiosk-change'],
+    intentIds: ['respond-to-change-request'],
+  }, dialogueQuestions)
+  assert.equal(legacyKioskHistory.situationIds.includes('calculate-kiosk-change'), false)
+  assert.equal(legacyKioskHistory.situationIds.includes('kiosk-small-change'), false)
+  const updatedKioskHistory = rememberDialogueQuestions(legacyKioskHistory, [dialogueQuestions.find((question) => question.id === 'd-everyday-07')!])
+  assert.equal(updatedKioskHistory.situationIds.includes('kiosk-small-change'), true)
 
   storage.values.set(DIALOGUE_HISTORY_KEY, '{bad json')
   assert.deepEqual(loadDialogueQuestionHistory(dialogueQuestions, storage), emptyDialogueQuestionHistory())
