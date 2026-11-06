@@ -187,6 +187,32 @@ test('each generated session has five rounds of four different, unambiguous pair
   }
 })
 
+test('new textbook additions remain in T5 and preserve unique, unambiguous sessions across 100 seeds', () => {
+  const pairs = adaptWordsToTrainerPairs(words)
+  for (const greek of ['μαθαίνω', 'αγοράζω', 'πληρώνω', 'σπουδάζω', 'τηλεκάρτα', 'ρέστα', 'ψιλά', 'περιπτεράς', 'καφετζής', 'Πόσο κάνουν όλα;', 'Πω, πω!', 'στάδιο', 'μαθητής', 'πιρούνι', 'σκύλος']) {
+    assert.ok(pairs.some((pair) => pair.answer === greek), `Missing T5 pair: ${greek}`)
+  }
+  const ids = pairs.map((pair) => pair.id)
+
+  for (let seed = 0; seed < 100; seed += 1) {
+    let history = createVocabularyMatchHistory(ids, seededRandom(seed + 10000))
+    for (let launch = 0; launch < 3; launch += 1) {
+      const selected = selectVocabularyMatchPairs(pairs, history, seededRandom(seed * 10 + launch))
+      assert.equal(selected.length, VOCABULARY_MATCH_SESSION_PAIR_COUNT, `seed=${seed}, launch=${launch}`)
+      assert.equal(new Set(selected.map((pair) => pair.id)).size, selected.length)
+      const session = createTrainerSession('vocabulary-match', selected, seededRandom(seed * 100 + launch))
+      for (const round of session.rounds) {
+        for (let left = 0; left < round.pairs.length; left += 1) {
+          for (let right = left + 1; right < round.pairs.length; right += 1) {
+            assert.equal(independentlyAmbiguous(round.pairs[left]!, round.pairs[right]!), false, `seed=${seed}, launch=${launch}`)
+          }
+        }
+      }
+      history = completeVocabularyMatchCycleItems(history, selected.map((pair) => pair.id), ids, seededRandom(seed * 1000 + launch))
+    }
+  }
+})
+
 test('the shared T1 engine accepts correct pairs, rejects wrong pairs and reports accurate results', () => {
   const pairs = selectVocabularyMatchPairs(
     adaptWordsToTrainerPairs(words),

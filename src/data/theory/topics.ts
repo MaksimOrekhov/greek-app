@@ -144,6 +144,18 @@ export const theoryTopics: TheoryTopic[] = [
     explanation: 'content/numbers-100-200/explanation.md',
     related: ['numbers-20-100', 'noun-gender'],
   },
+  {
+    id: 'numbers-200-plus',
+    title: 'Числительные от 200 и выше',
+    greekTitle: 'Αριθμοί από το 200 και πάνω',
+    category: 'Числительные',
+    description: 'Крупные числа, тысячи и названия больших величин.',
+    order: 4,
+    keywords: ['числительные', 'числа', 'сотни', 'тысячи', 'миллион', 'миллиард', 'διακόσια', 'τριακόσια', 'χίλια', 'εκατομμύριο', 'δισεκατομμύριο'],
+    summary: 'content/numbers-200-plus/summary.md',
+    explanation: 'content/numbers-200-plus/explanation.md',
+    related: ['numbers-100-200', 'noun-gender'],
+  },
 ]
 
 export interface TheoryResource {

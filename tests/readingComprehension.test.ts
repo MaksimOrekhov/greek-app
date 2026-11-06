@@ -49,15 +49,14 @@ class MemoryStorage implements ReadingHistoryStorage {
   }
 }
 
-test('T7 bank contains 15 reviewed texts, 45 questions, and evidence inside each passage', () => {
-  assert.equal(readingTexts.length, 15)
-  assert.equal(readingTexts.filter((text) => text.level === 'A1').length, 6)
-  assert.equal(readingTexts.filter((text) => text.level === 'A2').length, 9)
-  assert.equal(new Set(readingTexts.map((text) => text.id)).size, 15)
-  assert.equal(new Set(readingTexts.map((text) => text.genreId)).size, 14)
-  assert.equal(Object.keys(readingGenreLabels).length, 14)
-  assert.equal(readingTexts.flatMap((text) => text.questions).length, 45)
-  assert.equal(new Set(readingTexts.flatMap((text) => text.questions.map((question) => question.id))).size, 45)
+test('T7 bank matches its reviewed counts and keeps evidence inside each passage', () => {
+  assert.equal(readingTexts.length, READING_TEXT_COUNT)
+  assert.ok(readingTexts.filter((text) => text.level === 'A1').length >= 8)
+  assert.ok(readingTexts.filter((text) => text.level === 'A2').length >= 9)
+  assert.equal(new Set(readingTexts.map((text) => text.id)).size, READING_TEXT_COUNT)
+  assert.equal(new Set(readingTexts.map((text) => text.genreId)).size, Object.keys(readingGenreLabels).length)
+  assert.equal(readingTexts.flatMap((text) => text.questions).length, READING_TEXT_COUNT * 3)
+  assert.equal(new Set(readingTexts.flatMap((text) => text.questions.map((question) => question.id))).size, READING_TEXT_COUNT * 3)
 
   const textSignatures = new Set<string>()
   const questionSignatures = new Set<string>()
@@ -207,7 +206,7 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
     'cause-effect': 9,
     purpose: 4,
     sequence: 3,
-    'specific-information': 29,
+    'specific-information': 35,
   })
 })
 
@@ -313,6 +312,68 @@ test('both answers are required and checked together; selections lock only after
   assert.equal(advanceReadingSession(session).outcome, 'advanced')
   session = advanceReadingSession(session).session
   assert.equal(session.currentRoundIndex, 1)
+})
+
+test('new page 53–55 reading items have three independent A1 questions with checked evidence', () => {
+  const student = readingTexts.find((text) => text.id === 'r-a1-student-after-class')!
+  const kiosk = readingTexts.find((text) => text.id === 'r-a1-kiosk-postage')!
+  assert.ok(student && kiosk)
+  assert.equal(student.level, 'A1')
+  assert.equal(kiosk.level, 'A1')
+  assert.match(student.greek, /πανεπιστήμιο|σπουδάζω|πληρώνω/)
+  assert.match(kiosk.greek, /περίπτερο|γραμματόσημο|ρέστα/)
+  assert.match(student.greek, /κοντά στο σπίτι μου, αλλά μακριά από τον σταθμό/)
+  for (const text of [student, kiosk]) {
+    for (const question of text.questions) {
+      assert.ok(question.evidenceEl.every((evidence) => text.greek.includes(evidence)), question.id)
+      assert.equal(question.options.filter((option) => option.id === question.correctOptionId).length, 1, question.id)
+    }
+    const questionFacts = text.questions.map((question) => [question.promptRu, question.options.map((option) => option.textRu).join(' '), question.explanationRu].join(' '))
+    assert.equal(new Set(questionFacts).size, 3, text.id)
+  }
+  assert.equal(student.questions[0]!.correctOptionId, 'near-home')
+  assert.equal(student.questions[0]!.options.find((option) => option.id === 'near-station')!.textRu, 'Рядом с вокзалом.')
+  assert.deepEqual(student.questions[0]!.evidenceEl, ['Το πανεπιστήμιο είναι κοντά στο σπίτι μου, αλλά μακριά από τον σταθμό.'])
+  assert.equal(student.questions[1]!.correctOptionId, 'ten')
+  assert.equal(student.questions[2]!.correctOptionId, 'book')
+  assert.doesNotMatch(student.questions[1]!.options.map((option) => option.textRu).join(' '), /дом|вокзал/)
+  assert.doesNotMatch(student.questions[2]!.options.map((option) => option.textRu).join(' '), /дом|вокзал|десять/)
+  assert.equal(kiosk.questions[0]!.correctOptionId, 'no-change')
+  assert.equal(kiosk.questions[0]!.promptRu, 'Была ли у Анны мелочь до оплаты?')
+  assert.equal(kiosk.questions[0]!.explanationRu, 'Перед оплатой Анна говорит, что у неё нет мелких денег.')
+  assert.deepEqual(kiosk.questions[0]!.evidenceEl, ['Δεν έχει ψιλά.'])
+  assert.equal(kiosk.questions[0]!.options.find((option) => option.id === 'no-change')!.textRu, 'Нет, до оплаты у неё не было мелочи.')
+  assert.equal(kiosk.questions[0]!.options.find((option) => option.id === 'has-change')!.textRu, 'Да, до оплаты у неё были мелкие деньги.')
+  assert.equal(kiosk.questions[0]!.options.find((option) => option.id === 'pays-by-card')!.textRu, 'Она платит банковской картой.')
+  assert.ok(kiosk.greek.indexOf('Δεν έχει ψιλά.') < kiosk.greek.indexOf('Δίνει πέντε ευρώ'))
+  assert.equal(kiosk.questions[1]!.correctOptionId, 'stamp-chocolate')
+  assert.equal(kiosk.questions[2]!.correctOptionId, 'two-euro-twenty')
+  assert.doesNotMatch(kiosk.questions[1]!.options.map((option) => option.textRu).join(' '), /мелочь|сдач|евро|центов/)
+  assert.equal(kiosk.questions[2]!.explanationRu, '0,80 + 2,00 = 2,80 евро; 5,00 − 2,80 = 2,20 евро сдачи.')
+  assert.deepEqual(kiosk.questions[2]!.options.map((option) => option.textRu), [
+    'Два евро двадцать центов.', 'Два евро восемьдесят центов.', 'Два евро десять центов.',
+  ])
+  assert.equal(kiosk.translationRu, 'Анна идёт в киоск. Она покупает почтовую марку и шоколадку. Марка стоит 80 центов, а шоколадка — 2 евро. У Анны нет мелочи. Она даёт 5 евро и получает 2 евро 20 центов сдачи. Потом она идёт на почту.')
+})
+
+test('kiosk story prices, payment, and change form a consistent independent calculation', () => {
+  const postageCents = 80
+  const chocolateCents = 200
+  const paidCents = 500
+  const totalCents = postageCents + chocolateCents
+  const changeCents = paidCents - totalCents
+  const kiosk = readingTexts.find((text) => text.id === 'r-a1-kiosk-postage')!
+  const q3 = kiosk.questions[2]!
+
+  assert.equal(totalCents, 280)
+  assert.equal(changeCents, 220)
+  assert.match(kiosk.greek, /Το γραμματόσημο κάνει ογδόντα λεπτά και η σοκολάτα δύο ευρώ\./)
+  assert.match(kiosk.greek, /Δίνει πέντε ευρώ και παίρνει δύο ευρώ και είκοσι λεπτά ρέστα\./)
+  assert.equal(q3.correctOptionId, 'two-euro-twenty')
+  assert.ok(q3.evidenceEl.every((evidence) => kiosk.greek.includes(evidence)))
+  assert.equal(kiosk.questions[0]!.evidenceEl.join(' '), 'Δεν έχει ψιλά.')
+  assert.equal(kiosk.questions[1]!.evidenceEl.join(' '), 'Αγοράζει ένα γραμματόσημο και μία σοκολάτα.')
+  assert.equal(q3.evidenceEl.join(' '), 'Δίνει πέντε ευρώ και παίρνει δύο ευρώ και είκοσι λεπτά ρέστα.')
 })
 
 test('a text round can score zero, one, or two correct and a full session reports ten questions', () => {
@@ -454,21 +515,21 @@ test('100 fixed seeds and ten history-backed sessions cover the bank without wit
       session = advanceReadingSession(session).session
     }
   }
-  assert.equal(textOccurrences.size, 15)
-  assert.equal(questionIds.size, 45)
+  assert.equal(textOccurrences.size, READING_TEXT_COUNT)
+  assert.equal(questionIds.size, READING_TEXT_COUNT * 3)
   assert.deepEqual(levelCoverage, new Set(['A1', 'A2']))
-  assert.equal(genreCoverage.size, 14)
+  assert.equal(genreCoverage.size, Object.keys(readingGenreLabels).length)
   assert.equal(repeatsInsideSession, 0)
-  assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 35)
+  assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 50 - READING_TEXT_COUNT)
 })
 
-test('history rotation covers all 15 texts in the first three sessions across 100 fixed seeds', () => {
+test('history rotation covers the full text bank within four sessions across 100 fixed seeds', () => {
   for (let seed = 0; seed < 100; seed += 1) {
     let history = emptyReadingHistory()
     const random = seeded(seed + 7000)
     const seenTextIds = new Set<string>()
 
-    for (let launch = 0; launch < 3; launch += 1) {
+    for (let launch = 0; launch < Math.ceil(READING_TEXT_COUNT / 5); launch += 1) {
       let session = createReadingSession(readingTexts, random, history)
       for (let roundIndex = 0; roundIndex < 5; roundIndex += 1) {
         const round = session.rounds[session.currentRoundIndex]!

@@ -477,4 +477,17 @@ export const dialogueQuestions: DialogueQuestion[] = [
     ],
     correctOptionId: 'field', explanation: 'Сотрудник объяснил слово в анкете; теперь нужно уточнить, где вписать фамилию.',
   },
+  {
+    id: 'd-everyday-07', level: 'A1', categoryId: 'everyday-talk', situationId: 'kiosk-small-change', intentId: 'respond-to-change-request', replySpeaker: 'Πελάτης',
+    context: [
+      { speaker: 'Πελάτης', greek: 'Ένα πακέτο τσιγάρα, παρακαλώ. Έχω πέντε ευρώ.', translation: 'Пачку сигарет, пожалуйста. У меня есть пять евро.' },
+      { speaker: 'Περιπτεράς', greek: 'Το πακέτο κάνει δύο ευρώ. Δεν έχω ρέστα για πέντε ευρώ. Μήπως έχετε ψιλά;', translation: 'Пачка стоит 2 евро. У меня нет сдачи с 5 евро. У вас случайно есть мелочь?' },
+    ],
+    options: [
+      { id: 'two-euro-cash', greek: 'Ναι, έχω δύο ευρώ. Ορίστε.', translation: 'Да, у меня есть два евро. Вот, пожалуйста.', explanation: 'Покупатель отвечает, что у него есть нужная сумма, и предлагает её продавцу.' },
+      { id: 'change-reversed', greek: 'Ναι, ορίστε τα ρέστα σας.', translation: 'Да, вот ваша сдача.', explanation: 'Сдачу отдаёт продавец покупателю; здесь покупатель отвечает продавцу.' },
+      { id: 'repeat-price', greek: 'Πόσο κάνει το πακέτο;', translation: 'Сколько стоит пачка?', explanation: 'Продавец уже назвал цену; вопрос не отвечает, есть ли у покупателя мелочь.' },
+    ],
+    correctOptionId: 'two-euro-cash', explanation: 'Продавец спрашивает о мелочи, а покупатель отвечает, что у него есть 2 евро, и предлагает их.',
+  },
 ]

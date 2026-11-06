@@ -135,9 +135,10 @@ test('vocabulary and verb data have complete, unique references and forms', () =
   assert.deepEqual(verbs.find((verb) => verb.lemma === 'δίνω')?.forms.past, ['έδωσα', 'έδωσες', 'έδωσε', 'δώσαμε', 'δώσατε', 'έδωσαν'])
 })
 
-test('lesson vocabulary and theory through page 51 are registered', () => {
+test('lesson vocabulary and theory through page 55 are registered', () => {
   assert.deepEqual(validateTheoryTopics(), [])
   assert.ok(theoryTopics.some((topic) => topic.id === 'numbers-100-200'))
+  assert.ok(theoryTopics.some((topic) => topic.id === 'numbers-200-plus'))
 
   const word = (greek: string) => {
     const found = words.find((entry) => entry.greek === greek)
@@ -207,5 +208,98 @@ test('εισιτήριο has the correct Russian stress in its card and every ex
   for (const example of examples) {
     assert.ok(example.transliteration.includes('исити́рио'), `Incorrect ticket reading in: ${example.greek}`)
     assert.ok(!example.transliteration.includes('иситири́о'), `Old ticket stress remains in: ${example.greek}`)
+  }
+})
+
+test('new textbook vocabulary stays complete, uniquely keyed, and connected to spaced repetition', () => {
+  const expected = [
+    ['μαθαίνω', 'масэ́но'], ['αγοράζω', 'агора́зо'], ['πληρώνω', 'плиро́но'], ['σπουδάζω', 'спуза́зо'],
+    ['τσιγάρο', 'цига́ро'], ['πακέτο', 'пакэ́то'], ['τηλεκάρτα', 'тилэка́рта'], ['πανεπιστήμιο', 'панэписти́мио'],
+    ['ρέστα', 'рэ́ста'], ['ψιλά', 'псила́'], ['μπράβο', 'бра́во'], ['μετά', 'мэта́'],
+    ['περιπτεράς', 'пэриптэра́с'], ['καφετζής', 'кафэдзи́с'],
+    ['Θέλετε τίποτα άλλο;', 'сэ́лэтэ ти́пота а́ло?'], ['Πόσο κάνουν όλα;', 'по́со ка́нун о́ла?'],
+    ['Μήπως έχετε ψιλά;', 'ми́пос э́хэтэ псила́?'],
+    ['Πω, πω!', 'по, по!'], ['στάδιο', 'ста́зио'], ['μαθητής', 'масити́с'],
+    ['πιρούνι', 'пиру́ни'], ['σκύλος', 'ски́лос'],
+  ] as const
+  assert.equal(words.length, 385)
+  assert.equal(new Set(words.map((word) => word.greek)).size, words.length)
+  for (const [greek, transliteration] of expected) {
+    const word = words.find((item) => item.greek === greek)
+    assert.ok(word, greek)
+    assert.equal(word.transliteration, transliteration, greek)
+    assert.ok(word.russian.trim(), greek)
+    assert.ok(word.examples.length > 0, greek)
+    assert.ok(word.examples.every((example) => example.greek.trim() && example.transliteration.trim() && example.russian.trim()), greek)
+  }
+})
+
+test('three shop expressions have contextual examples rather than echoing their headwords', () => {
+  const expected = [
+    {
+      greek: 'Θέλετε τίποτα άλλο;',
+      example: 'Ο περιπτεράς δίνει το πακέτο τσιγάρα. Θέλετε τίποτα άλλο;',
+      transliteration: 'о пэриптэра́с зи́ни то пакэ́то цига́ра. сэ́лэтэ ти́пота а́ло?',
+      russian: 'Киоскёр передаёт пачку сигарет. Хотите что-нибудь ещё?',
+    },
+    {
+      greek: 'Πόσο κάνουν όλα;',
+      example: 'Αγοράζω ένα πακέτο τσιγάρα και μία τηλεκάρτα. Πόσο κάνουν όλα;',
+      transliteration: 'агора́зо э́на пакэ́то цига́ра кэ ми́а тилэка́рта. по́со ка́нун о́ла?',
+      russian: 'Я покупаю пачку сигарет и телефонную карту. Сколько всё вместе стоит?',
+    },
+    {
+      greek: 'Μήπως έχετε ψιλά;',
+      example: 'Ο περιπτεράς δεν έχει ρέστα. Μήπως έχετε ψιλά;',
+      transliteration: 'о пэриптэра́с зэн э́хи рэ́ста. ми́пос э́хэтэ псила́?',
+      russian: 'У киоскёра нет сдачи. У вас случайно есть мелочь?',
+    },
+  ]
+
+  for (const expectedExample of expected) {
+    const card = words.find((item) => item.greek === expectedExample.greek)
+    assert.ok(card, expectedExample.greek)
+    assert.equal(card.examples.length, 1, expectedExample.greek)
+    assert.notEqual(card.examples[0]!.greek, card.greek)
+    assert.deepEqual(card.examples[0], {
+      greek: expectedExample.example,
+      transliteration: expectedExample.transliteration,
+      russian: expectedExample.russian,
+    })
+  }
+})
+
+test('new textbook verbs match independently checked present, aorist, and future reference forms', () => {
+  const reference = [
+    {
+      lemma: 'αγοράζω',
+      present: ['αγοράζω', 'αγοράζεις', 'αγοράζει', 'αγοράζουμε', 'αγοράζετε', 'αγοράζουν'],
+      past: ['αγόρασα', 'αγόρασες', 'αγόρασε', 'αγοράσαμε', 'αγοράσατε', 'αγόρασαν'],
+      continuous: ['θα αγοράζω', 'θα αγοράζεις', 'θα αγοράζει', 'θα αγοράζουμε', 'θα αγοράζετε', 'θα αγοράζουν'],
+      simple: ['θα αγοράσω', 'θα αγοράσεις', 'θα αγοράσει', 'θα αγοράσουμε', 'θα αγοράσετε', 'θα αγοράσουν'],
+    },
+    {
+      lemma: 'πληρώνω',
+      present: ['πληρώνω', 'πληρώνεις', 'πληρώνει', 'πληρώνουμε', 'πληρώνετε', 'πληρώνουν'],
+      past: ['πλήρωσα', 'πλήρωσες', 'πλήρωσε', 'πληρώσαμε', 'πληρώσατε', 'πλήρωσαν'],
+      continuous: ['θα πληρώνω', 'θα πληρώνεις', 'θα πληρώνει', 'θα πληρώνουμε', 'θα πληρώνετε', 'θα πληρώνουν'],
+      simple: ['θα πληρώσω', 'θα πληρώσεις', 'θα πληρώσει', 'θα πληρώσουμε', 'θα πληρώσετε', 'θα πληρώσουν'],
+    },
+    {
+      lemma: 'σπουδάζω',
+      present: ['σπουδάζω', 'σπουδάζεις', 'σπουδάζει', 'σπουδάζουμε', 'σπουδάζετε', 'σπουδάζουν'],
+      past: ['σπούδασα', 'σπούδασες', 'σπούδασε', 'σπουδάσαμε', 'σπουδάσατε', 'σπούδασαν'],
+      continuous: ['θα σπουδάζω', 'θα σπουδάζεις', 'θα σπουδάζει', 'θα σπουδάζουμε', 'θα σπουδάζετε', 'θα σπουδάζουν'],
+      simple: ['θα σπουδάσω', 'θα σπουδάσεις', 'θα σπουδάσει', 'θα σπουδάσουμε', 'θα σπουδάσετε', 'θα σπουδάσουν'],
+    },
+  ]
+  for (const expected of reference) {
+    const verb = verbs.find((item) => item.lemma === expected.lemma)
+    assert.ok(verb, expected.lemma)
+    assert.deepEqual(verb.forms.present, expected.present)
+    assert.deepEqual(verb.forms.past, expected.past)
+    assert.deepEqual(verb.future.find((tense) => tense.aspect === 'continuous')?.forms, expected.continuous)
+    assert.deepEqual(verb.future.find((tense) => tense.aspect === 'simple')?.forms, expected.simple)
+    assert.equal(verb.pastLabel, 'Прошедшее (аорист)')
   }
 })
