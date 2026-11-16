@@ -300,6 +300,23 @@ test('noun-accusative fixed-only sessions complete and restart across 100 seeds 
   assert.deepEqual(seenQuestionIds, new Set(fixedQuestions.map((question) => question.id)))
 })
 
+test('noun-accusative fixed-only bank completes ten consecutive sessions through restart', () => {
+  let session = createFillGapSession('noun-accusative', trainerFillGapQuestions, seededRandom(6020), [])
+  for (let launch = 0; launch < 10; launch += 1) {
+    const questions = session.rounds.flatMap((round) => round.questions)
+    assert.equal(questions.length, FILL_GAP_SESSION_QUESTION_COUNT, `launch ${launch}`)
+    assert.ok(questions.every((question) => !question.checked && question.selectedOptionId === null), `launch ${launch}`)
+    for (let index = 0; index < FILL_GAP_SESSION_QUESTION_COUNT; index += 1) {
+      session = answerCurrent(session, true)
+    }
+    assert.equal(session.completed, true, `launch ${launch}`)
+    assert.deepEqual(getFillGapSessionResults(session).completedRounds, FILL_GAP_ROUND_COUNT)
+    if (launch < 9) {
+      session = restartFillGapSession(session, trainerFillGapQuestions, [], seededRandom(7020 + launch))
+    }
+  }
+})
+
 test('object pronouns only appear with a named Greek noun, and prices name euros or cents', () => {
   const objectForms = new Set(['Αυτό', 'Αυτά'])
   const agreementForms = FILL_GAP_PERSONAL_PRONOUNS.map((item) => item.word)
