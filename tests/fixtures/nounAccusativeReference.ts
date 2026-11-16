@@ -51,6 +51,11 @@ export const NOUN_CASE_FORM_REFERENCE = {
   Μαρία: { nominative: 'η Μαρία', accusative: 'τη Μαρία', genitive: 'της Μαρίας' },
 } as const
 
+/** Additional normative form recorded independently of the trainer question bank. */
+export const NOUN_CASE_ACCEPTED_VARIANT_REFERENCE = [
+  { headword: 'πουκάμισο', form: 'του πουκάμισου', case: 'genitive' },
+] as const
+
 export interface NounAccusativeQuestionReference {
   id: string
   sentence: string
@@ -67,7 +72,7 @@ export const NOUN_ACCUSATIVE_QUESTION_REFERENCE: readonly NounAccusativeQuestion
   { id: 'acc-see-friend-feminine-i', sentence: 'Βλέπω τη φίλη.', hint: 'Я вижу подругу.', role: 'object', choices: [{ text: 'η', case: 'nominative' }, { text: 'τη', case: 'accusative' }, { text: 'της', case: 'genitive' }] },
   { id: 'acc-wait-sister-feminine-vowel', sentence: 'Η Ελένη περιμένει την αδελφή.', hint: 'Элени ждёт сестру.', role: 'object', choices: [{ text: 'τη αδελφή', case: 'invalid' }, { text: 'την αδελφή', case: 'accusative' }, { text: 'της αδελφής', case: 'genitive' }] },
   { id: 'acc-read-newspaper-feminine-vowel', sentence: 'Διαβάζω την εφημερίδα κάθε πρωί.', hint: 'Я читаю газету каждое утро.', role: 'object', choices: [{ text: 'τη εφημερίδα', case: 'invalid' }, { text: 'την εφημερίδα', case: 'accusative' }, { text: 'της εφημερίδας', case: 'genitive' }] },
-  { id: 'acc-buy-shirt-neuter-o', sentence: 'Αγοράζω το πουκάμισο.', hint: 'Я покупаю рубашку.', role: 'object', choices: [{ text: 'το πουκάμισο', case: 'accusative' }, { text: 'τον πουκάμισο', case: 'invalid' }, { text: 'του πουκάμισου', case: 'invalid' }] },
+  { id: 'acc-buy-shirt-neuter-o', sentence: 'Αγοράζω το πουκάμισο.', hint: 'Я покупаю рубашку.', role: 'object', choices: [{ text: 'το πουκάμισο', case: 'accusative' }, { text: 'τον πουκάμισο', case: 'invalid' }, { text: 'του πουκάμισου', case: 'genitive' }] },
   { id: 'acc-see-dog-masculine-os', sentence: 'Το αγόρι βλέπει τον σκύλο.', hint: 'Мальчик видит собаку.', role: 'object', choices: [{ text: 'ο σκύλος', case: 'nominative' }, { text: 'τον σκύλο', case: 'accusative' }, { text: 'του σκύλου', case: 'genitive' }] },
   { id: 'acc-read-book-neuter-i', sentence: 'Ο φίλος διαβάζει το βιβλίο.', hint: 'Друг читает книгу.', role: 'object', choices: [{ text: 'το βιβλίο', case: 'accusative' }, { text: 'τον βιβλίο', case: 'invalid' }, { text: 'του βιβλίου', case: 'genitive' }] },
   { id: 'acc-see-teacher-masculine-os', sentence: 'Η μαθήτρια βλέπει τον δάσκαλο.', hint: 'Ученица видит учителя.', role: 'object', choices: [{ text: 'ο δάσκαλος', case: 'nominative' }, { text: 'τον δάσκαλο', case: 'accusative' }, { text: 'του δασκάλου', case: 'genitive' }] },

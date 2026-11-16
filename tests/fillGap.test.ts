@@ -37,6 +37,7 @@ import {
   FILL_GAP_PRONOUN_REFERENCE_CONTEXTS,
 } from '../src/data/trainers/generation/fillGapContent.ts'
 import {
+  NOUN_CASE_ACCEPTED_VARIANT_REFERENCE,
   NOUN_ACCUSATIVE_QUESTION_REFERENCE,
   NOUN_CASE_FORM_REFERENCE,
 } from './fixtures/nounAccusativeReference.ts'
@@ -253,6 +254,7 @@ test('noun-accusative fixed bank matches independent case forms and has one cont
   }
   const fullForms = Object.values(NOUN_CASE_FORM_REFERENCE).flatMap((forms) =>
     Object.entries(forms).map(([formCase, form]) => [form, formCase] as const))
+  fullForms.push(...NOUN_CASE_ACCEPTED_VARIANT_REFERENCE.map(({ form, case: formCase }) => [form, formCase] as const))
 
   for (const reference of NOUN_ACCUSATIVE_QUESTION_REFERENCE) {
     const question = bank.find((item) => item.id === reference.id)!
@@ -274,6 +276,10 @@ test('noun-accusative fixed bank matches independent case forms and has one cont
       question.options.find((option) => option.id === question.correctOptionId)?.text, question.id)
     assertOneAnswer(question)
   }
+
+  const shirtReference = NOUN_ACCUSATIVE_QUESTION_REFERENCE.find((item) => item.id === 'acc-buy-shirt-neuter-o')!
+  assert.equal(shirtReference.choices.find((choice) => choice.text === 'του πουκάμισου')?.case, 'genitive')
+  assert.equal(NOUN_CASE_ACCEPTED_VARIANT_REFERENCE.find((item) => item.form === 'του πουκάμισου')?.case, 'genitive')
 })
 
 test('noun-accusative fixed-only sessions complete and restart across 100 seeds and ten sequential launches', () => {

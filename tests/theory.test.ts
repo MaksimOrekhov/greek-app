@@ -240,6 +240,35 @@ test('registered topic content exists and both Markdown files render successfull
   }
 })
 
+test('present tense Markdown links resolve through hash routes and preserve external references', async () => {
+  const topic = getTheoryTopic('present-tense-verbs')!
+  const source = await readFile(resolve('src/data/theory', topic.explanation), 'utf8')
+  const html = renderTheoryMarkdown(source, 'explanation')
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [...theoryRoutes, { path: '/verbs', name: 'verbs', component: { template: '<div />' } }],
+  })
+  const links = [
+    { href: '#/verbs', path: '/verbs', name: 'verbs' },
+    { href: '#/theory/noun-cases', path: '/theory/noun-cases', name: 'theory-topic' },
+    { href: '#/theory/definite-article', path: '/theory/definite-article', name: 'theory-topic' },
+  ]
+
+  for (const link of links) {
+    assert.ok(html.includes(`href="${link.href}"`), `missing rendered href ${link.href}`)
+    assert.equal(router.resolve(link.path).name, link.name, `unresolved app route ${link.path}`)
+    const pageUrl = new URL('/greek-app/#/theory/present-tense-verbs', 'https://example.test')
+    const targetUrl = new URL(link.href, pageUrl)
+    assert.equal(targetUrl.pathname, '/greek-app/')
+    assert.equal(targetUrl.hash, `#${link.path}`)
+    assert.equal(router.resolve(targetUrl.hash.slice(1)).name, link.name)
+  }
+
+  assert.doesNotMatch(html, /href="\/(?:verbs|theory\/)/)
+  assert.match(html, /href="https:\/\/ebooks\.edu\.gr\/ebooks\/v\/html\/[^\"]*index_C_06\.html"/)
+  assert.match(html, /href="https:\/\/www\.greek-language\.gr\/greekLang\/modern_greek\/tools\/lexica\/triantafyllides\/search\.html\?lq=/)
+})
+
 test('neuter noun declension topic is registered, searchable, linked, and contains checked paradigms', async () => {
   const neuter = getTheoryTopic('noun-neuter')!
   assert.equal(neuter.title, 'Склонение существительных среднего рода')

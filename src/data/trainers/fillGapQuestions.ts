@@ -342,7 +342,7 @@ export const trainerFillGapQuestions: FillGapQuestion[] = [
   fixedQuestion('acc-buy-shirt-neuter-o', 'noun-accusative', {
     instruction, sentenceBefore: 'Αγοράζω ', sentenceAfter: '.', hint: 'Я покупаю рубашку.',
     choices: ['το πουκάμισο', 'τον πουκάμισο', 'του πουκάμισου'], correct: 'το πουκάμισο',
-    explanation: 'Полное предложение: Αγοράζω το πουκάμισο. В винительном среднего рода форма совпадает с именительным. В родительном нормативно του πουκαμίσου, а вариант из списка с другим ударением неверен.',
+    explanation: 'Полное предложение: Αγοράζω το πουκάμισο. Рубашка здесь — то, что покупают, поэтому нужна форма винительного падежа το πουκάμισο. Του πουκάμισου — нормативная форма родительного падежа, но в этом предложении она не подходит.',
   }),
   fixedQuestion('acc-see-dog-masculine-os', 'noun-accusative', {
     instruction, sentenceBefore: 'Το αγόρι βλέπει ', sentenceAfter: '.', hint: 'Мальчик видит собаку.',
