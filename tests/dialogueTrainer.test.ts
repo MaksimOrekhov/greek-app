@@ -450,7 +450,7 @@ test('rendered panel names the reply speaker before answering and reveals every 
   const before = await renderToString(createSSRApp(component, props))
   assert.ok(before.includes('Μαρία'))
   assert.ok(!before.includes('У меня встреча на улице Афинас, 12. На карте в задании маршрут № 3 показан на улице Кипру, а не на улице Афинас.'))
-  assert.ok(!before.includes('Не знаю. Давай посмотрим расписание вместе.'))
+  assert.ok(!before.includes('Да, лучше нам посмотреть другой маршрут до улицы Афинас.'))
   assert.ok(!before.includes('Переводы и разбор'))
   for (const option of item.question.options) assert.ok(!before.includes(option.translation))
   item.checked = true
