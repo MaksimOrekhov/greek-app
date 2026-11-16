@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { approximateReading } from '../src/data/approximateReading.ts'
 import { validateVocabularyData, words } from '../src/data/words.ts'
 import { validateVerbData, verbs } from '../src/data/verbs.ts'
@@ -232,7 +233,7 @@ test('εισιτήριο has the correct Russian stress in its card and every ex
   }
 })
 
-test('new textbook vocabulary stays complete, uniquely keyed, and connected to spaced repetition', () => {
+test('vocabulary additions preserve the original keys and make every new card usable', () => {
   const expected = [
     ['μαθαίνω', 'масэ́но'], ['αγοράζω', 'агора́зо'], ['πληρώνω', 'плиро́но'], ['σπουδάζω', 'спуза́зо'],
     ['τσιγάρο', 'цига́ро'], ['πακέτο', 'пакэ́то'], ['τηλεκάρτα', 'тилэка́рта'], ['πανεπιστήμιο', 'панэписти́мио'],
@@ -243,8 +244,31 @@ test('new textbook vocabulary stays complete, uniquely keyed, and connected to s
     ['Πω, πω!', 'по, по!'], ['στάδιο', 'ста́зио'], ['μαθητής', 'масити́с'],
     ['πιρούνι', 'пиру́ни'], ['σκύλος', 'ски́лос'],
   ] as const
-  assert.equal(words.length, 385)
+  const addedKeys = [
+    'αρχιτέκτονας', 'ηθοποιός', 'ωραίος', 'άσπρος', 'πουκάμισο', 'κάθε', 'πρωί', 'βλέπω', 'πίνω', 'Θεέ μου!',
+    'γράφω', 'τηλεόραση', 'εφημερίδα', 'άσκηση', 'τι', 'ζάχαρη', 'ήλιος', 'ρωτάω', 'ύπνος', 'χρώμα', 'χωρίς',
+    'κρεμμύδι', 'δάσκαλος', 'ψάρι', 'τυρί', 'μουστάκι', 'μωρό', 'καναρίνι', 'πλοίο', 'εκκλησία', 'σχολείο',
+    'Λονδίνο', 'νομίζω', 'αντίο', 'μισός', 'βιβλιοθήκη', 'τάξη', 'κλειστός', 'διδάσκω', 'ισπανικά', 'μπλούζα',
+    'Μαδρίτη', 'παστίτσιο', 'νύχτα', 'παππούς', 'Γερμανός', 'Ισπανός', 'Άγγλος', 'Ρώσος', 'Αλβανός', 'πάρκο',
+    'κρέμα', 'αλφάβητο', 'φόρεμα', 'Τρίτη', 'αγόρι', 'δασκάλα', 'Γερμανίδα', 'Ισπανίδα', 'Αγγλίδα', 'Ρωσίδα',
+    'Αλβανίδα', 'μαθήτρια',
+  ]
+  assert.equal(addedKeys.length, 63)
+  assert.equal(new Set(addedKeys).size, addedKeys.length)
+  assert.equal(words.length, 448)
   assert.equal(new Set(words.map((word) => word.greek)).size, words.length)
+  const originalKeys = words.filter((word) => !addedKeys.includes(word.greek)).map((word) => word.greek).sort()
+  assert.equal(originalKeys.length, 385)
+  assert.equal(createHash('sha256').update(originalKeys.join('\n')).digest('hex'), 'a3895d0de5095be4242c811145798616d6ee35e592d1a6da20d9866c9f3a14a1')
+  for (const greek of addedKeys) {
+    const word = words.find((item) => item.greek === greek)
+    assert.ok(word, greek)
+    assert.ok(word.russian.trim(), greek)
+    assert.ok(word.transliteration.trim(), greek)
+    assert.ok(word.partOfSpeech.length > 0, greek)
+    assert.ok(word.examples.length > 0, greek)
+    assert.ok(word.examples.every((example) => example.greek.trim() && example.transliteration.trim() && example.russian.trim()), greek)
+  }
   for (const [greek, transliteration] of expected) {
     const word = words.find((item) => item.greek === greek)
     assert.ok(word, greek)
@@ -252,6 +276,127 @@ test('new textbook vocabulary stays complete, uniquely keyed, and connected to s
     assert.ok(word.russian.trim(), greek)
     assert.ok(word.examples.length > 0, greek)
     assert.ok(word.examples.every((example) => example.greek.trim() && example.transliteration.trim() && example.russian.trim()), greek)
+  }
+})
+
+test('new vocabulary readings use reviewed forms in cards and example phrases', () => {
+  const expected = [
+    ['αρχιτέκτονας', 'архитэ́ктонас'], ['ηθοποιός', 'исопио́с'], ['Θεέ μου!', 'сэ-э́ му!'],
+    ['παστίτσιο', 'пасти́цио'],
+  ] as const
+  for (const [greek, reading] of expected) {
+    const word = words.find((entry) => entry.greek === greek)
+    assert.ok(word, greek)
+    assert.equal(word.transliteration, reading, greek)
+  }
+  assert.deepEqual(words.find((entry) => entry.greek === 'αρχιτέκτονας')?.russian, 'архитектор')
+  assert.equal(words.find((entry) => entry.greek === 'ηθοποιός')?.russian, 'актёр / актриса (форма одинакова)')
+})
+
+test('the 17 revised examples use distinct everyday contexts and checked readings', () => {
+  const expected = [
+    ['αρχιτέκτονας', 'Ο φίλος μου είναι αρχιτέκτονας.', 'о фи́лос му и́нэ архитэ́ктонас', 'Мой друг — архитектор.'],
+    ['δάσκαλος', 'Ο δάσκαλος έχει πολλούς μαθητές.', 'о за́скалос э́хи полу́с маситэ́с', 'У учителя много учеников.'],
+    ['μωρό', 'Το μωρό κοιμάται.', 'то моро́ кима́тэ', 'Малыш спит.'],
+    ['σχολείο', 'Μαθαίνουμε στο σχολείο.', 'масэ́нумэ сто схоли́о', 'Мы учимся в школе.'],
+    ['βιβλιοθήκη', 'Διαβάζω στη βιβλιοθήκη.', 'зява́зо сти вивлиоси́ки', 'Я читаю в библиотеке.'],
+    ['παππούς', 'Ο παππούς μου διαβάζει την εφημερίδα.', 'о папу́с му зява́зи тин эфимэри́за', 'Мой дедушка читает газету.'],
+    ['Γερμανός', 'Ο Γερμανός μιλάει αγγλικά.', 'о йэрмано́с мила́и англика́', 'Немец говорит по-английски.'],
+    ['Ισπανός', 'Ο Ισπανός μιλάει ελληνικά.', 'о испано́с мила́и элиника́', 'Испанец говорит по-гречески.'],
+    ['Άγγλος', 'Ο Άγγλος θέλει καφέ.', 'о а́нглос сэ́ли кафэ́', 'Англичанин хочет кофе.'],
+    ['Ρώσος', 'Ο Ρώσος αγοράζει ψωμί.', 'о ро́сос агора́зи псоми́', 'Русский покупает хлеб.'],
+    ['Αλβανός', 'Ο Αλβανός μένει στην Ελλάδα.', 'о алвано́с мэ́ни стин эла́за', 'Албанец живёт в Греции.'],
+    ['αγόρι', 'Το αγόρι παίζει με τον σκύλο.', 'то аго́ри пэ́зи мэ тон ски́ло', 'Мальчик играет с собакой.'],
+    ['Γερμανίδα', 'Η Γερμανίδα είναι φίλη μου.', 'и йэрмани́за и́нэ фи́ли му', 'Немка — моя подруга.'],
+    ['Ισπανίδα', 'Η Ισπανίδα μαθαίνει ελληνικά.', 'и испани́за масэ́ни элиника́', 'Испанка учит греческий.'],
+    ['Αγγλίδα', 'Η Αγγλίδα αγοράζει ένα βιβλίο.', 'и англи́за агора́зи э́на вивли́о', 'Англичанка покупает книгу.'],
+    ['Ρωσίδα', 'Η Ρωσίδα θέλει καφέ.', 'и роси́за сэ́ли кафэ́', 'Русская хочет кофе.'],
+    ['Αλβανίδα', 'Η Αλβανίδα πίνει νερό.', 'и алвани́за пи́ни нэро́', 'Албанка пьёт воду.'],
+  ] as const
+  assert.equal(expected.length, 17)
+  for (const [greek, phrase, reading, russian] of expected) {
+    const example = words.find((entry) => entry.greek === greek)?.examples[0]
+    assert.ok(example, greek)
+    assert.deepEqual([example.greek, example.transliteration, example.russian], [phrase, reading, russian], greek)
+  }
+  const addedKeys = new Set([
+    'αρχιτέκτονας', 'ηθοποιός', 'ωραίος', 'άσπρος', 'πουκάμισο', 'κάθε', 'πρωί', 'βλέπω', 'πίνω', 'Θεέ μου!',
+    'γράφω', 'τηλεόραση', 'εφημερίδα', 'άσκηση', 'τι', 'ζάχαρη', 'ήλιος', 'ρωτάω', 'ύπνος', 'χρώμα', 'χωρίς',
+    'κρεμμύδι', 'δάσκαλος', 'ψάρι', 'τυρί', 'μουστάκι', 'μωρό', 'καναρίνι', 'πλοίο', 'εκκλησία', 'σχολείο',
+    'Λονδίνο', 'νομίζω', 'αντίο', 'μισός', 'βιβλιοθήκη', 'τάξη', 'κλειστός', 'διδάσκω', 'ισπανικά', 'μπλούζα',
+    'Μαδρίτη', 'παστίτσιο', 'νύχτα', 'παππούς', 'Γερμανός', 'Ισπανός', 'Άγγλος', 'Ρώσος', 'Αλβανός', 'πάρκο',
+    'κρέμα', 'αλφάβητο', 'φόρεμα', 'Τρίτη', 'αγόρι', 'δασκάλα', 'Γερμανίδα', 'Ισπανίδα', 'Αγγλίδα', 'Ρωσίδα',
+    'Αλβανίδα', 'μαθήτρια',
+  ])
+  assert.equal([...addedKeys].length, 63)
+  assert.ok(words.filter((entry) => addedKeys.has(entry.greek)).every((entry) => entry.examples.every((example) => !example.greek.includes('είναι εδώ'))))
+})
+
+test('corrected κρέμα, ύπνος, μισός and παστίτσιο entries match their contexts', () => {
+  const cream = words.find((entry) => entry.greek === 'κρέμα')
+  assert.ok(cream)
+  assert.equal(cream.russian, 'крем (например, для кожи); также кремовый десерт')
+  assert.equal(cream.category, 'Покупки')
+  assert.deepEqual(cream.examples[0], {
+    greek: 'Αγοράζω σαμπουάν και κρέμα.',
+    transliteration: 'агора́зо самбуа́н кэ крэ́ма',
+    russian: 'Я покупаю шампунь и крем.',
+  })
+
+  const sleep = words.find((entry) => entry.greek === 'ύπνος')
+  assert.ok(sleep)
+  assert.deepEqual(sleep.examples[0], { greek: 'Ώρα για ύπνο.', transliteration: 'о́ра я и́пно', russian: 'Пора спать.' })
+
+  const half = words.find((entry) => entry.greek === 'μισός')
+  assert.ok(half)
+  assert.equal(half.russian, 'половина; половинный: μισός (м. р.), μισή (ж. р.), μισό (ср. р.)')
+  assert.equal(half.examples[0].greek, 'Είναι δύο και μισή.')
+  assert.equal(half.examples[0].russian, 'Сейчас половина третьего.')
+
+  const pastitsio = words.find((entry) => entry.greek === 'παστίτσιο')
+  assert.ok(pastitsio)
+  assert.equal(pastitsio.examples[0].russian, 'Пастицио — вкусное блюдо.')
+})
+
+test('the three added verb paradigms match independently checked forms and keep the prior 30', () => {
+  const originalLemmas = [
+    'μένω', 'ξέρω', 'θέλω', 'αρέσω', 'αργώ', 'κάνω', 'περιμένω', 'καταλαβαίνω', 'έχω', 'δουλεύω',
+    'είμαι', 'ευχαριστώ', 'παρακαλώ', 'πηγαίνω', 'έρχομαι', 'τρώω', 'πίνω', 'μιλάω', 'βλέπω', 'λέω',
+    'παίρνω', 'δίνω', 'γράφω', 'διαβάζω', 'μαθαίνω', 'μπορώ', 'παίζω', 'αγοράζω', 'πληρώνω', 'σπουδάζω',
+  ]
+  assert.equal(verbs.length, 33)
+  for (const lemma of originalLemmas) assert.ok(verbs.some((verb) => verb.lemma === lemma), lemma)
+  const expected = [
+    {
+      lemma: 'ρωτάω',
+      present: ['ρωτάω', 'ρωτάς', 'ρωτά', 'ρωτάμε', 'ρωτάτε', 'ρωτάνε'],
+      past: ['ρώτησα', 'ρώτησες', 'ρώτησε', 'ρωτήσαμε', 'ρωτήσατε', 'ρώτησαν'],
+      continuous: ['θα ρωτάω', 'θα ρωτάς', 'θα ρωτά', 'θα ρωτάμε', 'θα ρωτάτε', 'θα ρωτάνε'],
+      simple: ['θα ρωτήσω', 'θα ρωτήσεις', 'θα ρωτήσει', 'θα ρωτήσουμε', 'θα ρωτήσετε', 'θα ρωτήσουν'],
+    },
+    {
+      lemma: 'νομίζω',
+      present: ['νομίζω', 'νομίζεις', 'νομίζει', 'νομίζουμε', 'νομίζετε', 'νομίζουν'],
+      past: ['νόμισα', 'νόμισες', 'νόμισε', 'νομίσαμε', 'νομίσατε', 'νόμισαν'],
+      continuous: ['θα νομίζω', 'θα νομίζεις', 'θα νομίζει', 'θα νομίζουμε', 'θα νομίζετε', 'θα νομίζουν'],
+      simple: ['θα νομίσω', 'θα νομίσεις', 'θα νομίσει', 'θα νομίσουμε', 'θα νομίσετε', 'θα νομίσουν'],
+    },
+    {
+      lemma: 'διδάσκω',
+      present: ['διδάσκω', 'διδάσκεις', 'διδάσκει', 'διδάσκουμε', 'διδάσκετε', 'διδάσκουν'],
+      past: ['δίδαξα', 'δίδαξες', 'δίδαξε', 'διδάξαμε', 'διδάξατε', 'δίδαξαν'],
+      continuous: ['θα διδάσκω', 'θα διδάσκεις', 'θα διδάσκει', 'θα διδάσκουμε', 'θα διδάσκετε', 'θα διδάσκουν'],
+      simple: ['θα διδάξω', 'θα διδάξεις', 'θα διδάξει', 'θα διδάξουμε', 'θα διδάξετε', 'θα διδάξουν'],
+    },
+  ] as const
+  for (const reference of expected) {
+    const verb = verbs.find((entry) => entry.lemma === reference.lemma)
+    assert.ok(verb, reference.lemma)
+    assert.deepEqual(verb.forms.present, reference.present, reference.lemma)
+    assert.deepEqual(verb.forms.past, reference.past, reference.lemma)
+    assert.deepEqual(verb.future.find((tense) => tense.aspect === 'continuous')?.forms, reference.continuous, reference.lemma)
+    assert.deepEqual(verb.future.find((tense) => tense.aspect === 'simple')?.forms, reference.simple, reference.lemma)
+    assert.equal(verbs.filter((entry) => entry.lemma === reference.lemma).length, 1, reference.lemma)
   }
 })
 
