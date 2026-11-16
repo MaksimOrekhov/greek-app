@@ -51,6 +51,10 @@ class MemoryStorage implements ReadingHistoryStorage {
 
 test('T7 bank matches its reviewed counts and keeps evidence inside each passage', () => {
   assert.equal(readingTexts.length, READING_TEXT_COUNT)
+  assert.equal(READING_TEXT_COUNT, 19)
+  assert.equal(readingTexts.filter((text) => text.level === 'A1').length, 10)
+  assert.equal(readingTexts.filter((text) => text.level === 'A2').length, 9)
+  assert.equal(readingTexts.flatMap((text) => text.questions).length, 57)
   assert.ok(readingTexts.filter((text) => text.level === 'A1').length >= 8)
   assert.ok(readingTexts.filter((text) => text.level === 'A2').length >= 9)
   assert.equal(new Set(readingTexts.map((text) => text.id)).size, READING_TEXT_COUNT)
@@ -83,6 +87,52 @@ test('T7 bank matches its reviewed counts and keeps evidence inside each passage
       questionSignatures.add(questionSignature)
     }
   }
+})
+
+test('P59/W28.2 T7 questions have independent factual keys, text evidence, and non-leaking options', () => {
+  const studyDay = readingTexts.find((item) => item.id === 'r-a1-maria-study-day')!
+  assert.equal(studyDay.level, 'A1')
+  assert.equal(studyDay.greek, 'Η Μαρία είναι φοιτήτρια και μένει κοντά στο πανεπιστήμιο. Κάθε πρωί πίνει καφέ και διαβάζει την εφημερίδα. Μετά πηγαίνει στο μάθημα. Το απόγευμα αγοράζει ένα βιβλίο και μαθαίνει ελληνικά στο σπίτι.')
+  assert.equal(studyDay.translationRu, 'Мария — студентка и живёт недалеко от университета. Каждое утро она пьёт кофе и читает газету. Потом она идёт на занятие. После полудня она покупает книгу и учит греческий дома.')
+
+  const shopNotice = readingTexts.find((item) => item.id === 'r-a1-shirt-shop-notice')!
+  assert.equal(shopNotice.level, 'A1')
+  assert.match(shopNotice.contextNoteRu!, /Вымышленное учебное объявление/)
+  assert.equal(shopNotice.greek, 'Το κατάστημα έχει πουκάμισα και φορέματα. Το άσπρο πουκάμισο κάνει είκοσι πέντε ευρώ και το μπλε πουκάμισο κάνει τριάντα ευρώ. Τα φορέματα κάνουν σαράντα ευρώ. Το κατάστημα είναι ανοιχτό από Δευτέρα ως Παρασκευή, από τις εννέα το πρωί ως τις έξι το απόγευμα. Το Σάββατο είναι ανοιχτό ως τις δύο.')
+  assert.equal(shopNotice.translationRu, 'В магазине есть рубашки и платья. Белая рубашка стоит 25 евро, а синяя — 30 евро. Платья стоят 40 евро. Магазин открыт с понедельника по пятницу с девяти утра до шести вечера. В субботу он открыт до двух.')
+
+  const expected = [
+    { id: 'r-a1-maria-study-day-q1', text: studyDay, prompt: 'Где Мария живёт?', answer: 'Недалеко от университета.', evidence: 'μένει κοντά στο πανεπιστήμιο', distractors: ['Недалеко от вокзала.', 'Далеко от школы.'] },
+    { id: 'r-a1-maria-study-day-q2', text: studyDay, prompt: 'Что Мария читает каждое утро?', answer: 'Газету.', evidence: 'Κάθε πρωί πίνει καφέ και διαβάζει την εφημερίδα.', distractors: ['Книгу.', 'Сообщение другу.'] },
+    { id: 'r-a1-maria-study-day-q3', text: studyDay, prompt: 'Что Мария делает дома после полудня?', answer: 'Учит греческий.', evidence: 'μαθαίνει ελληνικά στο σπίτι', distractors: ['Готовит ужин.', 'Смотрит телевизор.'] },
+    { id: 'r-a1-shirt-shop-notice-q1', text: shopNotice, prompt: 'Сколько стоит белая рубашка?', answer: '25 евро.', evidence: 'Το άσπρο πουκάμισο κάνει είκοσι πέντε ευρώ', distractors: ['30 евро.', '40 евро.'] },
+    { id: 'r-a1-shirt-shop-notice-q2', text: shopNotice, prompt: 'Какая одежда есть в магазине?', answer: 'Рубашки и платья.', evidence: 'Το κατάστημα έχει πουκάμισα και φορέματα.', distractors: ['Рубашки и обувь.', 'Платья и сумки.'] },
+    { id: 'r-a1-shirt-shop-notice-q3', text: shopNotice, prompt: 'До которого часа магазин открыт в субботу?', answer: 'До двух часов.', evidence: 'Το Σάββατο είναι ανοιχτό ως τις δύο.', distractors: ['До шести часов.', 'До девяти часов.'] },
+  ]
+
+  const selectedFacts = new Set<string>()
+  for (const item of expected) {
+    const question = item.text.questions.find((entry) => entry.id === item.id)!
+    assert.equal(question.promptRu, item.prompt, item.id)
+    assert.ok(question.evidenceEl.some((fragment) => fragment.includes(item.evidence)), item.id)
+    assert.ok(item.text.greek.includes(item.evidence), item.id)
+    const correct = question.options.find((option) => option.id === question.correctOptionId)!
+    assert.equal(correct.textRu, item.answer, item.id)
+    assert.match(correct.feedbackRu, /прям|указан|указывает|сказан|назван|говорит|называет/i, item.id)
+    const distractors = question.options.filter((option) => option.id !== question.correctOptionId)
+    assert.deepEqual(distractors.map((option) => option.textRu), item.distractors, item.id)
+    assert.ok(distractors.every((option) => option.feedbackRu.trim()), item.id)
+    assert.ok(!selectedFacts.has(item.answer), `duplicate answer text: ${item.id}`)
+    selectedFacts.add(item.answer)
+  }
+
+  const mariaQuestions = studyDay.questions
+  assert.doesNotMatch(mariaQuestions[0]!.promptRu + mariaQuestions[0]!.options.map((option) => option.textRu).join(' '), /газет|книг|греческ/i)
+  assert.doesNotMatch(mariaQuestions[1]!.promptRu + mariaQuestions[1]!.options.map((option) => option.textRu).join(' '), /университет|вокзал|школ/i)
+  assert.doesNotMatch(mariaQuestions[2]!.promptRu + mariaQuestions[2]!.options.map((option) => option.textRu).join(' '), /университет|вокзал|школ|газет/i)
+  assert.doesNotMatch(shopNotice.questions[0]!.promptRu + shopNotice.questions[0]!.options.map((option) => option.textRu).join(' '), /суббот|ассортимент|обув|сумк/i)
+  assert.doesNotMatch(shopNotice.questions[1]!.promptRu + shopNotice.questions[1]!.options.map((option) => option.textRu).join(' '), /25|30|40|евро|суббот|час/i)
+  assert.doesNotMatch(shopNotice.questions[2]!.promptRu + shopNotice.questions[2]!.options.map((option) => option.textRu).join(' '), /рубаш|плать|обув|сумк/i)
 })
 
 test('T7.1 targeted content corrections keep questions independent and evidence aligned', () => {
@@ -206,7 +256,7 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
     'cause-effect': 9,
     purpose: 4,
     sequence: 3,
-    'specific-information': 35,
+    'specific-information': 41,
   })
 })
 
@@ -523,13 +573,13 @@ test('100 fixed seeds and ten history-backed sessions cover the bank without wit
   assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 50 - READING_TEXT_COUNT)
 })
 
-test('history rotation covers the full text bank within four sessions across 100 fixed seeds', () => {
+test('history rotation covers the full text bank within five sessions across 100 fixed seeds', () => {
   for (let seed = 0; seed < 100; seed += 1) {
     let history = emptyReadingHistory()
     const random = seeded(seed + 7000)
     const seenTextIds = new Set<string>()
 
-    for (let launch = 0; launch < Math.ceil(READING_TEXT_COUNT / 5); launch += 1) {
+    for (let launch = 0; launch < 5; launch += 1) {
       let session = createReadingSession(readingTexts, random, history)
       for (let roundIndex = 0; roundIndex < 5; roundIndex += 1) {
         const round = session.rounds[session.currentRoundIndex]!
@@ -543,7 +593,7 @@ test('history rotation covers the full text bank within four sessions across 100
       }
     }
 
-    assert.equal(seenTextIds.size, READING_TEXT_COUNT, `Seed ${seed} did not cover every text in three sessions`)
+    assert.equal(seenTextIds.size, READING_TEXT_COUNT, `Seed ${seed} did not cover every text in five sessions`)
   }
 })
 
@@ -617,4 +667,38 @@ test('the T7 route and UI keep both answers together and hide the translation un
   const passageIndex = timetableBeforeCheck.indexOf(timetable.greek)
   assert.ok(noteIndex >= 0 && noteIndex < passageIndex)
   assert.ok(!timetableBeforeCheck.includes(timetable.translationRu))
+
+  const shop = readingTexts.find((item) => item.id === 'r-a1-shirt-shop-notice')!
+  const shopRound = {
+    number: 1,
+    text: shop,
+    questions: shop.questions.slice(0, 2).map((question) => ({
+      question,
+      optionOrder: question.options.map((option) => option.id),
+      selectedOptionId: null,
+      checked: false,
+      isCorrect: null,
+    })),
+    checked: false,
+    completed: false,
+  }
+  const shopBeforeCheck = await renderToString(createSSRApp(component, { round: shopRound, totalRounds: 5 }))
+  assert.ok(shopBeforeCheck.includes(shop.greek))
+  assert.ok(shopBeforeCheck.includes(shop.contextNoteRu!))
+  assert.ok(!shopBeforeCheck.includes(shop.translationRu))
+  for (const item of shopRound.questions) {
+    assert.ok(!shopBeforeCheck.includes(item.question.explanationRu))
+  }
+  shopRound.questions.forEach((item) => {
+    item.selectedOptionId = item.question.correctOptionId
+    item.checked = true
+    item.isCorrect = true
+  })
+  shopRound.checked = true
+  const shopAfterCheck = await renderToString(createSSRApp(component, { round: shopRound, totalRounds: 5 }))
+  assert.ok(shopAfterCheck.includes(shop.translationRu))
+  for (const item of shopRound.questions) {
+    assert.ok(shopAfterCheck.includes(item.question.explanationRu))
+    for (const evidence of item.question.evidenceEl) assert.ok(shopAfterCheck.includes(evidence))
+  }
 })

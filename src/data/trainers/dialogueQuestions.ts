@@ -490,4 +490,54 @@ export const dialogueQuestions: DialogueQuestion[] = [
     ],
     correctOptionId: 'two-euro-cash', explanation: 'Продавец спрашивает о мелочи, а покупатель отвечает, что у него есть 2 евро, и предлагает их.',
   },
+  {
+    id: 'd-self-07', level: 'A1', categoryId: 'about-yourself', situationId: 'identify-man-by-shirt', intentId: 'identify-person-from-description', replySpeaker: 'Μαρία',
+    context: [
+      { speaker: 'Μαρία', greek: 'Βλέπεις τον άντρα με το άσπρο πουκάμισο;', translation: 'Видишь мужчину в белой рубашке?' },
+      { speaker: 'Ελένη', greek: 'Ναι. Ποιος είναι;', translation: 'Да. Кто это?' },
+    ],
+    options: [
+      { id: 'teacher', greek: 'Νομίζω ότι είναι ο νέος δάσκαλος.', translation: 'Думаю, это новый учитель.', explanation: 'Мария отвечает, кого Элени видит; она предполагает, что это новый учитель.' },
+      { id: 'shirt', greek: 'Το άσπρο πουκάμισο είναι πολύ ωραίο.', translation: 'Белая рубашка очень красивая.', explanation: 'Это комментарий о рубашке, но Элени спросила, кто этот мужчина.' },
+      { id: 'coffee', greek: 'Πίνω καφέ κάθε πρωί.', translation: 'Я пью кофе каждое утро.', explanation: 'Это сообщение о привычке, оно не помогает узнать, кто этот мужчина.' },
+    ],
+    correctOptionId: 'teacher', explanation: 'После вопроса «Ποιος είναι;» Мария предполагает, что мужчина — новый учитель.',
+  },
+  {
+    id: 'd-everyday-08', level: 'A1', categoryId: 'everyday-talk', situationId: 'ask-about-teaching-job', intentId: 'describe-occupation', replySpeaker: 'Άννα',
+    context: [
+      { speaker: 'Νίκος', greek: 'Τι δουλειά κάνεις, Άννα;', translation: 'Кем ты работаешь, Анна?' },
+    ],
+    options: [
+      { id: 'teacher', greek: 'Είμαι δασκάλα και διδάσκω στο σχολείο.', translation: 'Я учительница и преподаю в школе.', explanation: 'Анна прямо называет свою профессию и говорит, где преподаёт.' },
+      { id: 'greek-class', greek: 'Μαθαίνω ελληνικά στο σχολείο.', translation: 'Я учу греческий в школе.', explanation: 'Это сообщает, что Анна изучает греческий, а не отвечает, кем она работает.' },
+      { id: 'coffee', greek: 'Κάθε πρωί πίνω καφέ.', translation: 'Каждое утро я пью кофе.', explanation: 'Это повседневная привычка, а Никос спрашивает о профессии.' },
+    ],
+    correctOptionId: 'teacher', explanation: 'На вопрос о работе Анна называет профессию — δασκάλα — и место, где преподаёт.',
+  },
+  {
+    id: 'd-everyday-09', level: 'A1', categoryId: 'everyday-talk', situationId: 'ask-what-read-with-coffee', intentId: 'describe-daily-routine', replySpeaker: 'Ελένη',
+    context: [
+      { speaker: 'Μαρία', greek: 'Τι διαβάζεις κάθε πρωί με τον καφέ σου;', translation: 'Что ты читаешь каждое утро за кофе?' },
+    ],
+    options: [
+      { id: 'newspaper', greek: 'Διαβάζω την εφημερίδα.', translation: 'Я читаю газету.', explanation: 'Элени отвечает, что именно она читает по утрам.' },
+      { id: 'television', greek: 'Βλέπω τηλεόραση το βράδυ.', translation: 'Вечером я смотрю телевизор.', explanation: 'Это действие вечером, но Мария спрашивает, что Элени читает утром.' },
+      { id: 'message', greek: 'Γράφω ένα μήνυμα στον φίλο μου.', translation: 'Я пишу сообщение другу.', explanation: 'Это действие с сообщением, а вопрос был о том, что Элени читает.' },
+    ],
+    correctOptionId: 'newspaper', explanation: 'Элени отвечает на вопрос о чтении за утренним кофе: она читает газету.',
+  },
+  {
+    id: 'd-polite-07', level: 'A1', categoryId: 'politeness-requests', situationId: 'choose-shirt-size', intentId: 'choose-item-size', replySpeaker: 'Μαρία',
+    context: [
+      { speaker: 'Μαρία', greek: 'Ψάχνω ένα άσπρο πουκάμισο.', translation: 'Я ищу белую рубашку.' },
+      { speaker: 'Ελένη', greek: 'Έχουμε αυτό το πουκάμισο σε μικρό και μεγάλο μέγεθος. Ποιο μέγεθος θέλετε;', translation: 'У нас есть эта рубашка маленького и большого размера. Какой размер вы хотите?' },
+    ],
+    options: [
+      { id: 'small', greek: 'Το μικρό, παρακαλώ.', translation: 'Маленький, пожалуйста.', explanation: 'Продавщица спрашивает, какой размер нужен; ответ называет размер.' },
+      { id: 'blue', greek: 'Το μπλε, παρακαλώ.', translation: 'Синий, пожалуйста.', explanation: 'Это цвет, а продавщица уточняет размер рубашки.' },
+      { id: 'dress-price', greek: 'Πόσο κάνει το φόρεμα;', translation: 'Сколько стоит платье?', explanation: 'Это вопрос о цене другого предмета, а не ответ о размере рубашки.' },
+    ],
+    correctOptionId: 'small', explanation: 'Из двух предложенных размеров покупатель выбирает маленький и вежливо просит его.',
+  },
 ]

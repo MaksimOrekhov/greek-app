@@ -133,17 +133,60 @@ test('the three T6.2 revisions have one context-supported continuation each', ()
 
   const route = byId('d-place-05')
   assert.equal(route.replySpeaker, 'Μαρία')
-  assert.match(route.context[0]!.greek, /χάρτης της άσκησης/)
-  assert.match(route.context[0]!.greek, /γραμμή 3.*Κύπρου.*όχι.*Αθηνάς/)
+  assert.equal(route.intentId, 'confirm-route-detail')
+  assert.match(route.context[0]!.greek, /χάρτης της άσκησης.*γραμμή 3.*οδό Κύπρου, όχι στην οδό Αθηνάς/)
   assert.match(route.context.at(-1)!.greek, /άλλη γραμμή.*ραντεβού σου/)
-  assert.match(route.context[0]!.translation, /маршрут № 3 показан на улице Кипру, а не на улице Афинас/)
+  assert.match(route.context[0]!.translation, /карте в задании маршрут № 3 показан на улице Кипру, а не на улице Афинас/)
   const routeAnswer = route.options.find((option) => option.id === route.correctOptionId)!
   assert.equal(routeAnswer.greek, 'Ναι, καλύτερα να κοιτάξουμε άλλη γραμμή για την οδό Αθηνάς.')
-  assert.match(routeAnswer.explanation, /карте задания линия 3 проходит по улице Кипру/)
-  assert.match(route.explanation, /карте учебного задания линия 3 проходит по Кипру, а не по Афинас/)
+  assert.equal(routeAnswer.translation, 'Да, лучше нам посмотреть другой маршрут до улицы Афинас.')
+  assert.match(routeAnswer.explanation, /на карте задания линия 3 проходит по улице Кипру/)
+  assert.match(route.explanation, /на карте учебного задания линия 3 проходит по Кипру, а не по Афинас/)
   assert.equal(route.options.find((option) => option.id === 'appointment')!.greek, 'Το ραντεβού μου είναι αύριο το πρωί.')
+  assert.match(route.options.find((option) => option.id === 'appointment')!.explanation, /не отвечает, стоит ли искать другой маршрут/)
   assert.equal(route.options.find((option) => option.id === 'wrong-street')!.greek, 'Όχι, πάρε τη γραμμή 3 για την οδό Αθηνάς.')
-  assert.match(route.options.find((option) => option.id === 'wrong-street')!.explanation, /карте учебного задания/)
+  assert.match(route.options.find((option) => option.id === 'wrong-street')!.translation, /Нет, поезжай на автобусе № 3/)
+  assert.match(route.options.find((option) => option.id === 'wrong-street')!.explanation, /линия 3 показана на улице Кипру, а не на улице Афинас/)
+  assert.equal(new Set(route.options.map((option) => option.greek)).size, 3)
+})
+
+test('new T6 dialogues have reviewed roles, translations, one supported reply, and contextual distractors', () => {
+  const byId = (id: string) => dialogueQuestions.find((question) => question.id === id)!
+  const reviewed = [
+    {
+      id: 'd-self-07', speaker: 'Μαρία', intent: 'identify-person-from-description',
+      prompt: 'Ναι. Ποιος είναι?', answer: 'Νομίζω ότι είναι ο νέος δάσκαλος.',
+      distractors: ['Το άσπρο πουκάμισο είναι πολύ ωραίο.', 'Πίνω καφέ κάθε πρωί.'],
+    },
+    {
+      id: 'd-everyday-08', speaker: 'Άννα', intent: 'describe-occupation',
+      prompt: 'Τι δουλειά κάνεις, Άννα?', answer: 'Είμαι δασκάλα και διδάσκω στο σχολείο.',
+      distractors: ['Μαθαίνω ελληνικά στο σχολείο.', 'Κάθε πρωί πίνω καφέ.'],
+    },
+    {
+      id: 'd-everyday-09', speaker: 'Ελένη', intent: 'describe-daily-routine',
+      prompt: 'Τι διαβάζεις κάθε πρωί με τον καφέ σου?', answer: 'Διαβάζω την εφημερίδα.',
+      distractors: ['Βλέπω τηλεόραση το βράδυ.', 'Γράφω ένα μήνυμα στον φίλο μου.'],
+    },
+    {
+      id: 'd-polite-07', speaker: 'Μαρία', intent: 'choose-item-size',
+      prompt: 'Έχουμε αυτό το πουκάμισο σε μικρό και μεγάλο μέγεθος. Ποιο μέγεθος θέλετε?', answer: 'Το μικρό, παρακαλώ.',
+      distractors: ['Το μπλε, παρακαλώ.', 'Πόσο κάνει το φόρεμα;'],
+    },
+  ]
+
+  for (const expected of reviewed) {
+    const question = byId(expected.id)
+    assert.equal(question.replySpeaker, expected.speaker, expected.id)
+    assert.equal(question.intentId, expected.intent, expected.id)
+    assert.ok(question.context.some((line) => line.greek.replace(/[;؟?]/gu, '?') === expected.prompt), expected.id)
+    const answer = question.options.find((option) => option.id === question.correctOptionId)!
+    assert.equal(answer.greek, expected.answer, expected.id)
+    assert.equal(new Set(question.options.map((option) => option.greek)).size, 3, expected.id)
+    assert.deepEqual(question.options.filter((option) => option.id !== question.correctOptionId).map((option) => option.greek), expected.distractors)
+    assert.ok(question.context.every((line) => line.translation.trim()), expected.id)
+    assert.ok(question.options.every((option) => option.translation.trim() && option.explanation.trim()), expected.id)
+  }
 })
 
 test('T6 creates five rounds of two unique questions with broad topic coverage', () => {
@@ -386,7 +429,7 @@ test('history records only checked answers across early exit and re-entry', () =
 })
 
 test('reply roles match reviewed participants rather than a blanket user label', () => {
-  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ','Πελάτης' ]
+  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ','Πελάτης','Μαρία','Άννα','Ελένη','Μαρία' ]
   assert.deepEqual(dialogueQuestions.map(q => q.replySpeaker), roles)
 })
 
@@ -406,7 +449,8 @@ test('rendered panel names the reply speaker before answering and reveals every 
   const props = { questionState: item, roundNumber: 1, totalRounds: 5, questionNumber: 1, totalQuestions: 10 }
   const before = await renderToString(createSSRApp(component, props))
   assert.ok(before.includes('Μαρία'))
-  assert.ok(!before.includes('На карте в задании маршрут № 3 показан на улице Кипру, а не на улице Афинас.'))
+  assert.ok(!before.includes('У меня встреча на улице Афинас, 12. На карте в задании маршрут № 3 показан на улице Кипру, а не на улице Афинас.'))
+  assert.ok(!before.includes('Да, лучше нам посмотреть другой маршрут до улицы Афинас.'))
   assert.ok(!before.includes('Переводы и разбор'))
   for (const option of item.question.options) assert.ok(!before.includes(option.translation))
   item.checked = true

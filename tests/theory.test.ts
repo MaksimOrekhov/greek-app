@@ -104,7 +104,7 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   assert.equal(cases.title, 'Падежи существительных')
   assert.equal(cases.greekTitle, 'Οι πτώσεις των ουσιαστικών')
   assert.equal(cases.category, 'Грамматика')
-  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter'])
+  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter', 'present-tense-verbs'])
   for (const keyword of ['падеж', 'именительный', 'родительный', 'винительный', 'звательный']) {
     assert.ok(cases.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -122,6 +122,36 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve('/theory/noun-cases?explanation=1')
   assert.equal(route.name, 'theory-topic')
   assert.equal(route.params.topicId, 'noun-cases')
+  assert.equal(route.query.explanation, '1')
+})
+
+test('present-tense verb topic is registered, linked, searchable, and loads both Markdown files', async () => {
+  const verbs = getTheoryTopic('present-tense-verbs')!
+  assert.ok(verbs)
+  assert.equal(verbs.title, 'Глаголы в настоящем времени')
+  assert.equal(verbs.greekTitle, 'Ρήματα στον ενεστώτα')
+  assert.equal(verbs.category, 'Грамматика')
+  assert.deepEqual(verbs.related, ['noun-cases', 'definite-article'])
+  for (const keyword of ['глаголы', 'настоящее время', 'γράφω', 'ρωτάω', 'ρωτώ']) {
+    assert.ok(verbs.keywords.includes(keyword), `missing search keyword: ${keyword}`)
+  }
+
+  const summary = await readFile(resolve('src/data/theory', verbs.summary), 'utf8')
+  const explanation = await readFile(resolve('src/data/theory', verbs.explanation), 'utf8')
+  for (const form of ['γράφω', 'γράφεις', 'γράφει', 'γράφουμε', 'γράφετε', 'γράφουν']) {
+    assert.ok(summary.includes(form) || explanation.includes(form), `missing present-tense form: ${form}`)
+  }
+  for (const example of ['Βλέπω τον φίλο.', 'Πίνεις νερό;', 'Αγοράζουν το πουκάμισο.', 'Μαθαίνουμε ελληνικά.']) {
+    assert.ok(explanation.includes(example), `missing present-tense example: ${example}`)
+  }
+  assert.match(explanation, /ρωτάω\s*\/\s*ρωτώ/)
+  assert.match(explanation, /Не смешивайте времена/)
+  assert.match(renderTheoryMarkdown(summary), /<p>/)
+  assert.match(renderTheoryMarkdown(explanation), /<h2\b/)
+
+  const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve('/theory/present-tense-verbs?explanation=1')
+  assert.equal(route.name, 'theory-topic')
+  assert.equal(route.params.topicId, 'present-tense-verbs')
   assert.equal(route.query.explanation, '1')
 })
 
@@ -208,6 +238,35 @@ test('registered topic content exists and both Markdown files render successfull
       assert.doesNotMatch(html, /<script\b/i)
     }
   }
+})
+
+test('present tense Markdown links resolve through hash routes and preserve external references', async () => {
+  const topic = getTheoryTopic('present-tense-verbs')!
+  const source = await readFile(resolve('src/data/theory', topic.explanation), 'utf8')
+  const html = renderTheoryMarkdown(source, 'explanation')
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [...theoryRoutes, { path: '/verbs', name: 'verbs', component: { template: '<div />' } }],
+  })
+  const links = [
+    { href: '#/verbs', path: '/verbs', name: 'verbs' },
+    { href: '#/theory/noun-cases', path: '/theory/noun-cases', name: 'theory-topic' },
+    { href: '#/theory/definite-article', path: '/theory/definite-article', name: 'theory-topic' },
+  ]
+
+  for (const link of links) {
+    assert.ok(html.includes(`href="${link.href}"`), `missing rendered href ${link.href}`)
+    assert.equal(router.resolve(link.path).name, link.name, `unresolved app route ${link.path}`)
+    const pageUrl = new URL('/greek-app/#/theory/present-tense-verbs', 'https://example.test')
+    const targetUrl = new URL(link.href, pageUrl)
+    assert.equal(targetUrl.pathname, '/greek-app/')
+    assert.equal(targetUrl.hash, `#${link.path}`)
+    assert.equal(router.resolve(targetUrl.hash.slice(1)).name, link.name)
+  }
+
+  assert.doesNotMatch(html, /href="\/(?:verbs|theory\/)/)
+  assert.match(html, /href="https:\/\/ebooks\.edu\.gr\/ebooks\/v\/html\/[^\"]*index_C_06\.html"/)
+  assert.match(html, /href="https:\/\/www\.greek-language\.gr\/greekLang\/modern_greek\/tools\/lexica\/triantafyllides\/search\.html\?lq=/)
 })
 
 test('neuter noun declension topic is registered, searchable, linked, and contains checked paradigms', async () => {

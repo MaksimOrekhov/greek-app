@@ -37,6 +37,11 @@ import {
   FILL_GAP_PRONOUN_REFERENCE_CONTEXTS,
 } from '../src/data/trainers/generation/fillGapContent.ts'
 import {
+  NOUN_CASE_ACCEPTED_VARIANT_REFERENCE,
+  NOUN_ACCUSATIVE_QUESTION_REFERENCE,
+  NOUN_CASE_FORM_REFERENCE,
+} from './fixtures/nounAccusativeReference.ts'
+import {
   fillGapQuestionSignature,
   fillGapQuestionContextSignature,
   fillGapQuestionSituationSignature,
@@ -121,6 +126,11 @@ function personalExpected(hint: string, templateId: string | undefined): string 
 
 function matchesReference(question: FillGapQuestion, candidate: string): boolean {
   const value = candidate.toLocaleLowerCase('el')
+  if (question.topicId === 'noun-accusative') {
+    const reference = NOUN_ACCUSATIVE_QUESTION_REFERENCE.find((item) => item.id === question.id)
+    const choice = reference?.choices.find((item) => normalized(item.text) === normalized(candidate))
+    return choice?.case === (reference?.role === 'subject' ? 'nominative' : 'accusative')
+  }
   if (question.topicId === 'personal-pronouns') {
     const expected = personalExpected(question.hint, question.templateId)
     if (!expected || candidate !== expected && value !== expected.toLocaleLowerCase('el')) return false
@@ -206,6 +216,7 @@ class MemoryStorage implements FillGapHistoryStorage, MultiSelectHistoryStorage 
 }
 
 const bankForTopic = (topicId: string) => trainerFillGapQuestions.filter((question) => question.topicId === topicId)
+const generatedFillGapTopics = trainerTopics.filter((topic) => generatedFillGapTemplates(topic.id).length > 0)
 
 test('fixed fill-gap bank is valid, expandable, and has at least twelve questions per topic', () => {
   assert.deepEqual(validateFillGapQuestionBank(), [])
@@ -227,6 +238,87 @@ test('fixed fill-gap bank is valid, expandable, and has at least twelve question
       assert.ok(completeFillGapSentence(question).trim())
       assertWordBoundaries(question)
       assertOneAnswer(question)
+    }
+  }
+})
+
+test('noun-accusative fixed bank matches independent case forms and has one context-appropriate answer', () => {
+  const bank = bankForTopic('noun-accusative')
+  assert.equal(bank.length, 24)
+  assert.deepEqual(new Set(bank.map((question) => question.id)), new Set(NOUN_ACCUSATIVE_QUESTION_REFERENCE.map((item) => item.id)))
+  assert.deepEqual(generateFillGapQuestions('noun-accusative', seededRandom(218)), [])
+
+  const articleCases: Record<string, string[]> = {
+    ο: ['nominative'], η: ['nominative'], το: ['nominative', 'accusative'],
+    τον: ['accusative'], τη: ['accusative'], την: ['accusative'], του: ['genitive'], της: ['genitive'],
+  }
+  const fullForms = Object.values(NOUN_CASE_FORM_REFERENCE).flatMap((forms) =>
+    Object.entries(forms).map(([formCase, form]) => [form, formCase] as const))
+  fullForms.push(...NOUN_CASE_ACCEPTED_VARIANT_REFERENCE.map(({ form, case: formCase }) => [form, formCase] as const))
+
+  for (const reference of NOUN_ACCUSATIVE_QUESTION_REFERENCE) {
+    const question = bank.find((item) => item.id === reference.id)!
+    assert.equal(completeFillGapSentence(question).normalize('NFC'), reference.sentence.normalize('NFC'), question.id)
+    assert.equal(question.hint, reference.hint, question.id)
+    assert.deepEqual(question.options.map((option) => option.text), reference.choices.map((choice) => choice.text), question.id)
+
+    for (const choice of reference.choices) {
+      const matchingForms = fullForms.filter(([form]) => normalized(form) === normalized(choice.text))
+      const articleOnlyCases = articleCases[choice.text.toLocaleLowerCase('el')] ?? []
+      const possibleCases = new Set([...matchingForms.map(([, formCase]) => formCase), ...articleOnlyCases])
+      if (choice.case === 'invalid') assert.equal(possibleCases.size, 0, `${question.id}: ${choice.text} must not be a normative case form`)
+      else assert.ok(possibleCases.has(choice.case), `${question.id}: ${choice.text} must be independently recorded as ${choice.case}`)
+    }
+
+    const targetCase = reference.role === 'subject' ? 'nominative' : 'accusative'
+    assert.equal(reference.choices.filter((choice) => choice.case === targetCase).length, 1, question.id)
+    assert.equal(reference.choices.find((choice) => choice.case === targetCase)?.text,
+      question.options.find((option) => option.id === question.correctOptionId)?.text, question.id)
+    assertOneAnswer(question)
+  }
+
+  const shirtReference = NOUN_ACCUSATIVE_QUESTION_REFERENCE.find((item) => item.id === 'acc-buy-shirt-neuter-o')!
+  assert.equal(shirtReference.choices.find((choice) => choice.text === 'του πουκάμισου')?.case, 'genitive')
+  assert.equal(NOUN_CASE_ACCEPTED_VARIANT_REFERENCE.find((item) => item.form === 'του πουκάμισου')?.case, 'genitive')
+})
+
+test('noun-accusative fixed-only sessions complete and restart across 100 seeds and ten sequential launches', () => {
+  const fixedQuestions = bankForTopic('noun-accusative')
+  const seenQuestionIds = new Set<string>()
+  for (let seed = 0; seed < 100; seed += 1) {
+    let session = createFillGapSession('noun-accusative', trainerFillGapQuestions, seededRandom(seed + 4200), [])
+    assert.equal(session.rounds.length, FILL_GAP_ROUND_COUNT, `seed ${seed}`)
+    assert.ok(session.rounds.every((round) => round.questions.length === FILL_GAP_QUESTIONS_PER_ROUND), `seed ${seed}`)
+    const selected = session.rounds.flatMap((round) => round.questions.map((item) => item.question.id))
+    assert.equal(selected.length, FILL_GAP_SESSION_QUESTION_COUNT, `seed ${seed}`)
+    assert.equal(new Set(selected).size, FILL_GAP_SESSION_QUESTION_COUNT, `seed ${seed}`)
+    selected.forEach((id) => seenQuestionIds.add(id))
+    for (let index = 0; index < FILL_GAP_SESSION_QUESTION_COUNT; index += 1) session = answerCurrent(session, true)
+    assert.equal(session.completed, true, `seed ${seed}`)
+    assert.deepEqual(getFillGapSessionResults(session).completedRounds, FILL_GAP_ROUND_COUNT)
+    if (seed < 10) {
+      const restarted = restartFillGapSession(session, trainerFillGapQuestions, [], seededRandom(seed + 5200))
+      assert.equal(restarted.completed, false)
+      assert.equal(restarted.rounds.flatMap((round) => round.questions).length, FILL_GAP_SESSION_QUESTION_COUNT)
+      assert.ok(restarted.rounds.flatMap((round) => round.questions).every((item) => !item.checked && item.selectedOptionId === null))
+    }
+  }
+  assert.deepEqual(seenQuestionIds, new Set(fixedQuestions.map((question) => question.id)))
+})
+
+test('noun-accusative fixed-only bank completes ten consecutive sessions through restart', () => {
+  let session = createFillGapSession('noun-accusative', trainerFillGapQuestions, seededRandom(6020), [])
+  for (let launch = 0; launch < 10; launch += 1) {
+    const questions = session.rounds.flatMap((round) => round.questions)
+    assert.equal(questions.length, FILL_GAP_SESSION_QUESTION_COUNT, `launch ${launch}`)
+    assert.ok(questions.every((question) => !question.checked && question.selectedOptionId === null), `launch ${launch}`)
+    for (let index = 0; index < FILL_GAP_SESSION_QUESTION_COUNT; index += 1) {
+      session = answerCurrent(session, true)
+    }
+    assert.equal(session.completed, true, `launch ${launch}`)
+    assert.deepEqual(getFillGapSessionResults(session).completedRounds, FILL_GAP_ROUND_COUNT)
+    if (launch < 9) {
+      session = restartFillGapSession(session, trainerFillGapQuestions, [], seededRandom(7020 + launch))
     }
   }
 })
@@ -294,7 +386,8 @@ test('fill-gap validator catches incomplete, duplicated, ambiguous-structure, an
 })
 
 test('each topic has three distinct templates with independently checked answers', () => {
-  for (const topic of trainerTopics) {
+  assert.equal(generatedFillGapTemplates('noun-accusative').length, 0)
+  for (const topic of generatedFillGapTopics) {
     const templates = generatedFillGapTemplates(topic.id)
     assert.equal(templates.length, 3, topic.id)
     assert.equal(new Set(templates).size, 3, topic.id)
@@ -324,7 +417,7 @@ test('fill-gap generation remains reproducible from a seed', () => {
 })
 
 test('all four generators stay valid and unambiguous across two hundred fixed seeds', () => {
-  for (const [topicIndex, topic] of trainerTopics.entries()) {
+  for (const [topicIndex, topic] of generatedFillGapTopics.entries()) {
     for (let seed = 0; seed < 200; seed += 1) {
       const generated = generateFillGapQuestions(topic.id, seededRandom(topicIndex * 10_000 + seed))
       assert.equal(generated.length, 6, `${topic.id}: ${seed}`)
@@ -429,7 +522,7 @@ test('fixed question selection finishes with duplicate contexts only when altern
 })
 
 test('ten sessions track distinct question combinations and semantic contexts separately', () => {
-  for (const topic of trainerTopics) {
+  for (const topic of generatedFillGapTopics) {
     const storage = new MemoryStorage()
     const combinationsByTemplate = new Map<string, Set<string>>()
     const contextsByTemplate = new Map<string, Set<string>>()
@@ -525,8 +618,8 @@ test('the ten-question session keeps six generated and four fixed questions acro
     assert.equal(session.rounds.length, FILL_GAP_ROUND_COUNT)
     assert.ok(session.rounds.every((round) => round.questions.length === FILL_GAP_QUESTIONS_PER_ROUND))
     assert.equal(questions.length, FILL_GAP_SESSION_QUESTION_COUNT)
-    assert.equal(questions.filter((question) => question.templateId).length, 6)
-    assert.equal(questions.filter((question) => !question.templateId).length, 4)
+    assert.equal(questions.filter((question) => question.templateId).length, topic.id === 'noun-accusative' ? 0 : 6)
+    assert.equal(questions.filter((question) => !question.templateId).length, topic.id === 'noun-accusative' ? 10 : 4)
     assert.equal(new Set(questions.map((question) => question.id)).size, 10)
     assert.ok(session.rounds.flatMap((round) => round.questions).every((item) => item.selectedOptionId === null && !item.checked))
   }

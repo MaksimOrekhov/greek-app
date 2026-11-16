@@ -32,6 +32,13 @@ export const trainerTopics: TrainerTopic[] = [
     pairSetId: 'numbers',
     availableExercises: ['match-pairs', 'multi-select', 'fill-gaps', 'order-items'],
   },
+  {
+    id: 'noun-accusative',
+    title: 'Кого? Что? Формы слов в предложении',
+    description: 'Сопоставьте фразы и выберите форму существительного по его роли в простом предложении.',
+    pairSetId: 'noun-accusative',
+    availableExercises: ['match-pairs', 'fill-gaps'],
+  },
 ]
 
 export function getTrainerTopic(id: string): TrainerTopic | undefined {

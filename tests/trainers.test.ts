@@ -5,6 +5,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { trainerPairSets } from '../src/data/trainers/pairSets.ts'
 import { getTrainerTopic, trainerTopics, validateTrainerRegistry } from '../src/data/trainers/topics.ts'
 import { trainerRoutes } from '../src/data/trainers/routes.ts'
+import { NOUN_ACCUSATIVE_PAIR_REFERENCE } from './fixtures/nounAccusativeReference.ts'
 import {
   advanceTrainerSession,
   createTrainerSession,
@@ -33,22 +34,25 @@ function assertRoundHasUniquePromptsAndAnswers(round: ReturnType<typeof createTr
   assert.equal(new Set(round.pairs.map((pair) => pair.answer.trim())).size, round.pairs.length)
 }
 
-test('four trainer topics and all their pair sets are registered', () => {
+test('trainer topics and all their pair sets are registered', () => {
   assert.deepEqual(validateTrainerRegistry(), [])
   assert.deepEqual(trainerTopics.map((topic) => topic.id), [
     'personal-pronouns',
     'personal-pronouns-genitive',
     'verb-eimai',
     'numbers',
+    'noun-accusative',
   ])
   assert.deepEqual(trainerTopics.map((topic) => topic.availableExercises), [
     ['match-pairs', 'multi-select', 'fill-gaps'], ['match-pairs', 'multi-select', 'fill-gaps'],
     ['match-pairs', 'multi-select', 'fill-gaps'], ['match-pairs', 'multi-select', 'fill-gaps', 'order-items'],
+    ['match-pairs', 'fill-gaps'],
   ])
   assert.equal(trainerPairSets['personal-pronouns']?.pairs.length, 10)
   assert.equal(trainerPairSets['personal-pronouns-genitive']?.pairs.length, 7)
   assert.equal(trainerPairSets['verb-eimai']?.pairs.length, 6)
   assert.equal(trainerPairSets.numbers?.pairs.length, 20)
+  assert.equal(trainerPairSets['noun-accusative']?.pairs.length, 20)
   assert.deepEqual(trainerPairSets['personal-pronouns']?.pairs.map((pair) => pair.answer), [
     'εγώ', 'εσύ', 'αυτός', 'αυτή', 'αυτό', 'εμείς', 'εσείς', 'αυτοί', 'αυτές', 'αυτά',
   ])
@@ -67,7 +71,32 @@ test('four trainer topics and all their pair sets are registered', () => {
   )
   assert.ok(trainerPairSets.numbers?.pairs.every((pair) => Number(pair.prompt) >= 0 && Number(pair.prompt) <= 200))
   assert.ok(getTrainerTopic('numbers'))
+  assert.ok(getTrainerTopic('noun-accusative'))
   assert.equal(getTrainerTopic('not-a-topic'), undefined)
+})
+
+test('noun-accusative pair meanings and translations match an independent reference', () => {
+  const topic = getTrainerTopic('noun-accusative')!
+  const pairs = trainerPairSets[topic.pairSetId]!.pairs
+  assert.deepEqual(topic.availableExercises, ['match-pairs', 'fill-gaps'])
+  assert.equal(pairs.length, 20)
+  assert.deepEqual(pairs, NOUN_ACCUSATIVE_PAIR_REFERENCE.map(({ id, prompt, answer }) => ({ id, prompt, answer })))
+  assert.equal(new Set(NOUN_ACCUSATIVE_PAIR_REFERENCE.map((pair) => pair.meaning)).size, 20)
+  assert.equal(new Set(pairs.map((pair) => pair.prompt.normalize('NFC').trim())).size, 20)
+  assert.equal(new Set(pairs.map((pair) => pair.answer.normalize('NFC').trim())).size, 20)
+})
+
+test('noun-accusative pair sessions cover all twenty pairs in five rounds across 100 fixed seeds', () => {
+  const pairs = trainerPairSets['noun-accusative']!.pairs
+  for (let seed = 0; seed < 100; seed += 1) {
+    const session = createTrainerSession('noun-accusative', pairs, seededRandom(seed + 9100))
+    assert.equal(session.rounds.length, 5, `seed ${seed}`)
+    assert.ok(session.rounds.every((round) => round.pairs.length === 4), `seed ${seed}`)
+    session.rounds.forEach(assertRoundHasUniquePromptsAndAnswers)
+    const selected = session.rounds.flatMap((round) => round.pairs.map((pair) => pair.id))
+    assert.equal(new Set(selected).size, 20, `seed ${seed}`)
+    assert.deepEqual(new Set(selected), new Set(pairs.map((pair) => pair.id)), `seed ${seed}`)
+  }
 })
 
 test('every generated round has up to four compatible pairs with unique prompts and answers', () => {
