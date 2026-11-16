@@ -41,7 +41,9 @@ function answerCurrentCorrectly(session: ReturnType<typeof createMultiSelectSess
 test('all four topics expose at least 12 beginner-friendly multiple-selection questions', () => {
   assert.deepEqual(validateTrainerRegistry(), [])
   assert.deepEqual(validateMultiSelectQuestionBank(), [])
-  for (const topic of trainerTopics) {
+  const multiSelectTopics = trainerTopics.filter((topic) => topic.availableExercises.includes('multi-select'))
+  assert.equal(multiSelectTopics.some((topic) => topic.id === 'noun-accusative'), false)
+  for (const topic of multiSelectTopics) {
     assert.ok(topic.availableExercises.includes('multi-select'))
     assert.ok(trainerMultiSelectQuestions.filter((item) => item.topicId === topic.id).length >= 12)
     assert.equal(createMultiSelectSession(topic.id, trainerMultiSelectQuestions, seededRandom(71)).rounds.length, 5)

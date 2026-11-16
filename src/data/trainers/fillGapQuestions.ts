@@ -309,6 +309,126 @@ export const trainerFillGapQuestions: FillGapQuestion[] = [
     choices: ['πενήντα', 'εξήντα', 'σαράντα τρία'], correct: 'πενήντα',
     explanation: 'Это 20, 30, 40; следующее число — 50, πενήντα.',
   }),
+  fixedQuestion('acc-see-friend-masculine-os', 'noun-accusative', {
+    instruction, sentenceBefore: 'Βλέπω ', sentenceAfter: ' φίλο.', hint: 'Я вижу друга.',
+    choices: ['ο', 'τον', 'του'], correct: 'τον',
+    explanation: 'Полное предложение: Βλέπω τον φίλο. Друг здесь тот, кого видят, поэтому нужны винительный падеж и форма τον φίλο.',
+  }),
+  fixedQuestion('acc-wait-father-masculine-as', 'noun-accusative', {
+    instruction, sentenceBefore: 'Η Μαρία περιμένει ', sentenceAfter: '.', hint: 'Мария ждёт отца.',
+    choices: ['ο πατέρας', 'τον πατέρα', 'του πατέρα'], correct: 'τον πατέρα',
+    explanation: 'Полное предложение: Η Μαρία περιμένει τον πατέρα. Отец — тот, кого ждёт Мария, поэтому выбираем τον πατέρα.',
+  }),
+  fixedQuestion('acc-ask-student-masculine-is', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο δάσκαλος ρωτάει ', sentenceAfter: '.', hint: 'Учитель спрашивает ученика.',
+    choices: ['ο μαθητής', 'τον μαθητή', 'του μαθητή'], correct: 'τον μαθητή',
+    explanation: 'Полное предложение: Ο δάσκαλος ρωτάει τον μαθητή. Ученик — тот, кого спрашивает учитель: ο μαθητής становится τον μαθητή.',
+  }),
+  fixedQuestion('acc-see-friend-feminine-i', 'noun-accusative', {
+    instruction, sentenceBefore: 'Βλέπω ', sentenceAfter: ' φίλη.', hint: 'Я вижу подругу.',
+    choices: ['η', 'τη', 'της'], correct: 'τη',
+    explanation: 'Полное предложение: Βλέπω τη φίλη. Перед согласной φ в женском винительном падеже пишется τη.',
+  }),
+  fixedQuestion('acc-wait-sister-feminine-vowel', 'noun-accusative', {
+    instruction, sentenceBefore: 'Η Ελένη περιμένει ', sentenceAfter: '.', hint: 'Элени ждёт сестру.',
+    choices: ['τη αδελφή', 'την αδελφή', 'της αδελφής'], correct: 'την αδελφή',
+    explanation: 'Полное предложение: Η Ελένη περιμένει την αδελφή. Перед гласной в женском винительном артикле сохраняется ν.',
+  }),
+  fixedQuestion('acc-read-newspaper-feminine-vowel', 'noun-accusative', {
+    instruction, sentenceBefore: 'Διαβάζω ', sentenceAfter: ' κάθε πρωί.', hint: 'Я читаю газету каждое утро.',
+    choices: ['τη εφημερίδα', 'την εφημερίδα', 'της εφημερίδας'], correct: 'την εφημερίδα',
+    explanation: 'Полное предложение: Διαβάζω την εφημερίδα κάθε πρωί. Перед гласной ε женский артикль пишется с ν.',
+  }),
+  fixedQuestion('acc-buy-shirt-neuter-o', 'noun-accusative', {
+    instruction, sentenceBefore: 'Αγοράζω ', sentenceAfter: '.', hint: 'Я покупаю рубашку.',
+    choices: ['το πουκάμισο', 'τον πουκάμισο', 'του πουκάμισου'], correct: 'το πουκάμισο',
+    explanation: 'Полное предложение: Αγοράζω το πουκάμισο. В винительном среднего рода форма совпадает с именительным. В родительном нормативно του πουκαμίσου, а вариант из списка с другим ударением неверен.',
+  }),
+  fixedQuestion('acc-see-dog-masculine-os', 'noun-accusative', {
+    instruction, sentenceBefore: 'Το αγόρι βλέπει ', sentenceAfter: '.', hint: 'Мальчик видит собаку.',
+    choices: ['ο σκύλος', 'τον σκύλο', 'του σκύλου'], correct: 'τον σκύλο',
+    explanation: 'Полное предложение: Το αγόρι βλέπει τον σκύλο. Собака — прямое дополнение; для этой модели нужны τον и форма σκύλο.',
+  }),
+  fixedQuestion('acc-read-book-neuter-i', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο φίλος διαβάζει ', sentenceAfter: '.', hint: 'Друг читает книгу.',
+    choices: ['το βιβλίο', 'τον βιβλίο', 'του βιβλίου'], correct: 'το βιβλίο',
+    explanation: 'Полное предложение: Ο φίλος διαβάζει το βιβλίο. В этой форме среднего рода артикль и существительное не меняются.',
+  }),
+  fixedQuestion('acc-see-teacher-masculine-os', 'noun-accusative', {
+    instruction, sentenceBefore: 'Η μαθήτρια βλέπει ', sentenceAfter: '.', hint: 'Ученица видит учителя.',
+    choices: ['ο δάσκαλος', 'τον δάσκαλο', 'του δασκάλου'], correct: 'τον δάσκαλο',
+    explanation: 'Полное предложение: Η μαθήτρια βλέπει τον δάσκαλο. Учитель — тот, кого видит ученица; выбираем винительный падеж.',
+  }),
+  fixedQuestion('acc-student-form-masculine-is', 'noun-accusative', {
+    instruction, sentenceBefore: 'Περιμένω ', sentenceAfter: '.', hint: 'Я жду ученика.',
+    choices: ['ο μαθητής', 'τον μαθητή', 'του μαθητή'], correct: 'τον μαθητή',
+    explanation: 'Полное предложение: Περιμένω τον μαθητή. После «жду» ученик — прямое дополнение: ο μαθητής → τον μαθητή.',
+  }),
+  fixedQuestion('acc-see-elena-feminine-proper-vowel', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο φίλος βλέπει ', sentenceAfter: '.', hint: 'Друг видит Элени.',
+    choices: ['η Ελένη', 'την Ελένη', 'της Ελένης'], correct: 'την Ελένη',
+    explanation: 'Полное предложение: Ο φίλος βλέπει την Ελένη. Имя — прямое дополнение; перед гласной артикль пишется как την.',
+  }),
+  fixedQuestion('acc-ask-teacher-feminine-a', 'noun-accusative', {
+    instruction, sentenceBefore: 'Η μαθήτρια ρωτάει ', sentenceAfter: '.', hint: 'Ученица спрашивает учительницу.',
+    choices: ['η δασκάλα', 'τη δασκάλα', 'της δασκάλας'], correct: 'τη δασκάλα',
+    explanation: 'Полное предложение: Η μαθήτρια ρωτάει τη δασκάλα. Действие направлено на учительницу; перед согласной δ пишется женский артикль τη.',
+  }),
+  fixedQuestion('acc-see-mother-feminine-a', 'noun-accusative', {
+    instruction, sentenceBefore: 'Η Ελένη βλέπει ', sentenceAfter: '.', hint: 'Элени видит мать.',
+    choices: ['η μητέρα', 'τη μητέρα', 'της μητέρας'], correct: 'τη μητέρα',
+    explanation: 'Полное предложение: Η Ελένη βλέπει τη μητέρα. Перед согласной μ у женского артикля здесь нет ν; της μητέρας было бы родительным падежом.',
+  }),
+  fixedQuestion('acc-drink-juice-masculine-os', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο φίλος πίνει ', sentenceAfter: '.', hint: 'Друг пьёт сок.',
+    choices: ['ο χυμός', 'τον χυμό', 'το χυμό'], correct: 'τον χυμό',
+    explanation: 'Полное предложение: Ο φίλος πίνει τον χυμό. Это существительное мужского рода: в винительном артикль пишется τον, а окончание меняется на -ό.',
+  }),
+  fixedQuestion('acc-buy-bread-neuter-i', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο φίλος αγοράζει ', sentenceAfter: '.', hint: 'Друг покупает хлеб.',
+    choices: ['το ψωμί', 'τον ψωμί', 'του ψωμιού'], correct: 'το ψωμί',
+    explanation: 'Полное предложение: Ο φίλος αγοράζει το ψωμί. Το ψωμί — средний род; форма винительного совпадает с именительным.',
+  }),
+  fixedQuestion('acc-read-letter-neuter-ma', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο μαθητής γράφει ', sentenceAfter: '.', hint: 'Ученик пишет письмо.',
+    choices: ['το γράμμα', 'τον γράμμα', 'του γράμματος'], correct: 'το γράμμα',
+    explanation: 'Полное предложение: Ο μαθητής γράφει το γράμμα. Существительное среднего рода на -μα остаётся в этой форме; артикль — το.',
+  }),
+  fixedQuestion('acc-read-exercise-feminine-i', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο δάσκαλος διαβάζει ', sentenceAfter: '.', hint: 'Учитель читает упражнение.',
+    choices: ['τη άσκηση', 'την άσκηση', 'της άσκησης'], correct: 'την άσκηση',
+    explanation: 'Полное предложение: Ο δάσκαλος διαβάζει την άσκηση. Перед начальной гласной α женский артикль сохраняет ν.',
+  }),
+  fixedQuestion('acc-teacher-sees-student-subject', 'noun-accusative', {
+    instruction, sentenceBefore: '', sentenceAfter: ' βλέπει τον μαθητή.', hint: 'Учитель видит ученика.',
+    choices: ['Ο δάσκαλος', 'Τον δάσκαλο', 'Του δασκάλου'], correct: 'Ο δάσκαλος',
+    explanation: 'Полное предложение: Ο δάσκαλος βλέπει τον μαθητή. Учитель выполняет действие, поэтому в начале предложения нужен именительный падеж.',
+  }),
+  fixedQuestion('acc-father-waits-bus-subject', 'noun-accusative', {
+    instruction, sentenceBefore: '', sentenceAfter: ' περιμένει το λεωφορείο.', hint: 'Отец ждёт автобус.',
+    choices: ['Ο πατέρας', 'Τον πατέρα', 'Του πατέρα'], correct: 'Ο πατέρας',
+    explanation: 'Полное предложение: Ο πατέρας περιμένει το λεωφορείο. Отец ждёт, то есть выполняет действие; здесь нужна форма ο πατέρας.',
+  }),
+  fixedQuestion('acc-student-asks-teacher-object', 'noun-accusative', {
+    instruction, sentenceBefore: 'Η μαθήτρια ρωτάει ', sentenceAfter: '.', hint: 'Ученица спрашивает учителя.',
+    choices: ['ο δάσκαλος', 'τον δάσκαλο', 'του δασκάλου'], correct: 'τον δάσκαλο',
+    explanation: 'Полное предложение: Η μαθήτρια ρωτάει τον δάσκαλο. Учитель — тот, кому задают вопрос; нужен винительный падеж.',
+  }),
+  fixedQuestion('acc-baby-sees-canary-neuter-i', 'noun-accusative', {
+    instruction, sentenceBefore: 'Το μωρό βλέπει ', sentenceAfter: '.', hint: 'Малыш видит канарейку.',
+    choices: ['το καναρίνι', 'τον καναρίνι', 'του καναρινιού'], correct: 'το καναρίνι',
+    explanation: 'Полное предложение: Το μωρό βλέπει το καναρίνι. Слово среднего рода, поэтому артикль остаётся το.',
+  }),
+  fixedQuestion('acc-student-buys-dress-subject', 'noun-accusative', {
+    instruction, sentenceBefore: '', sentenceAfter: ' αγοράζει το φόρεμα.', hint: 'Ученица покупает платье.',
+    choices: ['Η μαθήτρια', 'Τη μαθήτρια', 'Της μαθήτριας'], correct: 'Η μαθήτρια',
+    explanation: 'Полное предложение: Η μαθήτρια αγοράζει το φόρεμα. Ученица выполняет действие, поэтому используется именительный падеж.',
+  }),
+  fixedQuestion('acc-father-sees-student-object', 'noun-accusative', {
+    instruction, sentenceBefore: 'Ο πατέρας βλέπει ', sentenceAfter: '.', hint: 'Отец видит ученика.',
+    choices: ['ο μαθητής', 'τον μαθητή', 'του μαθητή'], correct: 'τον μαθητή',
+    explanation: 'Полное предложение: Ο πατέρας βλέπει τον μαθητή. Отец выполняет действие, а ученик — тот, кого он видит: ο μαθητής → τον μαθητή.',
+  }),
 ]
 
 function normalize(value: string): string {

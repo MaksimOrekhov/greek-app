@@ -171,9 +171,12 @@ class MemoryStorage implements MultiSelectHistoryStorage {
   setItem(_key: string, value: string): void { this.value = value }
 }
 
+const multiSelectTopics = trainerTopics.filter((topic) => topic.availableExercises.includes('multi-select'))
+
 test('each topic generates six questions from three distinct templates and keeps four bank questions', () => {
   assert.ok(trainerMultiSelectQuestions.length >= 49)
-  for (const topic of trainerTopics) {
+  assert.equal(multiSelectTopics.some((topic) => topic.id === 'noun-accusative'), false)
+  for (const topic of multiSelectTopics) {
     assert.ok(trainerMultiSelectQuestions.filter((item) => item.topicId === topic.id).length >= 12, topic.id)
     assert.equal(generatedQuestionTemplates(topic.id).length, 3)
 
@@ -253,7 +256,7 @@ test('adding a fixed question keeps the bank valid and preserves the session con
 })
 
 test('fixed seeds reproduce results and different seeds change actual question content', () => {
-  for (const topic of trainerTopics) {
+  for (const topic of multiSelectTopics) {
     const first = generateMultiSelectQuestions(topic.id, seededRandom(420))
     const same = generateMultiSelectQuestions(topic.id, seededRandom(420))
     const different = generateMultiSelectQuestions(topic.id, seededRandom(421))
@@ -272,7 +275,7 @@ test('fixed seeds reproduce results and different seeds change actual question c
 })
 
 test('ten seeded training starts change contents within every template and history does not increase repeats', () => {
-  for (const topic of trainerTopics) {
+  for (const topic of multiSelectTopics) {
     const storage = new MemoryStorage()
     const withHistory = new Set<string>()
     const withoutHistory = new Set<string>()
@@ -307,7 +310,7 @@ test('finite number spellings match independent references at the gender and ran
 })
 
 test('two hundred seeded generations per topic stay structurally and linguistically bounded', () => {
-  for (const [topicIndex, topic] of trainerTopics.entries()) {
+  for (const [topicIndex, topic] of multiSelectTopics.entries()) {
     for (let seed = 0; seed < 200; seed += 1) {
       const generated = generateMultiSelectQuestions(topic.id, seededRandom(topicIndex * 10_000 + seed))
       assert.equal(generated.length, 6)
@@ -353,8 +356,9 @@ test('recent history reduces repeats, is versioned, bounded, and survives broken
 
 test('an unknown topic returns no generated questions and finite seeds never require unbounded retries', () => {
   assert.deepEqual(generateMultiSelectQuestions('unknown-topic', seededRandom(3)), [])
+  assert.deepEqual(generateMultiSelectQuestions('noun-accusative', seededRandom(3)), [])
   const constantRandom = () => 0
-  for (const topic of trainerTopics) {
+  for (const topic of multiSelectTopics) {
     const generated = generateMultiSelectQuestions(topic.id, constantRandom)
     assert.equal(generated.length, 6)
     assert.equal(new Set(generated.map(multiSelectQuestionSignature)).size, 6)

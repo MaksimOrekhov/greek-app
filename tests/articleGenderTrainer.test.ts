@@ -135,10 +135,14 @@ function rendererText(node: TestRendererNode): string {
 test('T10 bank contains reviewed dictionary nouns with balanced article counts', async () => {
   const candidateCount = words.filter((word) => word.partOfSpeech.includes('noun')).length
   assert.ok(candidateCount >= verifiedArticleNounRecords.length)
-  assert.equal(verifiedArticleNounRecords.length, 100)
+  assert.equal(verifiedArticleNounRecords.length, 143)
   assert.equal(verifiedArticleNounRecords.length, Object.keys(ARTICLE_GENDER_REFERENCE).length)
   assert.ok(verifiedArticleNounRecords.length >= 90)
   assert.equal(articleGenderNouns.length, verifiedArticleNounRecords.length)
+  assert.deepEqual(
+    Object.fromEntries(NOMINATIVE_ARTICLES.map((article) => [article, verifiedArticleNounRecords.filter((noun) => noun.article === article).length])),
+    { ο: 40, η: 51, το: 52 },
+  )
   assert.deepEqual(articleGenderNouns.map((noun) => noun.wordId), verifiedArticleNounRecords.map((noun) => noun.wordId))
   assert.equal(new Set(verifiedArticleNounRecords.map((noun) => noun.wordId)).size, verifiedArticleNounRecords.length)
 
@@ -160,7 +164,7 @@ test('T10 bank contains reviewed dictionary nouns with balanced article counts',
     article,
     articleGenderNouns.filter((noun) => noun.article === article).length,
   ]))
-  assert.deepEqual(distribution, { ο: 31, η: 33, το: 36 })
+  assert.deepEqual(distribution, { ο: 40, η: 51, το: 52 })
   assert.ok(Object.values(distribution).every((count) => count >= 25))
   assert.deepEqual(
     Object.fromEntries(Object.entries(ARTICLE_GENDER_REFERENCE).sort()),
@@ -189,7 +193,7 @@ test('T10 bank contains reviewed dictionary nouns with balanced article counts',
   assert.ok(articleGenderNouns.find((noun) => noun.wordId === 'ταξί')?.sourceUrl.includes('lq=%CF%84%CE%B1%CE%BE%CE%AF'))
 
   const excluded = new Set(verifiedArticleNounRecords.map((noun) => noun.wordId))
-  for (const ambiguous of ['κύριε', 'γιατρός', 'ξένος', 'αγγλικά', 'ελληνικά', 'μαθηματικά', 'αθλητικά', 'ναρκωτικά', 'χρονών', 'Έλληνας', 'Ελληνίδα', 'Αμερικανός', 'Αμερικανίδα', 'Γάλλος', 'Γαλλίδα']) {
+  for (const ambiguous of ['κύριε', 'γιατρός', 'ξένος', 'αγγλικά', 'ελληνικά', 'μαθηματικά', 'αθλητικά', 'ναρκωτικά', 'χρονών', 'Έλληνας', 'Ελληνίδα', 'Αμερικανός', 'Αμερικανίδα', 'Γάλλος', 'Γαλλίδα', 'αρχιτέκτονας', 'ηθοποιός', 'ισπανικά', 'Λονδίνο', 'Μαδρίτη']) {
     assert.equal(excluded.has(ambiguous), false, `${ambiguous} must not be included`)
   }
 })
@@ -318,7 +322,7 @@ test('ten sequential sessions cover the whole bank; 100 fixed seeds preserve bal
         beginsSession: question === session.rounds[0]!.questions[0],
       })
     }
-    if (run === 5) assert.equal(seen.size, ids.length, 'six sessions should complete one full cycle')
+    if (run === 7) assert.equal(seen.size, ids.length, 'eight sessions should complete one full cycle')
   }
   assert.equal(seen.size, ids.length)
   assert.ok(history.sessionCount >= 10)

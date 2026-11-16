@@ -104,7 +104,7 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   assert.equal(cases.title, 'Падежи существительных')
   assert.equal(cases.greekTitle, 'Οι πτώσεις των ουσιαστικών')
   assert.equal(cases.category, 'Грамматика')
-  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter'])
+  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter', 'present-tense-verbs'])
   for (const keyword of ['падеж', 'именительный', 'родительный', 'винительный', 'звательный']) {
     assert.ok(cases.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -122,6 +122,36 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve('/theory/noun-cases?explanation=1')
   assert.equal(route.name, 'theory-topic')
   assert.equal(route.params.topicId, 'noun-cases')
+  assert.equal(route.query.explanation, '1')
+})
+
+test('present-tense verb topic is registered, linked, searchable, and loads both Markdown files', async () => {
+  const verbs = getTheoryTopic('present-tense-verbs')!
+  assert.ok(verbs)
+  assert.equal(verbs.title, 'Глаголы в настоящем времени')
+  assert.equal(verbs.greekTitle, 'Ρήματα στον ενεστώτα')
+  assert.equal(verbs.category, 'Грамматика')
+  assert.deepEqual(verbs.related, ['noun-cases', 'definite-article'])
+  for (const keyword of ['глаголы', 'настоящее время', 'γράφω', 'ρωτάω', 'ρωτώ']) {
+    assert.ok(verbs.keywords.includes(keyword), `missing search keyword: ${keyword}`)
+  }
+
+  const summary = await readFile(resolve('src/data/theory', verbs.summary), 'utf8')
+  const explanation = await readFile(resolve('src/data/theory', verbs.explanation), 'utf8')
+  for (const form of ['γράφω', 'γράφεις', 'γράφει', 'γράφουμε', 'γράφετε', 'γράφουν']) {
+    assert.ok(summary.includes(form) || explanation.includes(form), `missing present-tense form: ${form}`)
+  }
+  for (const example of ['Βλέπω τον φίλο.', 'Πίνεις νερό;', 'Αγοράζουν το πουκάμισο.', 'Μαθαίνουμε ελληνικά.']) {
+    assert.ok(explanation.includes(example), `missing present-tense example: ${example}`)
+  }
+  assert.match(explanation, /ρωτάω\s*\/\s*ρωτώ/)
+  assert.match(explanation, /Не смешивайте времена/)
+  assert.match(renderTheoryMarkdown(summary), /<p>/)
+  assert.match(renderTheoryMarkdown(explanation), /<h2\b/)
+
+  const route = createRouter({ history: createMemoryHistory(), routes: theoryRoutes }).resolve('/theory/present-tense-verbs?explanation=1')
+  assert.equal(route.name, 'theory-topic')
+  assert.equal(route.params.topicId, 'present-tense-verbs')
   assert.equal(route.query.explanation, '1')
 })
 

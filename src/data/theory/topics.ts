@@ -58,7 +58,7 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['падеж', 'падежи', 'именительный', 'родительный', 'винительный', 'звательный', 'πτώσεις', 'ονομαστική', 'γενική', 'αιτιατική', 'κλητική', 'артикль', 'склонение'],
     summary: 'content/noun-cases/summary.md',
     explanation: 'content/noun-cases/explanation.md',
-    related: ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter'],
+    related: ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter', 'present-tense-verbs'],
   },
   {
     id: 'noun-masculine',
@@ -106,6 +106,18 @@ export const theoryTopics: TheoryTopic[] = [
     keywords: ['местоимения', 'личные местоимения', 'слабые формы', 'родительный падеж', 'принадлежность', 'μου', 'σου', 'του', 'της', 'μας', 'σας', 'τους'],
     summary: 'content/personal-pronouns-genitive/summary.md',
     explanation: 'content/personal-pronouns-genitive/explanation.md',
+    related: ['noun-cases', 'definite-article'],
+  },
+  {
+    id: 'present-tense-verbs',
+    title: 'Глаголы в настоящем времени',
+    greekTitle: 'Ρήματα στον ενεστώτα',
+    category: 'Грамматика',
+    description: 'Как формы настоящего времени показывают, кто выполняет действие.',
+    order: 9,
+    keywords: ['глагол', 'глаголы', 'настоящее время', 'ενεστώτας', 'γράφω', 'βλέπω', 'πίνω', 'ρωτάω', 'ρωτώ', 'αγοράζω', 'спряжение'],
+    summary: 'content/present-tense-verbs/summary.md',
+    explanation: 'content/present-tense-verbs/explanation.md',
     related: ['noun-cases', 'definite-article'],
   },
   {
