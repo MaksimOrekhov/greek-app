@@ -1,11 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
+import { adaptWordsToTrainerPairs, areVocabularyPairsAmbiguous } from '../src/lib/trainers/vocabularyMatch.ts'
 import { approximateReading } from '../src/data/approximateReading.ts'
 import { validateVocabularyData, words } from '../src/data/words.ts'
 import { validateVerbData, verbs } from '../src/data/verbs.ts'
 import { theoryTopics, validateTheoryTopics } from '../src/data/theory/topics.ts'
-import { canImportAnonymousProgress, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, normalizeIntroductionIds, normalizeProgressIds, selectSessionWords } from '../src/lib/studyRules.ts'
+import { canImportAnonymousProgress, canonicalWordId, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, normalizeIntroductionIds, normalizeProgressIds, selectSessionWords } from '../src/lib/studyRules.ts'
 import { nextPosition, sessionProgress } from '../src/lib/studySession.ts'
 
 test('review intervals preserve rating order, handle first reviews and cap growth', () => {
@@ -255,9 +256,9 @@ test('vocabulary additions preserve the original keys and make every new card us
   ]
   assert.equal(addedKeys.length, 63)
   assert.equal(new Set(addedKeys).size, addedKeys.length)
-  assert.equal(words.length, 448)
-  assert.equal(new Set(words.map((word) => word.greek)).size, words.length)
-  const originalKeys = words.filter((word) => !addedKeys.includes(word.greek)).map((word) => word.greek).sort()
+  const wordsThroughP59 = words.slice(0, 448)
+  assert.equal(new Set(wordsThroughP59.map((word) => word.greek)).size, 448)
+  const originalKeys = wordsThroughP59.filter((word) => !addedKeys.includes(word.greek)).map((word) => word.greek).sort()
   assert.equal(originalKeys.length, 385)
   assert.equal(createHash('sha256').update(originalKeys.join('\n')).digest('hex'), 'a3895d0de5095be4242c811145798616d6ee35e592d1a6da20d9866c9f3a14a1')
   for (const greek of addedKeys) {
@@ -364,7 +365,6 @@ test('the three added verb paradigms match independently checked forms and keep 
     'είμαι', 'ευχαριστώ', 'παρακαλώ', 'πηγαίνω', 'έρχομαι', 'τρώω', 'πίνω', 'μιλάω', 'βλέπω', 'λέω',
     'παίρνω', 'δίνω', 'γράφω', 'διαβάζω', 'μαθαίνω', 'μπορώ', 'παίζω', 'αγοράζω', 'πληρώνω', 'σπουδάζω',
   ]
-  assert.equal(verbs.length, 33)
   for (const lemma of originalLemmas) assert.ok(verbs.some((verb) => verb.lemma === lemma), lemma)
   const expected = [
     {
@@ -468,4 +468,121 @@ test('new textbook verbs match independently checked present, aorist, and future
     assert.deepEqual(verb.future.find((tense) => tense.aspect === 'simple')?.forms, expected.simple)
     assert.equal(verb.pastLabel, 'Прошедшее (аорист)')
   }
+})
+
+test('P65/W31 adds the reviewed cards and preserves the previous progress keys', () => {
+  const tagsByLemma = {
+    particle: [
+      'μάλιστα',
+    ],
+    noun: [
+      'μονόκλινο', 'δίκλινο', 'τρίκλινο', 'κρεβάτι', 'όροφος', 'σαββατοκύριακο', 'ψυγείο', 'πρωινό',
+      'κλειδί', 'υπάλληλος', 'γραφείο', 'Πειραιάς', 'νούμερο', 'παντελόνι', 'πουλόβερ', 'φούστα',
+      'μαντήλι', 'παπούτσι', 'ζώνη', 'τιμή', 'ναός', 'δώρο', 'κεφτές', 'τραγούδι',
+      'άγαλμα', 'άνθρωπος', 'εστιατόριο', 'παραλία', 'πόλη',
+    ],
+    adjective: [
+      'ζεστός', 'γαλάζιος', 'μαύρος', 'κίτρινος', 'πράσινος', 'κόκκινος', 'μοβ', 'μπλε',
+      'νέος', 'πλούσιος', 'κρύος', 'καινούργιος', 'αστείος', 'ψηλός', 'κοντός', 'αρχαίος',
+      'μέτριος', 'νόστιμος', 'κουρασμένος', 'παλιός', 'κινέζικος',
+    ],
+    adverb: [
+      'φυσικά',
+    ],
+    numeral: [
+      'πρώτος', 'δεύτερος', 'τρίτος', 'τέταρτος', 'πέμπτος',
+    ],
+    expression: [
+      'καφέ χρώμα',
+    ],
+    verb: [
+      'δίνω', 'ανεβαίνω',
+    ],
+  } as const
+  const addedKeys = Object.values(tagsByLemma).flat()
+  const previousKeys = words.slice(0, 448).map((word) => word.greek).sort()
+  assert.equal(createHash('sha256').update(previousKeys.join('\n')).digest('hex'), '7ebff34017b7785172c0ec6b8a83adf1ed616c895ccc1697f7edb4bebf25d67f')
+  const added = words.slice(448)
+  assert.equal(words.length, 508)
+  assert.equal(addedKeys.length, 60)
+  assert.deepEqual(added.map((word) => word.greek).sort(), [...addedKeys].sort())
+  assert.deepEqual(validateVocabularyData(), [])
+  for (const [tag, lemmas] of Object.entries(tagsByLemma)) {
+    for (const lemma of lemmas) {
+      const card = added.find((word) => word.greek === lemma)
+      assert.ok(card, lemma)
+      assert.deepEqual(card.partOfSpeech, [tag], lemma)
+      assert.ok(card.examples.length > 0, lemma)
+      assert.equal(canonicalWordId(lemma), lemma)
+      if (lemma !== 'μοβ' && lemma !== 'μπλε') assert.match(card.transliteration.normalize('NFD'), /\u0301/u, lemma)
+    }
+  }
+  for (const form of ['καφέ', 'μωβ', 'μαύρο', 'κόκκινη', 'παπούτσια', 'κεφτέδες']) {
+    assert.ok(!words.some((word) => word.greek === form), form)
+  }
+})
+
+test('P65/W31 retains the reviewed readings of headwords and their inflected examples', () => {
+  const reference = [
+    ['δίκλινο', 'зи́клино', 'то зи́клино э́хи зи́о крэва́тья'],
+    ['δεύτερος', 'зэ́фтэрос', 'ти зэ́фтэри мэ́ра па́мэ сти са́ласа'],
+    ['παπούτσι', 'папу́ци', 'та папу́цья му и́нэ микра́'],
+    ['ζεστός', 'зэсто́с', 'сэ́ло зэсти́ су́па'],
+    ['μέτριος', 'мэ́триос', 'э́нан элинико́ кафэ́ мэ́трио, паракало́'],
+    ['κεφτές', 'кэфтэ́с', 'сэ́ло кэфтэ́зэс мэ пата́тэс'],
+    ['κουρασμένος', 'куразмэ́нос', 'и́мэ куразмэ́ни мэта́ ти зулья́'],
+    ['ανεβαίνω', 'анэвэ́но', 'анэвэ́но стон зэ́фтэро о́рофо мэ та по́зья'],
+  ]
+  for (const [lemma, reading, exampleReading] of reference) {
+    const card = words.find((word) => word.greek === lemma)
+    assert.ok(card, lemma)
+    assert.equal(card.transliteration, reading, lemma)
+    assert.equal(card.examples[0].transliteration, exampleReading, lemma)
+  }
+})
+
+test('T5 adapts all P65/W31 cards without new matching conflicts', () => {
+  const pairs = adaptWordsToTrainerPairs(words)
+  assert.equal(pairs.length, words.length)
+  for (const word of words.slice(448)) {
+    const pair = pairs.find((entry) => entry.id === 'dictionary:' + word.greek)
+    assert.ok(pair, word.greek)
+    assert.equal(pair.answer, word.greek)
+    assert.equal(pair.prompt, word.russian)
+    assert.ok(!pairs.some((other) => other !== pair && areVocabularyPairsAmbiguous(pair, other)), word.greek)
+  }
+})
+
+test('P65/W31 clothing examples use a present-tense translation and the lesson price question', () => {
+  const pullover = words.find((word) => word.greek === 'πουλόβερ')
+  assert.deepEqual(pullover?.examples[0], {
+    greek: 'Φοράω πουλόβερ γιατί κάνει κρύο.',
+    transliteration: 'фора́о пуло́вэр яти́ ка́ни кри́о',
+    russian: 'Я в свитере, потому что холодно.',
+  })
+
+  const skirt = words.find((word) => word.greek === 'φούστα')
+  assert.deepEqual(skirt?.examples[0], {
+    greek: 'Πόσο κάνει αυτή η φούστα;',
+    transliteration: 'по́со ка́ни афти́ и фу́ста?',
+    russian: 'Сколько стоит эта юбка?',
+  })
+})
+
+test('P65/W31 adds the independently checked ανεβαίνω paradigm without replacing a verb', () => {
+  const previousLemmas = verbs.slice(0, 33).map((verb) => verb.lemma).sort()
+  assert.equal(createHash('sha256').update(previousLemmas.join('\n')).digest('hex'), '4327d2af31e6a89c0be2170a116ed4cc3b0c3bbd9a9d650605f40d915ebf6430')
+  assert.deepEqual(validateVerbData(), [])
+  assert.equal(verbs.length, 34)
+  const verb = verbs.find((entry) => entry.lemma === 'ανεβαίνω')
+  assert.ok(verb)
+  // Neurolingo Lexiscope, active voice and the two aspect stems.
+  assert.deepEqual(verb.forms.present, ['ανεβαίνω', 'ανεβαίνεις', 'ανεβαίνει', 'ανεβαίνουμε', 'ανεβαίνετε', 'ανεβαίνουν'])
+  assert.deepEqual(verb.forms.past, ['ανέβηκα', 'ανέβηκες', 'ανέβηκε', 'ανεβήκαμε', 'ανεβήκατε', 'ανέβηκαν'])
+  assert.deepEqual(verb.future.find((tense) => tense.aspect === 'continuous')?.forms,
+    ['θα ανεβαίνω', 'θα ανεβαίνεις', 'θα ανεβαίνει', 'θα ανεβαίνουμε', 'θα ανεβαίνετε', 'θα ανεβαίνουν'])
+  assert.deepEqual(verb.future.find((tense) => tense.aspect === 'simple')?.forms,
+    ['θα ανέβω', 'θα ανέβεις', 'θα ανέβει', 'θα ανέβουμε', 'θα ανέβετε', 'θα ανέβουν'])
+  assert.match(verb.note ?? '', /θα ανεβώ/u)
+  assert.deepEqual(words.find((word) => word.greek === verb.lemma)?.partOfSpeech, ['verb'])
 })
