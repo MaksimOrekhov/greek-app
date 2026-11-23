@@ -541,7 +541,7 @@ test('P65/W31 retains the reviewed readings of headwords and their inflected exa
   }
 })
 
-test('T5 adapts all P65/W31 cards without new matching conflicts', () => {
+test('T5 adapts all P65/W31 cards and recognizes the reviewed matching conflict', () => {
   const pairs = adaptWordsToTrainerPairs(words)
   assert.equal(pairs.length, words.length)
   for (const word of words.slice(448)) {
@@ -549,7 +549,8 @@ test('T5 adapts all P65/W31 cards without new matching conflicts', () => {
     assert.ok(pair, word.greek)
     assert.equal(pair.answer, word.greek)
     assert.equal(pair.prompt, word.russian)
-    assert.ok(!pairs.some((other) => other !== pair && areVocabularyPairsAmbiguous(pair, other)), word.greek)
+    const conflicts = pairs.filter((other) => other !== pair && areVocabularyPairsAmbiguous(pair, other)).map((other) => other.answer)
+    assert.deepEqual(conflicts, word.greek === 'νέος' ? ['καινούργιος'] : word.greek === 'καινούργιος' ? ['νέος'] : [], word.greek)
   }
 })
 

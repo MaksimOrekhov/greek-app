@@ -20,6 +20,8 @@ export const VOCABULARY_MATCH_CONFLICT_GROUPS: readonly (readonly string[])[] = 
   ['άντρας', 'τύπος'],
   ['κινηματογράφος', 'σινεμά'],
   ['φιλμ', 'σινεμά'],
+  ['νέος', 'καινούργιος'],
+  ['όμορφος', 'ωραίος'],
 ]
 
 export const VOCABULARY_MATCH_SESSION_PAIR_COUNT = 20

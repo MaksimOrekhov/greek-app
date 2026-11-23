@@ -135,13 +135,13 @@ function rendererText(node: TestRendererNode): string {
 test('T10 bank contains reviewed dictionary nouns with balanced article counts', async () => {
   const candidateCount = words.filter((word) => word.partOfSpeech.includes('noun')).length
   assert.ok(candidateCount >= verifiedArticleNounRecords.length)
-  assert.equal(verifiedArticleNounRecords.length, 143)
+  assert.equal(verifiedArticleNounRecords.length, 170)
   assert.equal(verifiedArticleNounRecords.length, Object.keys(ARTICLE_GENDER_REFERENCE).length)
   assert.ok(verifiedArticleNounRecords.length >= 90)
   assert.equal(articleGenderNouns.length, verifiedArticleNounRecords.length)
   assert.deepEqual(
     Object.fromEntries(NOMINATIVE_ARTICLES.map((article) => [article, verifiedArticleNounRecords.filter((noun) => noun.article === article).length])),
-    { ο: 40, η: 51, το: 52 },
+    { ο: 44, η: 56, το: 70 },
   )
   assert.deepEqual(articleGenderNouns.map((noun) => noun.wordId), verifiedArticleNounRecords.map((noun) => noun.wordId))
   assert.equal(new Set(verifiedArticleNounRecords.map((noun) => noun.wordId)).size, verifiedArticleNounRecords.length)
@@ -155,16 +155,22 @@ test('T10 bank contains reviewed dictionary nouns with balanced article counts',
     assert.ok(noun.greek.trim() && !/\s/.test(noun.greek), noun.wordId)
     assert.ok(NOMINATIVE_ARTICLES.includes(noun.article), noun.wordId)
     const source = new URL(noun.sourceUrl)
-    assert.equal(source.hostname, 'www.greek-language.gr')
-    assert.match(source.pathname, /triantafyllides\/search\.html$/)
-    assert.ok(source.searchParams.get('lq')?.trim(), noun.wordId)
+    assert.equal(source.protocol, 'https:')
+    if (source.hostname === 'christikolexiko.academyofathens.gr') {
+      assert.equal(source.pathname, '/index.php/anazitisi')
+      assert.equal(source.searchParams.get('st'), noun.wordId)
+    } else {
+      assert.equal(source.hostname, 'www.greek-language.gr')
+      assert.match(source.pathname, /triantafyllides\/search\.html$/)
+      assert.ok(source.searchParams.get('lq')?.trim(), noun.wordId)
+    }
   }
 
   const distribution = Object.fromEntries(NOMINATIVE_ARTICLES.map((article) => [
     article,
     articleGenderNouns.filter((noun) => noun.article === article).length,
   ]))
-  assert.deepEqual(distribution, { ο: 40, η: 51, το: 52 })
+  assert.deepEqual(distribution, { ο: 44, η: 56, το: 70 })
   assert.ok(Object.values(distribution).every((count) => count >= 25))
   assert.deepEqual(
     Object.fromEntries(Object.entries(ARTICLE_GENDER_REFERENCE).sort()),
@@ -193,7 +199,7 @@ test('T10 bank contains reviewed dictionary nouns with balanced article counts',
   assert.ok(articleGenderNouns.find((noun) => noun.wordId === 'ταξί')?.sourceUrl.includes('lq=%CF%84%CE%B1%CE%BE%CE%AF'))
 
   const excluded = new Set(verifiedArticleNounRecords.map((noun) => noun.wordId))
-  for (const ambiguous of ['κύριε', 'γιατρός', 'ξένος', 'αγγλικά', 'ελληνικά', 'μαθηματικά', 'αθλητικά', 'ναρκωτικά', 'χρονών', 'Έλληνας', 'Ελληνίδα', 'Αμερικανός', 'Αμερικανίδα', 'Γάλλος', 'Γαλλίδα', 'αρχιτέκτονας', 'ηθοποιός', 'ισπανικά', 'Λονδίνο', 'Μαδρίτη']) {
+  for (const ambiguous of ['κύριε', 'γιατρός', 'ξένος', 'αγγλικά', 'ελληνικά', 'μαθηματικά', 'αθλητικά', 'ναρκωτικά', 'χρονών', 'Έλληνας', 'Ελληνίδα', 'Αμερικανός', 'Αμερικανίδα', 'Γάλλος', 'Γαλλίδα', 'αρχιτέκτονας', 'ηθοποιός', 'ισπανικά', 'Λονδίνο', 'Μαδρίτη', 'υπάλληλος', 'Πειραιάς']) {
     assert.equal(excluded.has(ambiguous), false, `${ambiguous} must not be included`)
   }
 })
@@ -309,11 +315,11 @@ test('versioned history tolerates invalid or unavailable storage and reconciles 
   })
 })
 
-test('ten sequential sessions cover the whole bank; 100 fixed seeds preserve balance and option variety', () => {
+test('sequential sessions cover the expanded bank; 100 fixed seeds preserve balance and option variety', () => {
   const ids = articleGenderNouns.map((noun) => noun.wordId)
   let history = createArticleGenderHistory(ids, seeded(44))
   const seen = new Set<string>()
-  for (let run = 0; run < 10; run += 1) {
+  for (let run = 0; run < 12; run += 1) {
     const session = createArticleGenderSession(articleGenderNouns, history, seeded(100 + run))
     for (const question of flatQuestions(session)) {
       seen.add(question.noun.wordId)
@@ -322,10 +328,9 @@ test('ten sequential sessions cover the whole bank; 100 fixed seeds preserve bal
         beginsSession: question === session.rounds[0]!.questions[0],
       })
     }
-    if (run === 7) assert.equal(seen.size, ids.length, 'eight sessions should complete one full cycle')
   }
   assert.equal(seen.size, ids.length)
-  assert.ok(history.sessionCount >= 10)
+  assert.ok(history.sessionCount >= 12)
   assert.ok(history.cycle >= 1)
 
   const optionOrders = new Set<string>()
@@ -565,4 +570,20 @@ test('article choice names separate Russian from Greek and focus moves to the av
   advance()
   assert.equal(advanceCount, 1)
   app.unmount()
+})
+
+test('P65/W31 adds reviewed nouns while preserving actual P59/W28 completion and mistake IDs', () => {
+  const oldBank = articleGenderNouns.slice(0, 143)
+  const first = oldBank[0]!
+  const second = oldBank[1]!
+  const previous = createArticleGenderHistory(oldBank.map(({ wordId }) => wordId), seeded(65))
+  const history = recordArticleGenderAnswer(previous, first.wordId, false, oldBank)
+  const checked = recordArticleGenderAnswer(history, second.wordId, true, oldBank)
+  const storage = new MemoryStorage()
+  storage.setItem(ARTICLE_GENDER_HISTORY_KEY, JSON.stringify(checked))
+  const expanded = loadArticleGenderHistory(articleGenderNouns, seeded(66), storage)
+  assert.deepEqual(expanded.completedIds, checked.completedIds)
+  assert.deepEqual(expanded.mistakeQueue, checked.mistakeQueue)
+  assert.equal(new Set(expanded.order).size, 170)
+  assert.ok(expanded.order.includes('κρεβάτι'))
 })

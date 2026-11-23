@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useTemplateRef, watch } from 'vue'
 import { completeFillGapSentence, type FillGapQuestion } from '../../data/trainers/fillGapQuestions.ts'
 
 const props = defineProps<{
@@ -25,6 +25,18 @@ const orderedOptions = computed(() => props.optionOrder
 const selectedOption = computed(() => props.question.options.find((option) => option.id === props.selectedOptionId) ?? null)
 const completedSentence = computed(() => completeFillGapSentence(props.question))
 const progress = computed(() => `${props.questionNumber} / ${props.totalQuestions}`)
+const questionHeading = useTemplateRef<HTMLElement>('questionHeading')
+const nextAction = useTemplateRef<HTMLButtonElement>('nextAction')
+
+watch(() => props.checked, (checked) => {
+  if (checked) nextAction.value?.focus()
+}, { flush: 'post' })
+
+function focusQuestion(): void {
+  questionHeading.value?.focus()
+}
+
+defineExpose({ focusQuestion })
 </script>
 
 <template>
@@ -36,7 +48,7 @@ const progress = computed(() => `${props.questionNumber} / ${props.totalQuestion
       </div>
     </div>
 
-    <h2 id="fill-gap-instruction">{{ question.instruction }}</h2>
+    <h2 id="fill-gap-instruction" ref="questionHeading" tabindex="-1">{{ question.instruction }}</h2>
     <p class="fill-gap-hint">{{ question.hint }}</p>
 
     <p class="sentence-line" aria-label="Предложение с пропуском">
@@ -84,7 +96,7 @@ const progress = computed(() => `${props.questionNumber} / ${props.totalQuestion
       <strong>{{ isCorrect ? 'Верно!' : 'Пока неверно.' }}</strong>
       <p v-if="!isCorrect" class="correct-sentence"><span>Правильная фраза:</span> {{ completedSentence }}</p>
       <p>{{ question.explanation }}</p>
-      <button class="exercise-action-button" type="button" @click="emit('advance')">
+      <button ref="nextAction" class="exercise-action-button" type="button" @click="emit('advance')">
         {{ continueLabel }} <span aria-hidden="true">→</span>
       </button>
     </div>

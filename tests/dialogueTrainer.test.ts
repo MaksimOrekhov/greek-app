@@ -429,7 +429,7 @@ test('history records only checked answers across early exit and re-entry', () =
 })
 
 test('reply roles match reviewed participants rather than a blanket user label', () => {
-  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ','Πελάτης','Μαρία','Άννα','Ελένη','Μαρία' ]
+  const roles = [ 'Άννα','Εσύ','Εσύ','Άννα','Ελένη','Άννα','Εσύ','Εσύ','Ελένη','Νίκος','Άννα','Μαρία','Νίκος','Άννα','Ελένη','Μαρία','Νίκος','Άννα','Νίκος','Εσύ','Οδηγός','Εσύ','Μαρία','Εσύ','Μαρία','Ελένη','Ελένη','Νίκος','Άννα','Ελένη','Εσύ','Άννα','Νίκος','Άννα','Εσύ','Εσύ','Πελάτης','Μαρία','Άννα','Ελένη','Μαρία','Πελάτης','Πελάτισσα','Υπάλληλος','Άννα' ]
   assert.deepEqual(dialogueQuestions.map(q => q.replySpeaker), roles)
 })
 
@@ -460,4 +460,24 @@ test('rendered panel names the reply speaker before answering and reveals every 
   for (const option of item.question.options) assert.ok(after.includes(option.translation))
   assert.ok(after.includes('Переводы и разбор всех вариантов'))
   assert.ok(!after.includes('dialogue-speaker">Ты'))
+})
+
+test('P65/W31 dialogue keys and roles match the independent situational review', () => {
+  const reviewed = [
+    ['d-p65-room-two-beds', 'Πελάτης', 'δύο κρεβάτια', 'Το δίκλινο, παρακαλώ.', 'Двухместный, пожалуйста.'],
+    ['d-p65-next-blue-pullover', 'Πελάτισσα', 'σε μπλε χρώμα', 'Το μπλε, παρακαλώ.', 'Синий, пожалуйста.'],
+    ['d-p65-hotel-key', 'Υπάλληλος', 'μόνο το κλειδί', 'Ορίστε το κλειδί σας.', 'Вот ваш ключ.'],
+    ['d-p65-up-to-flat', 'Άννα', 'στον δεύτερο όροφο', 'Στον δεύτερο όροφο. Σε περιμένω εδώ.', 'На второй этаж. Я жду тебя здесь.'],
+  ] as const
+  assert.equal(dialogueQuestions.length, 45)
+  assert.equal(new Set(dialogueQuestions.filter((q) => q.id.startsWith('d-p65-')).map((q) => q.intentId)).size, 4)
+  for (const [id, role, clue, el, ru] of reviewed) {
+    const item = dialogueQuestions.find((q) => q.id === id)!
+    assert.equal(item.replySpeaker, role)
+    assert.ok(item.context.some((line) => line.greek.includes(clue)), id)
+    assert.notEqual(item.context.at(-1)?.speaker, role)
+    const answer = item.options.find((option) => option.id === item.correctOptionId)!
+    assert.equal(answer.greek, el)
+    assert.equal(answer.translation, ru)
+  }
 })

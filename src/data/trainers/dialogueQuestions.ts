@@ -540,4 +540,56 @@ export const dialogueQuestions: DialogueQuestion[] = [
     ],
     correctOptionId: 'small', explanation: 'Из двух предложенных размеров покупатель выбирает маленький и вежливо просит его.',
   },
+  {
+    id: 'd-p65-room-two-beds', level: 'A1', categoryId: 'places-travel', situationId: 'hotel-choose-two-beds', intentId: 'choose-room-type', replySpeaker: 'Πελάτης',
+    context: [
+      { speaker: 'Πελάτης', greek: 'Θέλω ένα δωμάτιο με δύο κρεβάτια.', translation: 'Мне нужен номер с двумя кроватями.' },
+      { speaker: 'Υπάλληλος', greek: 'Έχουμε ένα μονόκλινο, ένα δίκλινο και ένα τρίκλινο. Ποιο θέλετε;', translation: 'У нас есть одноместный, двухместный и трёхместный номера. Какой вы хотите?' },
+    ],
+    options: [
+      { id: 'double', greek: 'Το δίκλινο, παρακαλώ.', translation: 'Двухместный, пожалуйста.', explanation: 'В этом уроке δίκλινο — номер с двумя кроватями.' },
+      { id: 'single', greek: 'Το μονόκλινο, παρακαλώ.', translation: 'Одноместный, пожалуйста.', explanation: 'В μονόκλινο одна кровать, а гость попросил две.' },
+      { id: 'triple', greek: 'Το τρίκλινο, παρακαλώ.', translation: 'Трёхместный, пожалуйста.', explanation: 'В τρίκλινο три кровати, а гость попросил номер с двумя.' },
+    ],
+    correctOptionId: 'double', explanation: 'Гость уже назвал нужное количество кроватей. Двухместный номер с двумя кроватями соответствует просьбе.',
+  },
+  {
+    id: 'd-p65-next-blue-pullover', level: 'A1', categoryId: 'politeness-requests', situationId: 'shop-request-different-colour', intentId: 'request-item-colour', replySpeaker: 'Πελάτισσα',
+    context: [
+      { speaker: 'Πελάτισσα', greek: 'Μου αρέσει αυτό το πουλόβερ, αλλά το θέλω σε μπλε χρώμα.', translation: 'Мне нравится этот свитер, но я хочу такой же синий.' },
+      { speaker: 'Υπάλληλος', greek: 'Υπάρχει σε μπλε, πράσινο και μαύρο. Ποιο θέλετε να δοκιμάσετε;', translation: 'Есть синий, зелёный и чёрный. Какой хотите примерить?' },
+    ],
+    options: [
+      { id: 'blue', greek: 'Το μπλε, παρακαλώ.', translation: 'Синий, пожалуйста.', explanation: 'Она сразу уточнила, что хочет синий свитер.' },
+      { id: 'green', greek: 'Το πράσινο, παρακαλώ.', translation: 'Зелёный, пожалуйста.', explanation: 'Πράσινο — зелёный цвет, покупательница попросила синий.' },
+      { id: 'black', greek: 'Το μαύρο, παρακαλώ.', translation: 'Чёрный, пожалуйста.', explanation: 'Μαύρο — чёрный цвет, покупательница попросила синий.' },
+    ],
+    correctOptionId: 'blue', explanation: 'Продавец предлагает три цвета для примерки. Покупательница выбрала синий.',
+  },
+  {
+    id: 'd-p65-hotel-key', level: 'A1', categoryId: 'places-travel', situationId: 'give-hotel-key-at-desk', intentId: 'hand-over-requested-object', replySpeaker: 'Υπάλληλος',
+    context: [
+      { speaker: 'Υπάλληλος', greek: 'Έχω εδώ το κλειδί του δωματίου και τον λογαριασμό σας.', translation: 'У меня здесь ключ от номера и ваш счёт.' },
+      { speaker: 'Πελάτης', greek: 'Θέλω μόνο το κλειδί τώρα, παρακαλώ.', translation: 'Сейчас мне нужен только ключ, пожалуйста.' },
+    ],
+    options: [
+      { id: 'key', greek: 'Ορίστε το κλειδί σας.', translation: 'Вот ваш ключ.', explanation: 'Сотрудник передаёт единственный предмет, который сейчас нужен гостю.' },
+      { id: 'bill', greek: 'Ορίστε ο λογαριασμός σας.', translation: 'Вот ваш счёт.', explanation: 'Гость сейчас попросил выдать ключ, а не счёт.' },
+      { id: 'passport', greek: 'Ορίστε το διαβατήριό σας.', translation: 'Вот ваш паспорт.', explanation: 'Паспорт не является запрошенным ключом от номера.' },
+    ],
+    correctOptionId: 'key', explanation: 'Гость просит только ключ, поэтому сотрудник передаёт ключ от номера.',
+  },
+  {
+    id: 'd-p65-up-to-flat', level: 'A1', categoryId: 'places-travel', situationId: 'tell-visitor-to-come-up', intentId: 'give-destination-in-building', replySpeaker: 'Άννα',
+    context: [
+      { speaker: 'Άννα', greek: 'Είμαι στο διαμέρισμά μου, στον δεύτερο όροφο.', translation: 'Я у себя в квартире, на втором этаже.' },
+      { speaker: 'Νίκος', greek: 'Είμαι κάτω. Σε ποιον όροφο ανεβαίνω;', translation: 'Я внизу. На какой этаж мне подняться?' },
+    ],
+    options: [
+      { id: 'second', greek: 'Στον δεύτερο όροφο. Σε περιμένω εδώ.', translation: 'На второй этаж. Я жду тебя здесь.', explanation: 'Анна ждёт в своей квартире на втором этаже.' },
+      { id: 'first', greek: 'Στον πρώτο όροφο. Σε περιμένω εκεί.', translation: 'На первый этаж. Я жду тебя там.', explanation: 'Анна сказала, что она на втором, а не на первом этаже.' },
+      { id: 'fourth', greek: 'Στον τέταρτο όροφο. Σε περιμένω εκεί.', translation: 'На четвёртый этаж. Я жду тебя там.', explanation: 'В условии нужный этаж — второй, а не четвёртый.' },
+    ],
+    correctOptionId: 'second', explanation: 'Никос просит указать этаж, куда ему подняться. Квартира Анны на втором этаже.',
+  },
 ]
