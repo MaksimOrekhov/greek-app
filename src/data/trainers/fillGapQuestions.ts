@@ -429,6 +429,326 @@ export const trainerFillGapQuestions: FillGapQuestion[] = [
     choices: ['ο μαθητής', 'τον μαθητή', 'του μαθητή'], correct: 'τον μαθητή',
     explanation: 'Полное предложение: Ο πατέρας βλέπει τον μαθητή. Отец выполняет действие, а ученик — тот, кого он видит: ο μαθητής → τον μαθητή.',
   }),
+  fixedQuestion('object-pronouns-dog', 'object-pronouns', {
+    instruction, sentenceBefore: 'Βλέπεις τον σκύλο; — Ναι, ', sentenceAfter: ' βλέπω.', hint: 'Видишь собаку? — Да, вижу её.',
+    choices: ['τον', 'τη', 'το'], correct: 'τον',
+    explanation: 'Ο σκύλος — мужского рода, хотя по-русски «собака» женского.',
+  }),
+  fixedQuestion('object-pronouns-newspaper', 'object-pronouns', {
+    instruction, sentenceBefore: 'Διαβάζεις την εφημερίδα; — Ναι, ', sentenceAfter: ' διαβάζω.', hint: 'Читаешь газету? — Да, читаю её.',
+    choices: ['τη', 'τον', 'το'], correct: 'τη',
+    explanation: 'Η εφημερίδα — женского рода. Перед δ пишем τη.',
+  }),
+  fixedQuestion('object-pronouns-shirt', 'object-pronouns', {
+    instruction, sentenceBefore: 'Έχεις το πουκάμισο; — Όχι, δεν ', sentenceAfter: ' έχω.', hint: 'У тебя есть рубашка? — Нет, её у меня нет.',
+    choices: ['τον', 'το', 'την'], correct: 'το',
+    explanation: 'Το πουκάμισο — среднего рода. После δεν местоимение остаётся перед глаголом.',
+  }),
+  fixedQuestion('object-pronouns-teacher', 'object-pronouns', {
+    instruction, sentenceBefore: 'Καταλαβαίνεις τον καθηγητή; — Όχι, δεν ', sentenceAfter: ' καταλαβαίνω.', hint: 'Ты понимаешь преподавателя? — Нет, я его не понимаю.',
+    choices: ['την', 'το', 'τον'], correct: 'τον',
+    explanation: 'Ο καθηγητής — мужского рода. В ответе τον стоит перед καταλαβαίνω.',
+  }),
+  fixedQuestion('object-pronouns-maria', 'object-pronouns', {
+    instruction, sentenceBefore: 'Περιμένεις τη Μαρία; — Ναι, ', sentenceAfter: ' περιμένω.', hint: 'Ждёшь Марию? — Да, жду её.',
+    choices: ['το', 'τον', 'την'], correct: 'την',
+    explanation: 'Η Μαρία — женского рода. Перед π пишем την.',
+  }),
+  fixedQuestion('object-pronouns-pencil', 'object-pronouns', {
+    instruction, sentenceBefore: 'Θέλεις το μολύβι; — Ναι, ', sentenceAfter: ' θέλω.', hint: 'Хочешь карандаш? — Да, хочу его.',
+    choices: ['τη', 'το', 'τον'], correct: 'το',
+    explanation: 'Το μολύβι — среднего рода, хотя по-русски «карандаш» мужского.',
+  }),
+  fixedQuestion('object-pronouns-father', 'object-pronouns', {
+    instruction, sentenceBefore: 'Ξέρεις τον πατέρα μου; — Ναι, ', sentenceAfter: ' ξέρω.', hint: 'Знаешь моего отца? — Да, знаю его.',
+    choices: ['την', 'τον', 'το'], correct: 'τον',
+    explanation: 'Ο πατέρας — мужского рода, поэтому в ответе τον.',
+  }),
+  fixedQuestion('object-pronouns-aspirin', 'object-pronouns', {
+    instruction, sentenceBefore: 'Έχεις την ασπιρίνη; — Ναι, ', sentenceAfter: ' έχω.', hint: 'У тебя есть аспирин? — Да, он у меня.',
+    choices: ['την', 'τον', 'το'], correct: 'την',
+    explanation: 'Η ασπιρίνη — женского рода, а έχω начинается с гласной. Нужна форма την.',
+  }),
+  fixedQuestion('object-pronouns-lesson', 'object-pronouns', {
+    instruction, sentenceBefore: 'Μαθαίνεις το μάθημα; — Ναι, ', sentenceAfter: ' μαθαίνω.', hint: 'Ты учишь урок? — Да, учу его.',
+    choices: ['τη', 'τον', 'το'], correct: 'το',
+    explanation: 'Το μάθημα — среднего рода. Его заменяет το.',
+  }),
+  fixedQuestion('object-pronouns-brother', 'object-pronouns', {
+    instruction, sentenceBefore: 'Βλέπεις τον αδερφό σου; — Όχι, δεν ', sentenceAfter: ' βλέπω.', hint: 'Видишь своего брата? — Нет, я его не вижу.',
+    choices: ['τον', 'τη', 'το'], correct: 'τον',
+    explanation: 'Ο αδερφός — мужского рода. Отрицание не убирает ν из τον.',
+  }),
+  fixedQuestion('object-pronouns-coffee', 'object-pronouns', {
+    instruction, sentenceBefore: 'Πληρώνεις τον καφέ; — Ναι, ', sentenceAfter: ' πληρώνω.', hint: 'Ты платишь за кофе? — Да, плачу за него.',
+    choices: ['τον', 'την', 'το'], correct: 'τον',
+    explanation: 'Ο καφές — мужского рода. Короткая форма относится к кофе.',
+  }),
+  fixedQuestion('object-pronouns-blouse', 'object-pronouns', {
+    instruction, sentenceBefore: 'Θέλεις την μπλούζα; — Όχι, δεν ', sentenceAfter: ' θέλω.', hint: 'Хочешь блузку? — Нет, я её не хочу.',
+    choices: ['τον', 'το', 'τη'], correct: 'τη',
+    explanation: 'Перед μπλούζα в вопросе стоит την, а перед θέλω в ответе — τη. Род тот же.',
+  }),
+  fixedQuestion('object-pronouns-gift', 'object-pronouns', {
+    instruction, sentenceBefore: 'Παίρνεις το δώρο; — Ναι, ', sentenceAfter: ' παίρνω.', hint: 'Берёшь подарок? — Да, беру его.',
+    choices: ['την', 'τον', 'το'], correct: 'το',
+    explanation: 'Το δώρο — среднего рода. Здесь το заменяет подарок.',
+  }),
+  fixedQuestion('object-pronouns-song', 'object-pronouns', {
+    instruction, sentenceBefore: 'Ξέρεις το τραγούδι; — Ναι, ', sentenceAfter: ' ξέρω.', hint: 'Знаешь песню? — Да, я её знаю.',
+    choices: ['την', 'το', 'τον'], correct: 'το',
+    explanation: 'Το τραγούδι — среднего рода даже при переводе «песня».',
+  }),
+  fixedQuestion('object-pronouns-juice', 'object-pronouns', {
+    instruction, sentenceBefore: 'Πίνεις τον χυμό; — Όχι, δεν ', sentenceAfter: ' πίνω.', hint: 'Пьёшь сок? — Нет, я его не пью.',
+    choices: ['το', 'τον', 'την'], correct: 'τον',
+    explanation: 'Ο χυμός — мужского рода. В ответе τον ставится перед πίνω.',
+  }),
+  fixedQuestion('object-pronouns-skirt', 'object-pronouns', {
+    instruction, sentenceBefore: 'Αγοράζεις τη φούστα; — Ναι, ', sentenceAfter: ' αγοράζω.', hint: 'Покупаешь юбку? — Да, покупаю её.',
+    choices: ['τον', 'το', 'την'], correct: 'την',
+    explanation: 'Перед φ в вопросе пишем τη, перед гласной в αγοράζω — την.',
+  }),
+  fixedQuestion('object-pronouns-daughter', 'object-pronouns', {
+    instruction, sentenceBefore: 'Ξέρεις την κόρη της; — Όχι, δεν ', sentenceAfter: ' ξέρω.', hint: 'Знаешь её дочь? — Нет, я её не знаю.',
+    choices: ['το', 'την', 'τον'], correct: 'την',
+    explanation: 'Η κόρη — женского рода. Перед ξ остаётся ν.',
+  }),
+  fixedQuestion('object-pronouns-key-question', 'object-pronouns', {
+    instruction, sentenceBefore: 'Το κλειδί είναι εδώ. — ', sentenceAfter: ' βλέπεις;', hint: 'Ключ здесь. — Видишь его?',
+    choices: ['Τη', 'Τον', 'Το'], correct: 'Το',
+    explanation: 'В начале вопроса Το заменяет το κλειδί и стоит перед βλέπεις.',
+  }),
+  fixedQuestion('object-pronouns-dress', 'object-pronouns', {
+    instruction, sentenceBefore: 'Βλέπεις το φόρεμα; — Ναι, ', sentenceAfter: ' βλέπω.', hint: 'Видишь платье? — Да, вижу его.',
+    choices: ['το', 'τη', 'τον'], correct: 'το',
+    explanation: 'Το φόρεμα — среднего рода. Форма το сама заменяет название платья.',
+  }),
+  fixedQuestion('object-pronouns-price', 'object-pronouns', {
+    instruction, sentenceBefore: 'Γράφεις την τιμή; — Όχι, δεν ', sentenceAfter: ' γράφω.', hint: 'Ты записываешь цену? — Нет, не записываю её.',
+    choices: ['τη', 'τον', 'το'], correct: 'τη',
+    explanation: 'Η τιμή — женского рода. Перед γ в γράφω пишем τη.',
+  }),
+  fixedQuestion('se-article-floor', 'se-article', {
+    instruction, sentenceBefore: 'Το δωμάτιό σας είναι ', sentenceAfter: ' τέταρτο όροφο.', hint: 'Ваш номер на четвёртом этаже.',
+    choices: ['στον', 'στην', 'στο'], correct: 'στον',
+    explanation: 'Όροφος — мужского рода. Σε + τον даёт στον.',
+  }),
+  fixedQuestion('se-article-piraeus', 'se-article', {
+    instruction, sentenceBefore: 'Αύριο πάμε ', sentenceAfter: ' Πειραιά.', hint: 'Завтра мы едем в Пирей.',
+    choices: ['στο', 'στον', 'στην'], correct: 'στον',
+    explanation: 'Ο Πειραιάς — мужского рода. Направление к городу: στον Πειραιά.',
+  }),
+  fixedQuestion('se-article-home', 'se-article', {
+    instruction, sentenceBefore: 'Τώρα είμαι ', sentenceAfter: ' σπίτι.', hint: 'Сейчас я дома.',
+    choices: ['στη', 'στον', 'στο'], correct: 'στο',
+    explanation: 'Το σπίτι — среднего рода. Σε + το даёт στο.',
+  }),
+  fixedQuestion('se-article-office', 'se-article', {
+    instruction, sentenceBefore: 'Ο πατέρας μου δουλεύει ', sentenceAfter: ' γραφείο.', hint: 'Мой отец работает в офисе.',
+    choices: ['στο', 'στη', 'στον'], correct: 'στο',
+    explanation: 'Το γραφείο — среднего рода, поэтому στο γραφείο.',
+  }),
+  fixedQuestion('se-article-athens', 'se-article', {
+    instruction, sentenceBefore: 'Η Άννα μένει ', sentenceAfter: ' Αθήνα.', hint: 'Анна живёт в Афинах.',
+    choices: ['στο', 'στην', 'στον'], correct: 'στην',
+    explanation: 'Η Αθήνα — женского рода. Перед гласной Α сохраняется ν.',
+  }),
+  fixedQuestion('se-article-sea', 'se-article', {
+    instruction, sentenceBefore: 'Το Σάββατο πάμε ', sentenceAfter: ' θάλασσα.', hint: 'В субботу мы едем к морю.',
+    choices: ['στο', 'στον', 'στη'], correct: 'στη',
+    explanation: 'Η θάλασσα — женского рода. Перед θ пишем στη.',
+  }),
+  fixedQuestion('se-article-room', 'se-article', {
+    instruction, sentenceBefore: 'Το κρεβάτι είναι ', sentenceAfter: ' δωμάτιο.', hint: 'Кровать находится в комнате.',
+    choices: ['στη', 'στον', 'στο'], correct: 'στο',
+    explanation: 'Το δωμάτιο — среднего рода, по-гречески στο δωμάτιο.',
+  }),
+  fixedQuestion('se-article-tavern', 'se-article', {
+    instruction, sentenceBefore: 'Απόψε τρώμε ', sentenceAfter: ' ταβέρνα.', hint: 'Сегодня вечером мы едим в таверне.',
+    choices: ['στο', 'στον', 'στην'], correct: 'στην',
+    explanation: 'Η ταβέρνα — женского рода. Перед τ сохраняется ν.',
+  }),
+  fixedQuestion('se-article-museum', 'se-article', {
+    instruction, sentenceBefore: 'Πηγαίνουμε ', sentenceAfter: ' μουσείο με το λεωφορείο.', hint: 'Мы едем в музей на автобусе.',
+    choices: ['στο', 'στη', 'στον'], correct: 'στο',
+    explanation: 'Το μουσείο — среднего рода. Здесь στο показывает направление вместе с πηγαίνουμε.',
+  }),
+  fixedQuestion('se-article-fridge', 'se-article', {
+    instruction, sentenceBefore: 'Το τυρί είναι ', sentenceAfter: ' ψυγείο.', hint: 'Сыр в холодильнике.',
+    choices: ['στον', 'στο', 'στην'], correct: 'στο',
+    explanation: 'Το ψυγείο — среднего рода, поэтому στο. Здесь речь о месте.',
+  }),
+  fixedQuestion('se-article-square', 'se-article', {
+    instruction, sentenceBefore: 'Ο φίλος μου με περιμένει ', sentenceAfter: ' πλατεία.', hint: 'Друг ждёт меня на площади.',
+    choices: ['στον', 'στην', 'στο'], correct: 'στην',
+    explanation: 'Η πλατεία — женского рода. Перед π пишем στην.',
+  }),
+  fixedQuestion('se-article-street', 'se-article', {
+    instruction, sentenceBefore: 'Βλέπω τον Νίκο ', sentenceAfter: ' δρόμο.', hint: 'Я вижу Никоса на улице.',
+    choices: ['στον', 'στη', 'στο'], correct: 'στον',
+    explanation: 'Ο δρόμος — мужского рода. Σε + τον даёт στον.',
+  }),
+  fixedQuestion('se-article-bus-stop', 'se-article', {
+    instruction, sentenceBefore: 'Το λεωφορείο σταματά ', sentenceAfter: ' στάση.', hint: 'Автобус останавливается на остановке.',
+    choices: ['στον', 'στη', 'στο'], correct: 'στη',
+    explanation: 'Η στάση — женского рода. Перед σ по школьной норме пишем στη.',
+  }),
+  fixedQuestion('se-article-bakery', 'se-article', {
+    instruction, sentenceBefore: 'Αγοράζω ψωμί ', sentenceAfter: ' φούρνο.', hint: 'Я покупаю хлеб в пекарне.',
+    choices: ['στο', 'στον', 'στη'], correct: 'στον',
+    explanation: 'Ο φούρνος — мужского рода. В στον конечное ν сохраняется.',
+  }),
+  fixedQuestion('se-article-beach', 'se-article', {
+    instruction, sentenceBefore: 'Πίνουμε καφέ ', sentenceAfter: ' παραλία.', hint: 'Мы пьём кофе на пляже.',
+    choices: ['στο', 'στην', 'στον'], correct: 'στην',
+    explanation: 'Η παραλία — женского рода. Перед π пишем στην.',
+  }),
+  fixedQuestion('se-article-balcony', 'se-article', {
+    instruction, sentenceBefore: 'Το πρωί πίνω νερό ', sentenceAfter: ' μπαλκόνι.', hint: 'Утром я пью воду на балконе.',
+    choices: ['στην', 'στον', 'στο'], correct: 'στο',
+    explanation: 'Το μπαλκόνι — среднего рода. Для среднего рода используется στο.',
+  }),
+  fixedQuestion('se-article-school', 'se-article', {
+    instruction, sentenceBefore: 'Τα παιδιά πηγαίνουν ', sentenceAfter: ' σχολείο.', hint: 'Дети идут в школу.',
+    choices: ['στη', 'στον', 'στο'], correct: 'στο',
+    explanation: 'Το σχολείο — среднего рода. Направление понятно из πηγαίνουν.',
+  }),
+  fixedQuestion('se-article-a-restaurant', 'se-article', {
+    instruction, sentenceBefore: 'Για φαγητό πάμε ', sentenceAfter: ' ένα εστιατόριο.', hint: 'Поесть мы идём в один ресторан (не названный раньше).',
+    choices: ['στην', 'σε', 'στο'], correct: 'σε',
+    explanation: 'Перед уже написанным ένα оставляем отдельное σε. Στο включало бы определённый артикль.',
+  }),
+  fixedQuestion('se-article-a-house', 'se-article', {
+    instruction, sentenceBefore: 'Το καλοκαίρι μένουμε ', sentenceAfter: ' ένα μικρό σπίτι.', hint: 'Летом мы живём в небольшом доме.',
+    choices: ['στο', 'στον', 'σε'], correct: 'σε',
+    explanation: 'В предложении уже есть ένα. С ним пишем σε ένα раздельно.',
+  }),
+  fixedQuestion('se-article-crete', 'se-article', {
+    instruction, sentenceBefore: 'Ο Νίκος δουλεύει ', sentenceAfter: ' Κρήτη.', hint: 'Никос работает на Крите.',
+    choices: ['στο', 'στην', 'στον'], correct: 'στην',
+    explanation: 'Η Κρήτη — женского рода. Перед κ сохраняется ν.',
+  }),
+  fixedQuestion('adjective-agreement-shirt', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Θέλω ένα ', sentenceAfter: ' πουκάμισο.', hint: 'Я хочу белую рубашку.',
+    choices: ['άσπρο', 'άσπρη', 'άσπρος'], correct: 'άσπρο',
+    explanation: 'Το πουκάμισο — среднего рода. После ένα здесь подходит άσπρο.',
+  }),
+  fixedQuestion('adjective-agreement-blouse', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Η ', sentenceAfter: ' μπλούζα κάνει δέκα ευρώ.', hint: 'Красная блузка стоит десять евро.',
+    choices: ['κόκκινος', 'κόκκινη', 'κόκκινο'], correct: 'κόκκινη',
+    explanation: 'Η μπλούζα — женского рода. С η подходит κόκκινη.',
+  }),
+  fixedQuestion('adjective-agreement-trousers', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Αγοράζω το ', sentenceAfter: ' παντελόνι.', hint: 'Я покупаю чёрные брюки.',
+    choices: ['μαύρη', 'μαύρος', 'μαύρο'], correct: 'μαύρο',
+    explanation: 'Το παντελόνι — единственное число среднего рода, даже если по-русски «брюки».',
+  }),
+  fixedQuestion('adjective-agreement-belt', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Βλέπω την ', sentenceAfter: ' ζώνη.', hint: 'Я вижу зелёный ремень.',
+    choices: ['πράσινος', 'πράσινη', 'πράσινο'], correct: 'πράσινη',
+    explanation: 'Η ζώνη — женского рода. После βλέπω форма πράσινη сохраняется, а перед π пишется την.',
+  }),
+  fixedQuestion('adjective-agreement-suitcase', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Ψάχνω τη ', sentenceAfter: ' βαλίτσα μου.', hint: 'Я ищу свой голубой чемодан.',
+    choices: ['γαλάζιος', 'γαλάζια', 'γαλάζιο'], correct: 'γαλάζια',
+    explanation: 'Η βαλίτσα — женского рода. Слово γαλάζια начинается с γ, поэтому перед ним τη.',
+  }),
+  fixedQuestion('adjective-agreement-dress', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Η Άννα φοράει ένα ', sentenceAfter: ' φόρεμα.', hint: 'Анна носит жёлтое платье.',
+    choices: ['κίτρινη', 'κίτρινος', 'κίτρινο'], correct: 'κίτρινο',
+    explanation: 'Το φόρεμα — среднего рода. Его описывает κίτρινο.',
+  }),
+  fixedQuestion('adjective-agreement-ancient', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Στο μουσείο βλέπω ένα ', sentenceAfter: ' άγαλμα.', hint: 'В музее я вижу древнюю статую.',
+    choices: ['αρχαίο', 'αρχαία', 'αρχαίος'], correct: 'αρχαίο',
+    explanation: 'Το άγαλμα — среднего рода. После ένα нужно αρχαίο.',
+  }),
+  fixedQuestion('adjective-agreement-gift', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Δίνω στον φίλο μου ένα ', sentenceAfter: ' δώρο.', hint: 'Я дарю другу дорогой подарок.',
+    choices: ['ακριβή', 'ακριβός', 'ακριβό'], correct: 'ακριβό',
+    explanation: 'Το δώρο — среднего рода. Подходит ακριβό.',
+  }),
+  fixedQuestion('adjective-agreement-tall', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Ο ', sentenceAfter: ' άντρας περιμένει το λεωφορείο.', hint: 'Высокий мужчина ждёт автобус.',
+    choices: ['ψηλός', 'ψηλή', 'ψηλό'], correct: 'ψηλός',
+    explanation: 'Ожидает мужчина, поэтому ο ψηλός άντρας.',
+  }),
+  fixedQuestion('adjective-agreement-tourist', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Στην πλατεία βλέπω έναν ', sentenceAfter: ' άντρα.', hint: 'На площади я вижу невысокого мужчину.',
+    choices: ['κοντός', 'κοντή', 'κοντό'], correct: 'κοντό',
+    explanation: 'После βλέπω нужен винительный. Έναν κοντό άντρα — невысокого мужчину.',
+  }),
+  fixedQuestion('adjective-agreement-student', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Ο ', sentenceAfter: ' μαθητής γράφει το όνομά του.', hint: 'Умный ученик пишет своё имя.',
+    choices: ['έξυπνη', 'έξυπνο', 'έξυπνος'], correct: 'έξυπνος',
+    explanation: 'Пишет ученик. Здесь ο έξυπνος μαθητής — подлежащее.',
+  }),
+  fixedQuestion('adjective-agreement-friend', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Περιμένουμε την ', sentenceAfter: ' φίλη της Μαρίας.', hint: 'Мы ждём новую подругу Марии.',
+    choices: ['καινούργια', 'καινούργιο', 'καινούργιος'], correct: 'καινούργια',
+    explanation: 'Η φίλη — женского рода. После περιμένουμε форма καινούργια сохраняется. Перед κ пишем την.',
+  }),
+  fixedQuestion('adjective-agreement-soup', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Τρώω ', sentenceAfter: ' σούπα.', hint: 'Я ем вкусный суп.',
+    choices: ['νόστιμη', 'νόστιμο', 'νόστιμος'], correct: 'νόστιμη',
+    explanation: 'Η σούπα — женского рода. Подходит νόστιμη.',
+  }),
+  fixedQuestion('adjective-agreement-water', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Το νερό είναι ', sentenceAfter: '.', hint: 'Вода холодная.',
+    choices: ['κρύος', 'κρύο', 'κρύα'], correct: 'κρύο',
+    explanation: 'Το νερό — среднего рода. Даже после είναι выбираем κρύο по роду слова νερό.',
+  }),
+  fixedQuestion('adjective-agreement-man-tired', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Ο πατέρας μου είναι ', sentenceAfter: ' μετά τη δουλειά.', hint: 'Мой отец устал после работы.',
+    choices: ['κουρασμένο', 'κουρασμένος', 'κουρασμένη'], correct: 'κουρασμένος',
+    explanation: 'Ο πατέρας — мужского рода. Его состояние описывает κουρασμένος.',
+  }),
+  fixedQuestion('adjective-agreement-woman-rich', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Η γιαγιά του είναι ', sentenceAfter: '.', hint: 'Его бабушка богата.',
+    choices: ['πλούσιο', 'πλούσιος', 'πλούσια'], correct: 'πλούσια',
+    explanation: 'Η γιαγιά — женского рода, поэтому πλούσια.',
+  }),
+  fixedQuestion('adjective-agreement-store', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Βλέπω τον ', sentenceAfter: ' φούρνο από το μπαλκόνι.', hint: 'Я вижу старую пекарню с балкона.',
+    choices: ['παλιός', 'παλιά', 'παλιό'], correct: 'παλιό',
+    explanation: 'Ο φούρνος — мужского рода. После βλέπω сочетание становится τον παλιό φούρνο.',
+  }),
+  fixedQuestion('adjective-agreement-day', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Σήμερα είναι μια ', sentenceAfter: ' μέρα.', hint: 'Сегодня прекрасный день.',
+    choices: ['ωραίος', 'ωραία', 'ωραίο'], correct: 'ωραία',
+    explanation: 'Η μέρα — женского рода. С μια выбираем ωραία.',
+  }),
+  fixedQuestion('adjective-agreement-street', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Από το παράθυρο βλέπω τον ', sentenceAfter: ' δρόμο.', hint: 'Из окна я вижу большую улицу.',
+    choices: ['μεγάλη', 'μεγάλος', 'μεγάλο'], correct: 'μεγάλο',
+    explanation: 'Ο δρόμος — мужского рода. После βλέπω подходит винительный τον μεγάλο δρόμο.',
+  }),
+  fixedQuestion('adjective-agreement-story', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Η γιαγιά λέει μια ', sentenceAfter: ' ιστορία.', hint: 'Бабушка рассказывает забавную историю.',
+    choices: ['αστείος', 'αστεία', 'αστείο'], correct: 'αστεία',
+    explanation: 'Η ιστορία — женского рода. Подходит αστεία.',
+  }),
+  fixedQuestion('adjective-agreement-restaurant', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Το ', sentenceAfter: ' εστιατόριο είναι δίπλα στο ξενοδοχείο.', hint: 'Китайский ресторан рядом с гостиницей.',
+    choices: ['κινέζικος', 'κινέζικο', 'κινέζικη'], correct: 'κινέζικο',
+    explanation: 'Το εστιατόριο — среднего рода. В разговорной форме из урока подойдёт κινέζικο.',
+  }),
+  fixedQuestion('adjective-agreement-pullover', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Φοράω το ', sentenceAfter: ' πουλόβερ.', hint: 'Я в синем свитере.',
+    choices: ['μοβ', 'μπλε', 'καφέ'], correct: 'μπλε',
+    explanation: 'Μπλε значит «синий» и сохраняет форму с πουλόβερ. Καφέ — коричневый, μοβ — фиолетовый.',
+  }),
+  fixedQuestion('adjective-agreement-skirt', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Θέλω τη ', sentenceAfter: ' φούστα.', hint: 'Я хочу фиолетовую юбку.',
+    choices: ['μπλε', 'καφέ', 'μοβ'], correct: 'μοβ',
+    explanation: 'Μοβ значит «фиолетовый» и сохраняет форму с φούστα. Μπλε — синий, καφέ — коричневый.',
+  }),
+  fixedQuestion('adjective-agreement-brown-dog', 'adjective-agreement', {
+    instruction, sentenceBefore: 'Ο ', sentenceAfter: ' σκύλος είναι στο σπίτι.', hint: 'Коричневая собака дома.',
+    choices: ['μπλε', 'καφέ', 'μοβ'], correct: 'καφέ',
+    explanation: 'Καφέ значит «коричневый» и сохраняет форму с σκύλος. Μοβ — фиолетовый, μπλε — синий.',
+  }),
 ]
 
 function normalize(value: string): string {

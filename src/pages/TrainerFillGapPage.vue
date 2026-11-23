@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FillGapExercise from '../components/trainers/FillGapExercise.vue'
 import FillGapSessionResults from '../components/trainers/FillGapSessionResults.vue'
@@ -12,6 +12,8 @@ const router = useRouter()
 const topicId = computed(() => String(route.params.topicId ?? ''))
 const topic = computed(() => getTrainerTopic(topicId.value))
 const { session, currentRound, currentQuestion, results, questionKey, start, selectOption, checkAnswer, advance, restart } = useFillGapSession()
+const exercise = useTemplateRef<InstanceType<typeof FillGapExercise>>('exercise')
+const resultsRegion = useTemplateRef<HTMLElement>('resultsRegion')
 
 watch(topicId, (id) => start(id), { immediate: true })
 
@@ -27,6 +29,19 @@ const continueLabel = computed(() => {
 
 function returnToCatalog(): void {
   void router.push('/trainers')
+}
+
+function handleAdvance(): void {
+  advance()
+  void nextTick(() => {
+    if (session.value?.completed) resultsRegion.value?.focus()
+    else exercise.value?.focusQuestion()
+  })
+}
+
+function handleRestart(): void {
+  restart()
+  void nextTick(() => exercise.value?.focusQuestion())
 }
 </script>
 
@@ -51,13 +66,14 @@ function returnToCatalog(): void {
       <RouterLink to="/trainers">Вернуться к темам</RouterLink>
     </section>
 
-    <FillGapSessionResults
-      v-else-if="session?.completed && results"
-      :topic="topic"
-      :results="results"
-      @restart="restart"
-      @catalog="returnToCatalog"
-    />
+    <div v-else-if="session?.completed && results" ref="resultsRegion" tabindex="-1" role="region" aria-label="Результаты тренировки">
+      <FillGapSessionResults
+        :topic="topic"
+        :results="results"
+        @restart="handleRestart"
+        @catalog="returnToCatalog"
+      />
+    </div>
 
     <section v-else-if="session && currentRound && currentQuestion" class="session-panel" aria-label="Тренировка «Заполни пропуски»">
       <div class="session-panel-header">
@@ -69,6 +85,7 @@ function returnToCatalog(): void {
       </div>
 
       <FillGapExercise
+        ref="exercise"
         :key="questionKey"
         :question="currentQuestion.question"
         :question-number="questionNumber"
@@ -80,7 +97,7 @@ function returnToCatalog(): void {
         :continue-label="continueLabel"
         @select-option="selectOption"
         @check-answer="checkAnswer"
-        @advance="advance"
+        @advance="handleAdvance"
       />
     </section>
   </section>

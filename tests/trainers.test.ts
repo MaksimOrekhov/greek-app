@@ -42,11 +42,15 @@ test('trainer topics and all their pair sets are registered', () => {
     'verb-eimai',
     'numbers',
     'noun-accusative',
+    'object-pronouns',
+    'se-article',
+    'adjective-agreement',
   ])
   assert.deepEqual(trainerTopics.map((topic) => topic.availableExercises), [
     ['match-pairs', 'multi-select', 'fill-gaps'], ['match-pairs', 'multi-select', 'fill-gaps'],
     ['match-pairs', 'multi-select', 'fill-gaps'], ['match-pairs', 'multi-select', 'fill-gaps', 'order-items'],
-    ['match-pairs', 'fill-gaps'],
+    ['match-pairs', 'fill-gaps'], ['match-pairs', 'fill-gaps'],
+    ['match-pairs', 'fill-gaps'], ['match-pairs', 'fill-gaps'],
   ])
   assert.equal(trainerPairSets['personal-pronouns']?.pairs.length, 10)
   assert.equal(trainerPairSets['personal-pronouns-genitive']?.pairs.length, 7)

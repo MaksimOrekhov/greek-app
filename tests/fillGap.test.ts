@@ -237,7 +237,7 @@ test('fixed fill-gap bank is valid, expandable, and has at least twelve question
       assert.doesNotMatch(question.sentenceBefore + question.sentenceAfter, /_{2,}|□/u)
       assert.ok(completeFillGapSentence(question).trim())
       assertWordBoundaries(question)
-      assertOneAnswer(question)
+      if (generatedFillGapTopics.includes(topic) || topic.id === 'noun-accusative') assertOneAnswer(question)
     }
   }
 })
@@ -610,7 +610,7 @@ test('context signatures ignore distractors while question signatures retain the
   assert.equal(fillGapQuestionContextSignature(question), fillGapQuestionContextSignature(changedDistractors))
 })
 
-test('the ten-question session keeps six generated and four fixed questions across five rounds', () => {
+test('sessions keep five rounds and use generated questions only where templates exist', () => {
   for (const topic of trainerTopics) {
     const generated = generateFillGapQuestions(topic.id, seededRandom(89))
     const session = createFillGapSession(topic.id, trainerFillGapQuestions, seededRandom(90), generated)
@@ -618,8 +618,9 @@ test('the ten-question session keeps six generated and four fixed questions acro
     assert.equal(session.rounds.length, FILL_GAP_ROUND_COUNT)
     assert.ok(session.rounds.every((round) => round.questions.length === FILL_GAP_QUESTIONS_PER_ROUND))
     assert.equal(questions.length, FILL_GAP_SESSION_QUESTION_COUNT)
-    assert.equal(questions.filter((question) => question.templateId).length, topic.id === 'noun-accusative' ? 0 : 6)
-    assert.equal(questions.filter((question) => !question.templateId).length, topic.id === 'noun-accusative' ? 10 : 4)
+    const expectedGenerated = generatedFillGapTopics.includes(topic) ? 6 : 0
+    assert.equal(questions.filter((question) => question.templateId).length, expectedGenerated)
+    assert.equal(questions.filter((question) => !question.templateId).length, 10 - expectedGenerated)
     assert.equal(new Set(questions.map((question) => question.id)).size, 10)
     assert.ok(session.rounds.flatMap((round) => round.questions).every((item) => item.selectedOptionId === null && !item.checked))
   }

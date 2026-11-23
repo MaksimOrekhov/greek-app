@@ -51,10 +51,10 @@ class MemoryStorage implements ReadingHistoryStorage {
 
 test('T7 bank matches its reviewed counts and keeps evidence inside each passage', () => {
   assert.equal(readingTexts.length, READING_TEXT_COUNT)
-  assert.equal(READING_TEXT_COUNT, 19)
-  assert.equal(readingTexts.filter((text) => text.level === 'A1').length, 10)
+  assert.equal(READING_TEXT_COUNT, 21)
+  assert.equal(readingTexts.filter((text) => text.level === 'A1').length, 12)
   assert.equal(readingTexts.filter((text) => text.level === 'A2').length, 9)
-  assert.equal(readingTexts.flatMap((text) => text.questions).length, 57)
+  assert.equal(readingTexts.flatMap((text) => text.questions).length, 63)
   assert.ok(readingTexts.filter((text) => text.level === 'A1').length >= 8)
   assert.ok(readingTexts.filter((text) => text.level === 'A2').length >= 9)
   assert.equal(new Set(readingTexts.map((text) => text.id)).size, READING_TEXT_COUNT)
@@ -253,10 +253,10 @@ test('T7.1 targeted content corrections keep questions independent and evidence 
     ]),
   )
   assert.deepEqual(skillCounts, {
-    'cause-effect': 9,
+    'cause-effect': 10,
     purpose: 4,
-    sequence: 3,
-    'specific-information': 41,
+    sequence: 4,
+    'specific-information': 45,
   })
 })
 
@@ -531,7 +531,7 @@ test('T7 history is versioned, bounded, reconciles removed content, and tolerate
   assert.doesNotThrow(() => createReadingSession(readingTexts, seeded(5), emptyReadingHistory()))
 })
 
-test('100 fixed seeds and ten history-backed sessions cover the bank without within-session repeats', () => {
+test('100 fixed seeds and twelve history-backed sessions cover the bank without within-session repeats', () => {
   for (let seed = 0; seed < 100; seed += 1) {
     const session = createReadingSession(readingTexts, seeded(seed + 1000))
     assert.equal(new Set(session.rounds.map((round) => round.text.id)).size, 5)
@@ -545,7 +545,7 @@ test('100 fixed seeds and ten history-backed sessions cover the bank without wit
   let repeatsInsideSession = 0
   const levelCoverage = new Set<string>()
   const genreCoverage = new Set<string>()
-  for (let launch = 0; launch < 10; launch += 1) {
+  for (let launch = 0; launch < 12; launch += 1) {
     let session = createReadingSession(readingTexts, random, history)
     const selectedTextIds = session.rounds.map((round) => round.text.id)
     repeatsInsideSession += selectedTextIds.length - new Set(selectedTextIds).size
@@ -570,16 +570,16 @@ test('100 fixed seeds and ten history-backed sessions cover the bank without wit
   assert.deepEqual(levelCoverage, new Set(['A1', 'A2']))
   assert.equal(genreCoverage.size, Object.keys(readingGenreLabels).length)
   assert.equal(repeatsInsideSession, 0)
-  assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 50 - READING_TEXT_COUNT)
+  assert.equal([...textOccurrences.values()].reduce((sum, count) => sum + count - 1, 0), 60 - READING_TEXT_COUNT)
 })
 
-test('history rotation covers the full text bank within five sessions across 100 fixed seeds', () => {
+test('history rotation covers the full text bank within six sessions across 100 fixed seeds', () => {
   for (let seed = 0; seed < 100; seed += 1) {
     let history = emptyReadingHistory()
     const random = seeded(seed + 7000)
     const seenTextIds = new Set<string>()
 
-    for (let launch = 0; launch < 5; launch += 1) {
+    for (let launch = 0; launch < 6; launch += 1) {
       let session = createReadingSession(readingTexts, random, history)
       for (let roundIndex = 0; roundIndex < 5; roundIndex += 1) {
         const round = session.rounds[session.currentRoundIndex]!
@@ -593,7 +593,7 @@ test('history rotation covers the full text bank within five sessions across 100
       }
     }
 
-    assert.equal(seenTextIds.size, READING_TEXT_COUNT, `Seed ${seed} did not cover every text in five sessions`)
+    assert.equal(seenTextIds.size, READING_TEXT_COUNT, `Seed ${seed} did not cover every text in six sessions`)
   }
 })
 
@@ -700,5 +700,35 @@ test('the T7 route and UI keep both answers together and hide the translation un
   for (const item of shopRound.questions) {
     assert.ok(shopAfterCheck.includes(item.question.explanationRu))
     for (const evidence of item.question.evidenceEl) assert.ok(shopAfterCheck.includes(evidence))
+  }
+})
+
+test('P65/W31 new texts use separate facts and retain their reviewed keys and evidence', () => {
+  const reference = {
+    'r-a1-hotel-reservation-note': [
+      ['На пятом.', 'στον πέμπτο όροφο'],
+      ['С трёх часов дня.', 'από τις τρεις το απόγευμα'],
+      ['За него нужно доплатить.', 'πέντε ευρώ ακόμα'],
+    ],
+    'r-a1-beach-day-visit': [
+      ['С сестрой.', 'με την αδελφή της'],
+      ['Они едят дома.', 'Πρώτα τρώνε στο σπίτι'],
+      ['Им не нравится кофе.', 'ο καφές δεν τους αρέσει'],
+    ],
+  }
+  for (const [id, refs] of Object.entries(reference)) {
+    const item = readingTexts.find((text) => text.id === id)!
+    const normalized = (copy: string) => copy.toLowerCase().replace(/[.!?]/g, '')
+    for (const [i, [answer, clue]] of refs.entries()) {
+      const question = item.questions[i]!
+      assert.equal(question.options.find((option) => option.id === question.correctOptionId)?.textRu, answer)
+      assert.ok(question.evidenceEl.some((evidence) => evidence.includes(clue)))
+      for (const other of item.questions.filter((_, index) => index !== i)) {
+        assert.ok(!other.evidenceEl.some((evidence) => evidence.includes(clue)))
+        for (const copy of [other.promptRu, ...other.options.map((option) => option.textRu)]) {
+          assert.ok(!normalized(copy).includes(normalized(answer)), copy)
+        }
+      }
+    }
   }
 })

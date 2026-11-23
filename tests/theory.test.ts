@@ -18,9 +18,9 @@ test('article and gender topics link to each other and the definite article', ()
   const definite = getTheoryTopic('definite-article')!
   const indefinite = getTheoryTopic('indefinite-article')!
   const gender = getTheoryTopic('noun-gender')!
-  assert.deepEqual(definite.related, ['indefinite-article', 'noun-gender', 'noun-masculine'])
+  assert.deepEqual(definite.related, ['indefinite-article', 'noun-gender', 'noun-masculine', 'noun-cases', 'personal-pronouns-accusative'])
   assert.deepEqual(indefinite.related, ['definite-article', 'noun-gender'])
-  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine', 'noun-neuter'])
+  assert.deepEqual(gender.related, ['definite-article', 'indefinite-article', 'noun-cases', 'noun-masculine', 'noun-feminine', 'noun-neuter', 'adjective-agreement'])
   assert.equal(indefinite.category, 'Грамматика')
   assert.equal(gender.category, 'Грамматика')
 })
@@ -28,7 +28,7 @@ test('article and gender topics link to each other and the definite article', ()
 test('weak genitive pronouns topic covers possessive and object uses', async () => {
   const pronouns = getTheoryTopic('personal-pronouns-genitive')!
   assert.equal(pronouns.category, 'Грамматика')
-  assert.deepEqual(pronouns.related, ['noun-cases', 'definite-article'])
+  assert.deepEqual(pronouns.related, ['noun-cases', 'definite-article', 'personal-pronouns-accusative'])
 
   const summary = await readFile(resolve('src/data/theory', pronouns.summary), 'utf8')
   for (const form of ['**μου**', '**σου**', '**του**', '**της**', '**μας**', '**σας**', '**τους**']) {
@@ -47,7 +47,7 @@ test('numbers topic is registered under its own category and links to related gr
   assert.equal(numbers.title, 'Числительные от 0 до 20')
   assert.equal(numbers.greekTitle, 'Αριθμοί από το 0 έως το 20')
   assert.equal(numbers.category, 'Числительные')
-  assert.deepEqual(numbers.related, ['indefinite-article', 'noun-gender'])
+  assert.deepEqual(numbers.related, ['indefinite-article', 'noun-gender', 'ordinal-numbers'])
   assert.ok(numbers.keywords.includes('числительные'))
 
   const summary = await readFile(resolve('src/data/theory', numbers.summary), 'utf8')
@@ -104,7 +104,7 @@ test('noun cases topic is searchable, linked to grammar topics, and includes val
   assert.equal(cases.title, 'Падежи существительных')
   assert.equal(cases.greekTitle, 'Οι πτώσεις των ουσιαστικών')
   assert.equal(cases.category, 'Грамматика')
-  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter', 'present-tense-verbs'])
+  assert.deepEqual(cases.related, ['definite-article', 'indefinite-article', 'noun-gender', 'noun-masculine', 'noun-feminine', 'noun-neuter', 'present-tense-verbs', 'personal-pronouns-accusative', 'adjective-agreement'])
   for (const keyword of ['падеж', 'именительный', 'родительный', 'винительный', 'звательный']) {
     assert.ok(cases.keywords.includes(keyword), `missing search keyword: ${keyword}`)
   }
@@ -345,4 +345,32 @@ test('deep links open explanation and same-page query updates preserve scrolling
   assert.equal(resolveScrollBehavior({ path: '/theory/topic', hash: '' }, { path: '/theory/topic', hash: '' }, { top: 300 }), false)
   assert.deepEqual(resolveScrollBehavior({ path: '/theory/topic', hash: '#explanation-section' }, { path: '/theory/topic', hash: '' }, null), { el: '#explanation-section' })
   assert.deepEqual(resolveScrollBehavior({ path: '/theory', hash: '' }, { path: '/cards', hash: '' }, null), { top: 0 })
+})
+
+test('P65/W31.2 registers linked theory, renders the reviewed forms, and uses hash links', async () => {
+  const checks = [
+    ['personal-pronouns-accusative', ['τον βλέπω', 'τη βλέπω', 'την έχω', 'το έχω', 'το βιβλίο']],
+    ['adjective-agreement', ['τον καλό φίλο', 'την καλή φίλη', 'το καλό παιδί', 'μια ωραία μέρα', 'το μπλε πουλόβερ']],
+    ['ordinal-numbers', ['πρώτος', 'δεύτερη', 'τρίτο', 'τέταρτη', 'πέμπτο', 'τη δεύτερη μέρα']],
+  ] as const
+  const router = createRouter({ history: createMemoryHistory('/greek-app/#'), routes: theoryRoutes })
+  for (const [id, forms] of checks) {
+    const entry = getTheoryTopic(id)
+    assert.ok(entry, id)
+    assert.equal(new Set(entry.related).size, entry.related.length)
+    const html = renderTheoryMarkdown(await readFile(resolve('src/data/theory', entry.explanation), 'utf8'))
+    for (const form of forms) assert.ok(html.includes(form), form)
+    assert.match(renderTheoryMarkdown(await readFile(resolve('src/data/theory', entry.summary), 'utf8')), /<p>/u)
+    for (const related of [id, ...entry.related]) {
+      const route = router.resolve({ name: 'theory-topic', params: { topicId: related } })
+      assert.equal(route.href, '#/theory/' + related)
+      assert.ok(getTheoryTopic(related))
+    }
+    assert.doesNotMatch(html, /href="\/theory\//u)
+  }
+  const cases = getTheoryTopic('noun-cases')!
+  const explanation = await readFile(resolve('src/data/theory', cases.explanation), 'utf8')
+  for (const form of ['στον δεύτερο όροφο', 'στην Αθήνα', 'στη θάλασσα', 'στο δωμάτιο', 'Πηγαίνω στο ξενοδοχείο.', 'Μένω στο ξενοδοχείο.', 'σε ένα δωμάτιο']) {
+    assert.ok(explanation.includes(form), form)
+  }
 })

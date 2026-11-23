@@ -14,7 +14,11 @@ function sourceUrl(lemma: string): string {
   return `${dictionarySearchUrl}?lq=${encodeURIComponent(lemma)}`
 }
 
-/** Each article is transcribed from the linked dictionary headword, never inferred from its ending. */
+function academySourceUrl(lemma: string): string {
+  return `https://christikolexiko.academyofathens.gr/index.php/anazitisi?st=${encodeURIComponent(lemma)}`
+}
+
+/** Each article follows the gender in the linked dictionary entry. */
 export const verifiedArticleNounRecords: readonly VerifiedArticleNoun[] = [
   { wordId: 'καφές', article: 'ο', sourceUrl: sourceUrl('καφές') },
   { wordId: 'φίλος', article: 'ο', sourceUrl: sourceUrl('φίλος') },
@@ -164,6 +168,33 @@ export const verifiedArticleNounRecords: readonly VerifiedArticleNoun[] = [
   { wordId: 'αλφάβητο', article: 'το', sourceUrl: sourceUrl('αλφάβητο') },
   { wordId: 'αγόρι', article: 'το', sourceUrl: sourceUrl('αγόρι') },
   { wordId: 'πρωί', article: 'το', sourceUrl: sourceUrl('πρωί'), noteRu: 'Как существительное «утро» — το πρωί; наречное употребление «утром» не меняет род существительного.' },
+  { wordId: 'όροφος', article: 'ο', sourceUrl: sourceUrl('όροφος') },
+  { wordId: 'ναός', article: 'ο', sourceUrl: academySourceUrl('ναός') },
+  { wordId: 'κεφτές', article: 'ο', sourceUrl: academySourceUrl('κεφτές') },
+  { wordId: 'άνθρωπος', article: 'ο', sourceUrl: sourceUrl('άνθρωπος'), noteRu: 'Грамматически мужской род, даже когда речь о женщине.' },
+  { wordId: 'φούστα', article: 'η', sourceUrl: academySourceUrl('φούστα') },
+  { wordId: 'ζώνη', article: 'η', sourceUrl: academySourceUrl('ζώνη') },
+  { wordId: 'τιμή', article: 'η', sourceUrl: sourceUrl('τιμή') },
+  { wordId: 'παραλία', article: 'η', sourceUrl: academySourceUrl('παραλία') },
+  { wordId: 'πόλη', article: 'η', sourceUrl: academySourceUrl('πόλη') },
+  { wordId: 'μονόκλινο', article: 'το', sourceUrl: sourceUrl('μονόκλινος'), noteRu: 'Отдельное существительное среднего рода в статье μονόκλινος, номер с одной кроватью.' },
+  { wordId: 'δίκλινο', article: 'το', sourceUrl: sourceUrl('δίκλινος'), noteRu: 'Отдельное существительное среднего рода в статье δίκλινος, номер с двумя кроватями.' },
+  { wordId: 'τρίκλινο', article: 'το', sourceUrl: sourceUrl('τρίκλινος'), noteRu: 'Отдельное существительное среднего рода в статье τρίκλινος, номер с тремя кроватями.' },
+  { wordId: 'κρεβάτι', article: 'το', sourceUrl: sourceUrl('κρεβάτι') },
+  { wordId: 'σαββατοκύριακο', article: 'το', sourceUrl: sourceUrl('σαββατοκύριακο') },
+  { wordId: 'ψυγείο', article: 'το', sourceUrl: academySourceUrl('ψυγείο') },
+  { wordId: 'πρωινό', article: 'το', sourceUrl: sourceUrl('πρωινό'), noteRu: 'В значении завтрак это существительное среднего рода.' },
+  { wordId: 'κλειδί', article: 'το', sourceUrl: academySourceUrl('κλειδί') },
+  { wordId: 'γραφείο', article: 'το', sourceUrl: academySourceUrl('γραφείο') },
+  { wordId: 'νούμερο', article: 'το', sourceUrl: academySourceUrl('νούμερο') },
+  { wordId: 'παντελόνι', article: 'το', sourceUrl: academySourceUrl('παντελόνι') },
+  { wordId: 'πουλόβερ', article: 'το', sourceUrl: academySourceUrl('πουλόβερ'), noteRu: 'Несклоняемое существительное среднего рода.' },
+  { wordId: 'μαντήλι', article: 'το', sourceUrl: academySourceUrl('μαντήλι') },
+  { wordId: 'παπούτσι', article: 'το', sourceUrl: academySourceUrl('παπούτσι') },
+  { wordId: 'δώρο', article: 'το', sourceUrl: academySourceUrl('δώρο') },
+  { wordId: 'τραγούδι', article: 'το', sourceUrl: academySourceUrl('τραγούδι') },
+  { wordId: 'άγαλμα', article: 'το', sourceUrl: sourceUrl('άγαλμα') },
+  { wordId: 'εστιατόριο', article: 'το', sourceUrl: academySourceUrl('εστιατόριο') },
 ]
 
 const dictionaryWords = new Map(words.map((word) => [word.greek, word]))

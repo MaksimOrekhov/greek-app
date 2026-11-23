@@ -39,6 +39,27 @@ export const trainerTopics: TrainerTopic[] = [
     pairSetId: 'noun-accusative',
     availableExercises: ['match-pairs', 'fill-gaps'],
   },
+  {
+    id: 'object-pronouns',
+    title: 'Его, её, это — короткие ответы',
+    description: 'Заменяйте уже названного человека или предмет словами τον, τη / την, το.',
+    pairSetId: 'object-pronouns',
+    availableExercises: ['match-pairs', 'fill-gaps'],
+  },
+  {
+    id: 'se-article',
+    title: 'Где? Куда?',
+    description: 'Используйте στον, στην, στη и στο, когда говорите о месте или направлении.',
+    pairSetId: 'se-article',
+    availableExercises: ['match-pairs', 'fill-gaps'],
+  },
+  {
+    id: 'adjective-agreement',
+    title: 'Подбери подходящую форму',
+    description: 'Описывайте людей, одежду и предметы и подбирайте форму по контексту.',
+    pairSetId: 'adjective-agreement',
+    availableExercises: ['match-pairs', 'fill-gaps'],
+  },
 ]
 
 export function getTrainerTopic(id: string): TrainerTopic | undefined {
