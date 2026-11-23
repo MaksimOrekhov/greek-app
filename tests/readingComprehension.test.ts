@@ -704,6 +704,7 @@ test('the T7 route and UI keep both answers together and hide the translation un
 })
 
 test('P65/W31 new texts use separate facts and retain their reviewed keys and evidence', () => {
+  const beachSequence = 'Πρώτα τρώνε στο σπίτι και μετά πηγαίνουν στην παραλία.'
   const reference = {
     'r-a1-hotel-reservation-note': [
       ['На пятом.', 'στον πέμπτο όροφο'],
@@ -712,10 +713,18 @@ test('P65/W31 new texts use separate facts and retain their reviewed keys and ev
     ],
     'r-a1-beach-day-visit': [
       ['С сестрой.', 'με την αδελφή της'],
-      ['Они едят дома.', 'Πρώτα τρώνε στο σπίτι'],
+      ['Они едят дома.', beachSequence],
       ['Им не нравится кофе.', 'ο καφές δεν τους αρέσει'],
     ],
   }
+  const beach = readingTexts.find((text) => text.id === 'r-a1-beach-day-visit')!
+  assert.ok(beach.greek.includes(beachSequence))
+  assert.ok(beach.translationRu.includes('Сначала они едят дома, а потом идут на пляж.'))
+  const sequence = beach.questions.find((question) => question.id === 'r-a1-beach-day-visit-q2')!
+  assert.equal(sequence.promptRu, 'Что происходит до выхода из дома?')
+  assert.deepEqual(sequence.evidenceEl, [beachSequence])
+  assert.equal(sequence.correctOptionId, 'meal')
+  assert.deepEqual(sequence.options.map((option) => option.id).sort(), ['beach-water', 'bus-book', 'meal'])
   for (const [id, refs] of Object.entries(reference)) {
     const item = readingTexts.find((text) => text.id === id)!
     const normalized = (copy: string) => copy.toLowerCase().replace(/[.!?]/g, '')

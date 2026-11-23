@@ -71,3 +71,9 @@ export const adjectiveReference: Readonly<Record<string, string>> = {
   skirt: 'τη μοβ φούστα',
   'brown-dog': 'Ο καφέ σκύλος',
 }
+
+export const indeclinableColourReference = [
+  { id: 'adjective-agreement-pullover', colour: 'μπλε', correctArticle: 'το', otherArticles: ['την', 'τον'] },
+  { id: 'adjective-agreement-skirt', colour: 'μοβ', correctArticle: 'τη', otherArticles: ['το', 'τον'] },
+  { id: 'adjective-agreement-brown-dog', colour: 'καφέ', correctArticle: 'Ο', otherArticles: ['Η', 'Το'] },
+] as const

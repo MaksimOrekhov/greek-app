@@ -6,7 +6,7 @@ import { getTrainerTopic } from '../src/data/trainers/topics.ts'
 import { advanceTrainerSession, createTrainerSession, getTrainerSessionResults, submitTrainerMatch } from '../src/lib/trainers/session.ts'
 import { generatedFillGapTemplates } from '../src/lib/trainers/fillGap/fillGapGenerator.ts'
 import { advanceFillGapSession, checkFillGapAnswer, createFillGapSession, getFillGapSessionResults, restartFillGapSession, selectFillGapOption } from '../src/lib/trainers/fillGap/fillGapSession.ts'
-import { adjectiveReference, objectPronounReference, seArticleReference } from './fixtures/p65GrammarReference.ts'
+import { adjectiveReference, indeclinableColourReference, objectPronounReference, seArticleReference } from './fixtures/p65GrammarReference.ts'
 
 function seeded(seed: number) {
   let state = seed
@@ -21,6 +21,21 @@ const references = {
   'se-article': seArticleReference,
   'adjective-agreement': adjectiveReference,
 }
+
+test('indeclinable colours stay the same while article options test three genders', () => {
+  for (const { id, colour, correctArticle, otherArticles } of indeclinableColourReference) {
+    const question = trainerFillGapQuestions.find((entry) => entry.id === id)
+    assert.ok(question, id)
+    const correct = question.options.find((option) => option.id === question.correctOptionId)
+    assert.equal(correct?.text, correctArticle + ' ' + colour, id)
+    const alternatives = question.options.filter((option) => option.id !== question.correctOptionId)
+    assert.deepEqual(
+      alternatives.map((option) => option.text).sort(),
+      otherArticles.map((article) => article + ' ' + colour).sort(),
+      id,
+    )
+  }
+})
 
 for (const [topic, reference] of Object.entries(references)) {
   test(topic + ' fixed cloze has exactly one reviewed completion for each context', () => {

@@ -735,19 +735,19 @@ export const trainerFillGapQuestions: FillGapQuestion[] = [
     explanation: 'Το εστιατόριο — среднего рода. В разговорной форме из урока подойдёт κινέζικο.',
   }),
   fixedQuestion('adjective-agreement-pullover', 'adjective-agreement', {
-    instruction, sentenceBefore: 'Φοράω το ', sentenceAfter: ' πουλόβερ.', hint: 'Я в синем свитере.',
-    choices: ['μοβ', 'μπλε', 'καφέ'], correct: 'μπλε',
-    explanation: 'Μπλε значит «синий» и сохраняет форму с πουλόβερ. Καφέ — коричневый, μοβ — фиолетовый.',
+    instruction, sentenceBefore: 'Φοράω ', sentenceAfter: ' πουλόβερ.', hint: 'Я в синем свитере.',
+    choices: ['το μπλε', 'την μπλε', 'τον μπλε'], correct: 'το μπλε',
+    explanation: 'Πουλόβερ среднего рода. Подходит το μπλε πουλόβερ. Цвет μπλε не изменяется.',
   }),
   fixedQuestion('adjective-agreement-skirt', 'adjective-agreement', {
-    instruction, sentenceBefore: 'Θέλω τη ', sentenceAfter: ' φούστα.', hint: 'Я хочу фиолетовую юбку.',
-    choices: ['μπλε', 'καφέ', 'μοβ'], correct: 'μοβ',
-    explanation: 'Μοβ значит «фиолетовый» и сохраняет форму с φούστα. Μπλε — синий, καφέ — коричневый.',
+    instruction, sentenceBefore: 'Θέλω ', sentenceAfter: ' φούστα.', hint: 'Я хочу фиолетовую юбку.',
+    choices: ['τη μοβ', 'το μοβ', 'τον μοβ'], correct: 'τη μοβ',
+    explanation: 'Φούστα женского рода. Перед μ пишем τη, поэтому подходит τη μοβ φούστα. Цвет μοβ не изменяется.',
   }),
   fixedQuestion('adjective-agreement-brown-dog', 'adjective-agreement', {
-    instruction, sentenceBefore: 'Ο ', sentenceAfter: ' σκύλος είναι στο σπίτι.', hint: 'Коричневая собака дома.',
-    choices: ['μπλε', 'καφέ', 'μοβ'], correct: 'καφέ',
-    explanation: 'Καφέ значит «коричневый» и сохраняет форму с σκύλος. Μοβ — фиолетовый, μπλε — синий.',
+    instruction, sentenceBefore: '', sentenceAfter: ' σκύλος είναι στο σπίτι.', hint: 'Коричневая собака дома.',
+    choices: ['Ο καφέ', 'Η καφέ', 'Το καφέ'], correct: 'Ο καφέ',
+    explanation: 'Σκύλος мужского рода, хотя русское «собака» женского. Подходит Ο καφέ σκύλος. Цвет καφέ не изменяется.',
   }),
 ]
 
