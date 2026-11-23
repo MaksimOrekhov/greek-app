@@ -503,6 +503,7 @@ test('P65/W31 adds the reviewed cards and preserves the previous progress keys',
   const previousKeys = words.slice(0, 448).map((word) => word.greek).sort()
   assert.equal(createHash('sha256').update(previousKeys.join('\n')).digest('hex'), '7ebff34017b7785172c0ec6b8a83adf1ed616c895ccc1697f7edb4bebf25d67f')
   const added = words.slice(448)
+  assert.equal(words.length, 508)
   assert.equal(addedKeys.length, 60)
   assert.deepEqual(added.map((word) => word.greek).sort(), [...addedKeys].sort())
   assert.deepEqual(validateVocabularyData(), [])
@@ -550,6 +551,22 @@ test('T5 adapts all P65/W31 cards without new matching conflicts', () => {
     assert.equal(pair.prompt, word.russian)
     assert.ok(!pairs.some((other) => other !== pair && areVocabularyPairsAmbiguous(pair, other)), word.greek)
   }
+})
+
+test('P65/W31 clothing examples use a present-tense translation and the lesson price question', () => {
+  const pullover = words.find((word) => word.greek === 'πουλόβερ')
+  assert.deepEqual(pullover?.examples[0], {
+    greek: 'Φοράω πουλόβερ γιατί κάνει κρύο.',
+    transliteration: 'фора́о пуло́вэр яти́ ка́ни кри́о',
+    russian: 'Я в свитере, потому что холодно.',
+  })
+
+  const skirt = words.find((word) => word.greek === 'φούστα')
+  assert.deepEqual(skirt?.examples[0], {
+    greek: 'Πόσο κάνει αυτή η φούστα;',
+    transliteration: 'по́со ка́ни афти́ и фу́ста?',
+    russian: 'Сколько стоит эта юбка?',
+  })
 })
 
 test('P65/W31 adds the independently checked ανεβαίνω paradigm without replacing a verb', () => {

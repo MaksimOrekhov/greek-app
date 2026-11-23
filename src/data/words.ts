@@ -1261,12 +1261,12 @@ const textbookP65WorkbookP31Words: WordCard[] = [
   {
     greek: 'πουλόβερ', russian: 'пуловер / свитер', transliteration: 'пуло́вэр',
     category: 'Одежда', partOfSpeech: ['noun'],
-    examples: [{ greek: 'Φοράω πουλόβερ γιατί κάνει κρύο.', transliteration: 'фора́о пуло́вэр яти́ ка́ни кри́о', russian: 'Я надел свитер, потому что холодно.' }],
+    examples: [{ greek: 'Φοράω πουλόβερ γιατί κάνει κρύο.', transliteration: 'фора́о пуло́вэр яти́ ка́ни кри́о', russian: 'Я в свитере, потому что холодно.' }],
   },
   {
     greek: 'φούστα', russian: 'юбка', transliteration: 'фу́ста',
     category: 'Одежда', partOfSpeech: ['noun'],
-    examples: [{ greek: 'Πόσο κοστίζει αυτή η φούστα;', transliteration: 'по́со кости́зи афти́ и фу́ста?', russian: 'Сколько стоит эта юбка?' }],
+    examples: [{ greek: 'Πόσο κάνει αυτή η φούστα;', transliteration: 'по́со ка́ни афти́ и фу́ста?', russian: 'Сколько стоит эта юбка?' }],
   },
   {
     greek: 'μαντήλι', russian: 'платок', transliteration: 'манди́ли',
