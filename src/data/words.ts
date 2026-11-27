@@ -1137,7 +1137,7 @@ const internationalWords: WordCard[] = [
   { greek: 'κρέμα', russian: 'крем (например, для кожи); также кремовый десерт', transliteration: 'крэ́ма', category: 'Покупки', partOfSpeech: ['noun'], examples: [{ greek: 'Αγοράζω σαμπουάν και κρέμα.', transliteration: 'агора́зо самбуа́н кэ крэ́ма', russian: 'Я покупаю шампунь и крем.' }] },
   { greek: 'αλφάβητο', russian: 'алфавит', transliteration: 'алфа́вито', category: 'Учёба', partOfSpeech: ['noun'], examples: [{ greek: 'Το ελληνικό αλφάβητο είναι εύκολο.', transliteration: 'то элинико́ алфа́вито и́нэ э́фколо', russian: 'Греческий алфавит лёгкий.' }] },
   { greek: 'φόρεμα', russian: 'платье', transliteration: 'фо́рэма', category: 'Одежда', partOfSpeech: ['noun'], examples: [{ greek: 'Το φόρεμα είναι ωραίο.', transliteration: 'то фо́рэма и́нэ орэ́о', russian: 'Платье красивое.' }] },
-  { greek: 'Τρίτη', russian: 'вторник', transliteration: 'три́ти', category: 'Время', partOfSpeech: ['noun'], examples: [{ greek: 'Την Τρίτη δουλεύω.', transliteration: 'тин три́ти зулэ́во', russian: 'Во вторник я работаю.' }] },
+  { greek: 'Τρίτη', russian: 'вторник', transliteration: 'три́ти', category: 'Дни недели', partOfSpeech: ['noun'], examples: [{ greek: 'Την Τρίτη δουλεύω.', transliteration: 'тин три́ти зулэ́во', russian: 'Во вторник я работаю.' }] },
   { greek: 'αγόρι', russian: 'мальчик', transliteration: 'аго́ри', category: 'Люди', partOfSpeech: ['noun'], examples: [{ greek: 'Το αγόρι παίζει με τον σκύλο.', transliteration: 'то аго́ри пэ́зи мэ тон ски́ло', russian: 'Мальчик играет с собакой.' }] },
   { greek: 'δασκάλα', russian: 'учительница (обычно в начальной школе)', transliteration: 'заска́ла', category: 'Профессии', partOfSpeech: ['noun'], examples: [{ greek: 'Η δασκάλα μιλάει ελληνικά.', transliteration: 'и заска́ла мила́и элиника́', russian: 'Учительница говорит по-гречески.' }] },
   { greek: 'Γερμανίδα', russian: 'немка', transliteration: 'йэрмани́за', category: 'Национальности', partOfSpeech: ['noun'], examples: [{ greek: 'Η Γερμανίδα είναι φίλη μου.', transliteration: 'и йэрмани́за и́нэ фи́ли му', russian: 'Немка — моя подруга.' }] },
@@ -1801,22 +1801,22 @@ const textbookP73WorkbookP34Words: WordCard[] = [
   },
   {
     greek: 'Δευτέρα', russian: 'понедельник', transliteration: 'зэфтэ́ра',
-    category: 'Время', partOfSpeech: ['noun'],
+    category: 'Дни недели', partOfSpeech: ['noun'],
     examples: [{ greek: 'Τη Δευτέρα έχω μάθημα ελληνικών.', transliteration: 'ти зэфтэ́ра э́хо ма́сима элинико́н', russian: 'В понедельник у меня урок греческого.' }],
   },
   {
     greek: 'Τετάρτη', russian: 'среда', transliteration: 'тэта́рти',
-    category: 'Время', partOfSpeech: ['noun'],
+    category: 'Дни недели', partOfSpeech: ['noun'],
     examples: [{ greek: 'Την Τετάρτη δουλεύω στο σπίτι.', transliteration: 'тин тэта́рти зулэ́во сто спи́ти', russian: 'В среду я работаю дома.' }],
   },
   {
     greek: 'Πέμπτη', russian: 'четверг', transliteration: 'пэ́мпти',
-    category: 'Время', partOfSpeech: ['noun'],
+    category: 'Дни недели', partOfSpeech: ['noun'],
     examples: [{ greek: 'Την Πέμπτη τρώμε με τους φίλους μας.', transliteration: 'тин пэ́мпти тро́мэ мэ тус фи́лус мас', russian: 'В четверг мы едим с нашими друзьями.' }],
   },
   {
     greek: 'Παρασκευή', russian: 'пятница', transliteration: 'параскэви́',
-    category: 'Время', partOfSpeech: ['noun'],
+    category: 'Дни недели', partOfSpeech: ['noun'],
     examples: [{ greek: 'Την Παρασκευή πάμε στο σινεμά.', transliteration: 'тин параскэви́ па́мэ сто синэма́', russian: 'В пятницу мы идём в кино.' }],
   },
   {

@@ -622,7 +622,9 @@ test('P73/W34 preserves all 508 keys and adds reviewed vocabulary with examples 
 
   const byWord = new Map(words.map((word) => [word.greek, word]))
   for (const weekday of ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή']) {
-    assert.deepEqual(byWord.get(weekday)?.partOfSpeech, ['noun'], weekday)
+    const card = byWord.get(weekday)
+    assert.deepEqual(card?.partOfSpeech, ['noun'], weekday)
+    assert.equal(card?.category, 'Дни недели', weekday)
   }
   assert.deepEqual(byWord.get('σε')?.partOfSpeech, ['preposition', 'pronoun'])
   assert.ok(byWord.get('σε')?.examples.some((example) => example.greek === 'Σε περιμένω έξω.'))
