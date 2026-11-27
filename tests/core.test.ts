@@ -8,6 +8,7 @@ import { validateVerbData, verbs } from '../src/data/verbs.ts'
 import { theoryTopics, validateTheoryTopics } from '../src/data/theory/topics.ts'
 import { canImportAnonymousProgress, canonicalWordId, formatInterval, introducedTodayCount, mergeProgressSnapshots, nextInterval, normalizeIntroductionIds, normalizeProgressIds, selectSessionWords } from '../src/lib/studyRules.ts'
 import { nextPosition, sessionProgress } from '../src/lib/studySession.ts'
+import { p73PresentAlternatives, p73VerbReference } from './fixtures/p73VerbReference.ts'
 
 test('review intervals preserve rating order, handle first reviews and cap growth', () => {
   assert.equal(nextInterval('again', 100), 0)
@@ -502,8 +503,7 @@ test('P65/W31 adds the reviewed cards and preserves the previous progress keys',
   const addedKeys = Object.values(tagsByLemma).flat()
   const previousKeys = words.slice(0, 448).map((word) => word.greek).sort()
   assert.equal(createHash('sha256').update(previousKeys.join('\n')).digest('hex'), '7ebff34017b7785172c0ec6b8a83adf1ed616c895ccc1697f7edb4bebf25d67f')
-  const added = words.slice(448)
-  assert.equal(words.length, 508)
+  const added = words.slice(448, 508)
   assert.equal(addedKeys.length, 60)
   assert.deepEqual(added.map((word) => word.greek).sort(), [...addedKeys].sort())
   assert.deepEqual(validateVocabularyData(), [])
@@ -574,7 +574,6 @@ test('P65/W31 adds the independently checked ανεβαίνω paradigm without r
   const previousLemmas = verbs.slice(0, 33).map((verb) => verb.lemma).sort()
   assert.equal(createHash('sha256').update(previousLemmas.join('\n')).digest('hex'), '4327d2af31e6a89c0be2170a116ed4cc3b0c3bbd9a9d650605f40d915ebf6430')
   assert.deepEqual(validateVerbData(), [])
-  assert.equal(verbs.length, 34)
   const verb = verbs.find((entry) => entry.lemma === 'ανεβαίνω')
   assert.ok(verb)
   // Neurolingo Lexiscope, active voice and the two aspect stems.
@@ -586,4 +585,75 @@ test('P65/W31 adds the independently checked ανεβαίνω paradigm without r
     ['θα ανέβω', 'θα ανέβεις', 'θα ανέβει', 'θα ανέβουμε', 'θα ανέβετε', 'θα ανέβουν'])
   assert.match(verb.note ?? '', /θα ανεβώ/u)
   assert.deepEqual(words.find((word) => word.greek === verb.lemma)?.partOfSpeech, ['verb'])
+})
+
+test('P73/W34 preserves all 508 keys and adds reviewed vocabulary with examples to the dictionary and T5', () => {
+  const priorKeys = words.slice(0, 508).map((word) => word.greek).sort()
+  assert.equal(createHash('sha256').update(priorKeys.join('\n')).digest('hex'), '29b18e81dfac47ab204f247f3309d7b7462c21828a5d2841de7c50dc29ddb33d')
+
+  const reviewedKeys = [
+    ...Object.keys(p73VerbReference),
+    'επάνω', 'κάτω', 'μέσα', 'έξω', 'μακριά', 'παρακάτω', 'ευθεία', 'απέναντι', 'τετράγωνο', 'γωνία', 'οδός', 'λεωφόρος',
+    'γρήγορα', 'όμως', 'ακριβώς', 'πάλι', 'ευχαριστημένος', 'σούπερ μάρκετ', 'ωχ',
+    'κύριος', 'πρόταση', 'πρόσωπο', 'Ποιον θέλετε, παρακαλώ;',
+    'σακάκι', 'καπέλο', 'ροζ', 'πάπια', 'παπί', 'πέτρα',
+    'μαζί', 'πάρα πολύ', 'φέτα', 'ντοματοσαλάτα', 'λουλούδι', 'τηγανητός', 'χωριάτικος', 'αρνάκι', 'φρικασέ',
+    'μοσχάρι', 'κοκκινιστός', 'λουκάνικο', 'μετρό', 'ωραία', 'οδηγός', 'δεσποινίς', 'ούτε', 'έλα',
+    'κατάστημα', 'τζιν', 'διάλογος', 'λέξη', 'ερώτηση', 'απάντηση',
+    'εβδομάδα', 'Δευτέρα', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'μεσημέρι', 'απόγευμα', 'βράδυ',
+    'δουλειά', 'τάβλι', 'έργο', 'σε', 'για',
+  ]
+  const newCards = words.slice(508)
+  assert.deepEqual(newCards.map((word) => word.greek).sort(), reviewedKeys.sort())
+  assert.deepEqual(validateVocabularyData(), [])
+
+  const dictionaryPairIds = new Set(adaptWordsToTrainerPairs(words).map((pair) => pair.id))
+  for (const word of newCards) {
+    assert.ok(dictionaryPairIds.has('dictionary:' + word.greek), word.greek)
+    assert.ok(word.examples.length, word.greek)
+    assert.match(word.transliteration, /\p{Script=Cyrillic}/u)
+    for (const example of word.examples) {
+      assert.match(example.greek, /\p{Script=Greek}/u)
+      assert.match(example.transliteration, /\p{Script=Cyrillic}/u)
+      assert.match(example.russian, /\p{Script=Cyrillic}/u)
+    }
+  }
+
+  const byWord = new Map(words.map((word) => [word.greek, word]))
+  for (const weekday of ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή']) {
+    assert.deepEqual(byWord.get(weekday)?.partOfSpeech, ['noun'], weekday)
+  }
+  assert.deepEqual(byWord.get('σε')?.partOfSpeech, ['preposition', 'pronoun'])
+  assert.ok(byWord.get('σε')?.examples.some((example) => example.greek === 'Σε περιμένω έξω.'))
+  assert.ok(byWord.get('πηγαίνω')?.examples.some((example) => example.greek.startsWith('Πάμε ')))
+  assert.ok(byWord.get('μέρα')?.examples.some((example) => example.greek.includes(' ημέρα ')))
+  for (const alternative of ['πάω', 'ημέρα', 'πάνω', 'σούπερ-μάρκετ', 'τηγανητή', ...Object.values(p73PresentAlternatives).map(([lemma]) => lemma)]) {
+    assert.ok(!byWord.has(alternative), alternative)
+  }
+})
+
+test('P73/W34 preserves the 34 previous verb keys and matches reviewed paradigms in all four rows', () => {
+  const priorLemmas = verbs.slice(0, 34).map((verb) => verb.lemma).sort()
+  assert.equal(createHash('sha256').update(priorLemmas.join('\n')).digest('hex'), '05f63a3de109904e7bf051ed2b87761a863362b67a32b54e423d1b72c5c00e7d')
+  assert.deepEqual(validateVerbData(), [])
+  assert.deepEqual(verbs.slice(34).map((verb) => verb.lemma).sort(), Object.keys(p73VerbReference).sort())
+
+  for (const [lemma, [present, aorist, perfective]] of Object.entries(p73VerbReference)) {
+    const verb = verbs.find((entry) => entry.lemma === lemma)
+    assert.ok(verb, lemma)
+    assert.equal(verb.pastLabel, 'Прошедшее (аорист)', lemma)
+    assert.deepEqual(verb.forms.present, present.split(' '), lemma)
+    assert.deepEqual(verb.forms.past, aorist.split(' '), lemma)
+    assert.deepEqual(verb.future.map(({ aspect, forms }) => [aspect, forms]), [
+      ['continuous', present.split(' ').map((form) => 'θα ' + form)],
+      ['simple', perfective.split(' ').map((form) => 'θα ' + form)],
+    ], lemma)
+    assert.deepEqual(words.find((word) => word.greek === lemma)?.partOfSpeech, ['verb'], lemma)
+    for (const variant of p73PresentAlternatives[lemma] ?? []) {
+      assert.ok(verb.note?.match(new RegExp('(?:^|[^\\p{L}])' + variant + '(?=$|[^\\p{L}])', 'u')), variant)
+    }
+  }
+  assert.match(verbs.find((verb) => verb.lemma === 'κατεβαίνω')?.note ?? '', /θα κατεβώ/u)
+  assert.match(verbs.find((verb) => verb.lemma === 'πηγαίνω')?.note ?? '', /πάω, πας, πάει, πάμε, πάτε, πάνε \(или παν\)/u)
+  assert.ok(!verbs.some((verb) => verb.lemma === 'πάω' || verb.lemma === 'έλα'))
 })
