@@ -191,7 +191,7 @@ const wordList: Omit<WordCard, 'examples' | 'partOfSpeech'>[] = [
   { greek: 'Αμερικανίδα', russian: 'американка', transliteration: 'амэрикани́за', category: 'Люди' },
   { greek: 'Γάλλος', russian: 'француз', transliteration: 'га́лос', category: 'Люди' },
   { greek: 'Γαλλίδα', russian: 'француженка', transliteration: 'гали́за', category: 'Люди' },
-  { greek: 'μέρα', russian: 'день', transliteration: 'мэ́ра', category: 'Время' },
+  { greek: 'μέρα', russian: 'день (также ημέρα)', transliteration: 'мэ́ра', category: 'Время' },
   { greek: 'Σάββατο', russian: 'суббота', transliteration: 'са́вато', category: 'Дни недели' },
   { greek: 'ποτήρι', russian: 'стакан / бокал', transliteration: 'поти́ри', category: 'Предметы' },
   { greek: 'πιάτο', russian: 'тарелка / блюдо', transliteration: 'пья́то', category: 'Предметы' },
@@ -259,7 +259,7 @@ const wordList: Omit<WordCard, 'examples' | 'partOfSpeech'>[] = [
   { greek: 'αργώ', russian: 'опаздывать / задерживаться', transliteration: 'арго́', category: 'Глаголы' },
   { greek: 'λέω', russian: 'говорить / сказать', transliteration: 'лэ́о', category: 'Глаголы' },
   { greek: 'μιλάω', russian: 'говорить', transliteration: 'мила́о', category: 'Глаголы' },
-  { greek: 'πηγαίνω', russian: 'идти / ехать', transliteration: 'пийэ́но', category: 'Глаголы' },
+  { greek: 'πηγαίνω', russian: 'идти / ехать (в настоящем также πάω)', transliteration: 'пийэ́но', category: 'Глаголы' },
   { greek: 'μου αρέσει', russian: 'мне нравится', transliteration: 'му арэ́си', category: 'Выражения' },
   { greek: 'μου αρέσουν', russian: 'мне нравятся', transliteration: 'му арэ́сун', category: 'Выражения' },
   { greek: 'έτσι κι έτσι', russian: 'так себе', transliteration: 'э́ци ки э́ци', category: 'Общение' },
@@ -841,7 +841,10 @@ const examplesByWord: Record<string, WordExample[]> = {
   'Αμερικανίδα': [{ greek: 'Η Άννα είναι Αμερικανίδα.', transliteration: 'и а́на и́нэ амэрикани́за', russian: 'Анна — американка.' }],
   'Γάλλος': [{ greek: 'Ο Νίκος είναι Γάλλος.', transliteration: 'о ни́кос и́нэ га́лос', russian: 'Никос — француз.' }],
   'Γαλλίδα': [{ greek: 'Η Μαρία είναι Γαλλίδα.', transliteration: 'и мари́а и́нэ гали́за', russian: 'Мария — француженка.' }],
-  'μέρα': [{ greek: 'Η μέρα είναι καλή.', transliteration: 'и мэ́ра и́нэ кали́', russian: 'День хороший.' }],
+  'μέρα': [
+    { greek: 'Η μέρα είναι καλή.', transliteration: 'и мэ́ра и́нэ кали́', russian: 'День хороший.' },
+    { greek: 'Την πρώτη ημέρα μένουμε στο ξενοδοχείο.', transliteration: 'тин про́ти имэ́ра мэ́нумэ сто ксэнозохи́о', russian: 'В первый день мы остаёмся в гостинице.' },
+  ],
   'Σάββατο': [{ greek: 'Το Σάββατο είμαι εδώ.', transliteration: 'то са́вато и́мэ эзо́', russian: 'В субботу я здесь.' }],
   'ποτήρι': [{ greek: 'Το ποτήρι είναι εδώ.', transliteration: 'то поти́ри и́нэ эзо́', russian: 'Стакан здесь.' }],
   'πιάτο': [{ greek: 'Το πιάτο είναι εδώ.', transliteration: 'то пья́то и́нэ эзо́', russian: 'Тарелка здесь.' }],
@@ -909,7 +912,10 @@ const examplesByWord: Record<string, WordExample[]> = {
   'αργώ': [{ greek: 'Άργησα!', transliteration: 'а́рйиса', russian: 'Я опоздал(а)!' }],
   'λέω': [{ greek: 'Πώς σε λένε;', transliteration: 'по́с сэ лэ́нэ?', russian: 'Как тебя зовут?' }],
   'μιλάω': [{ greek: 'Μιλάω ελληνικά.', transliteration: 'мила́о элиника́', russian: 'Я говорю по-гречески.' }],
-  'πηγαίνω': [{ greek: 'Πηγαίνω στην Αθήνα.', transliteration: 'пийэ́но стин аси́на', russian: 'Я еду в Афины.' }],
+  'πηγαίνω': [
+    { greek: 'Πηγαίνω στην Αθήνα.', transliteration: 'пийэ́но стин аси́на', russian: 'Я еду в Афины.' },
+    { greek: 'Πάμε με το λεωφορείο στο κέντρο.', transliteration: 'па́мэ мэ то лэофори́о сто кэ́ндро', russian: 'Мы едем на автобусе в центр.' },
+  ],
   'μου αρέσει': [{ greek: 'Μου αρέσει η μουσική.', transliteration: 'му арэ́си и мусики́', russian: 'Мне нравится музыка.' }],
   'μου αρέσουν': [{ greek: 'Μου αρέσουν τα βιβλία.', transliteration: 'му арэ́сун та вивли́а', russian: 'Мне нравятся книги.' }],
   'έτσι κι έτσι': [{ greek: 'Πώς είσαι; Έτσι κι έτσι.', transliteration: 'по́с и́сэ? э́ци ки э́ци.', russian: 'Как ты? Так себе.' }],
@@ -1131,7 +1137,7 @@ const internationalWords: WordCard[] = [
   { greek: 'κρέμα', russian: 'крем (например, для кожи); также кремовый десерт', transliteration: 'крэ́ма', category: 'Покупки', partOfSpeech: ['noun'], examples: [{ greek: 'Αγοράζω σαμπουάν και κρέμα.', transliteration: 'агора́зо самбуа́н кэ крэ́ма', russian: 'Я покупаю шампунь и крем.' }] },
   { greek: 'αλφάβητο', russian: 'алфавит', transliteration: 'алфа́вито', category: 'Учёба', partOfSpeech: ['noun'], examples: [{ greek: 'Το ελληνικό αλφάβητο είναι εύκολο.', transliteration: 'то элинико́ алфа́вито и́нэ э́фколо', russian: 'Греческий алфавит лёгкий.' }] },
   { greek: 'φόρεμα', russian: 'платье', transliteration: 'фо́рэма', category: 'Одежда', partOfSpeech: ['noun'], examples: [{ greek: 'Το φόρεμα είναι ωραίο.', transliteration: 'то фо́рэма и́нэ орэ́о', russian: 'Платье красивое.' }] },
-  { greek: 'Τρίτη', russian: 'вторник', transliteration: 'три́ти', category: 'Время', partOfSpeech: ['noun'], examples: [{ greek: 'Την Τρίτη δουλεύω.', transliteration: 'тин три́ти зулэ́во', russian: 'Во вторник я работаю.' }] },
+  { greek: 'Τρίτη', russian: 'вторник', transliteration: 'три́ти', category: 'Дни недели', partOfSpeech: ['noun'], examples: [{ greek: 'Την Τρίτη δουλεύω.', transliteration: 'тин три́ти зулэ́во', russian: 'Во вторник я работаю.' }] },
   { greek: 'αγόρι', russian: 'мальчик', transliteration: 'аго́ри', category: 'Люди', partOfSpeech: ['noun'], examples: [{ greek: 'Το αγόρι παίζει με τον σκύλο.', transliteration: 'то аго́ри пэ́зи мэ тон ски́ло', russian: 'Мальчик играет с собакой.' }] },
   { greek: 'δασκάλα', russian: 'учительница (обычно в начальной школе)', transliteration: 'заска́ла', category: 'Профессии', partOfSpeech: ['noun'], examples: [{ greek: 'Η δασκάλα μιλάει ελληνικά.', transliteration: 'и заска́ла мила́и элиника́', russian: 'Учительница говорит по-гречески.' }] },
   { greek: 'Γερμανίδα', russian: 'немка', transliteration: 'йэрмани́за', category: 'Национальности', partOfSpeech: ['noun'], examples: [{ greek: 'Η Γερμανίδα είναι φίλη μου.', transliteration: 'и йэрмани́за и́нэ фи́ли му', russian: 'Немка — моя подруга.' }] },
@@ -1445,11 +1451,428 @@ const textbookP65WorkbookP31Words: WordCard[] = [
   },
 ]
 
+const textbookP73WorkbookP34Words: WordCard[] = [
+  {
+    greek: 'κατεβαίνω', russian: 'спускаться', transliteration: 'катэвэ́но',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Κατεβαίνω από τον τρίτο όροφο με τα πόδια.', transliteration: 'катэвэ́но апо́ тон три́то о́рофо мэ та по́зья', russian: 'Я спускаюсь с третьего этажа пешком.' }],
+  },
+  {
+    greek: 'βγαίνω', russian: 'выходить', transliteration: 'вйэ́но',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Βγαίνω από το σπίτι στις οκτώ.', transliteration: 'вйэ́но апо́ то спи́ти стис окто́', russian: 'Я выхожу из дома в восемь.' }],
+  },
+  {
+    greek: 'μπαίνω', russian: 'входить / заходить', transliteration: 'бэ́но',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Μπαίνουμε στο ξενοδοχείο από εδώ.', transliteration: 'бэ́нумэ сто ксэнозохи́о апо́ эзо́', russian: 'Мы заходим в гостиницу отсюда.' }],
+  },
+  {
+    greek: 'στρίβω', russian: 'поворачивать', transliteration: 'стри́во',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Στρίβουμε αριστερά μετά την πλατεία.', transliteration: 'стри́вумэ аристэра́ мэта́ тин плати́а', russian: 'Мы поворачиваем налево после площади.' }],
+  },
+  {
+    greek: 'γκρινιάζω', russian: 'ворчать / брюзжать', transliteration: 'гринья́зо',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Γιατί γκρινιάζεις πάλι;', transliteration: 'яти́ гринья́зис па́ли?', russian: 'Почему ты опять ворчишь?' }],
+  },
+  {
+    greek: 'επάνω', russian: 'наверху / вверх; на (также πάνω)', transliteration: 'эпа́но',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [
+      { greek: 'Το γραφείο είναι επάνω, στον δεύτερο όροφο.', transliteration: 'то графи́о и́нэ эпа́но, стон зэ́фтэро о́рофо', russian: 'Офис наверху, на втором этаже.' },
+      { greek: 'Τα κλειδιά είναι πάνω στο τραπέζι.', transliteration: 'та клизья́ и́нэ па́но сто трапэ́зи', russian: 'Ключи на столе.' },
+    ],
+  },
+  {
+    greek: 'κάτω', russian: 'внизу / вниз; под', transliteration: 'ка́то',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [
+      { greek: 'Το κλειδί είναι κάτω από την καρέκλα.', transliteration: 'то клизи́ и́нэ ка́то апо́ тин карэ́кла', russian: 'Ключ под стулом.' },
+      { greek: 'Κατεβαίνω κάτω με το ασανσέρ.', transliteration: 'катэвэ́но ка́то мэ то асансэ́р', russian: 'Я спускаюсь вниз на лифте.' },
+    ],
+  },
+  {
+    greek: 'μέσα', russian: 'внутри / внутрь', transliteration: 'мэ́са',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Έλα μέσα, κάνει κρύο έξω.', transliteration: 'э́ла мэ́са, ка́ни кри́о э́ксо', russian: 'Заходи, на улице холодно.' }],
+  },
+  {
+    greek: 'έξω', russian: 'снаружи / наружу; на улице', transliteration: 'э́ксо',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Τα παιδιά παίζουν έξω.', transliteration: 'та пэзья́ пэ́зун э́ксо', russian: 'Дети играют на улице.' }],
+  },
+  {
+    greek: 'μακριά', russian: 'далеко', transliteration: 'макриа́',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Το μουσείο είναι μακριά από το κέντρο.', transliteration: 'то муси́о и́нэ макриа́ апо́ то кэ́ндро', russian: 'Музей далеко от центра.' }],
+  },
+  {
+    greek: 'παρακάτω', russian: 'дальше / ниже', transliteration: 'парака́то',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Η στάση είναι λίγο παρακάτω.', transliteration: 'и ста́си и́нэ ли́го парака́то', russian: 'Остановка чуть дальше.' }],
+  },
+  {
+    greek: 'ευθεία', russian: 'прямо (о направлении)', transliteration: 'эфси́а',
+    category: 'В дороге', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Πηγαίνετε ευθεία μέχρι την πλατεία.', transliteration: 'пийэ́нэтэ эфси́а мэ́хри тин плати́а', russian: 'Идите прямо до площади.' }],
+  },
+  {
+    greek: 'απέναντι', russian: 'напротив', transliteration: 'апэ́нанди',
+    category: 'Место', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Το φαρμακείο είναι απέναντι από το σχολείο.', transliteration: 'то фармаки́о и́нэ апэ́нанди апо́ то схоли́о', russian: 'Аптека находится напротив школы.' }],
+  },
+  {
+    greek: 'τετράγωνο', russian: 'городской квартал / квадрат', transliteration: 'тэтра́гоно',
+    category: 'Город', partOfSpeech: ['noun'],
+    examples: [
+      { greek: 'Η πλατεία είναι δύο τετράγωνα παρακάτω.', transliteration: 'и плати́а и́нэ зи́о тэтра́гона парака́то', russian: 'Площадь на два квартала дальше.' },
+      { greek: 'Βλέπω ένα μαύρο τετράγωνο.', transliteration: 'влэ́по э́на ма́вро тэтра́гоно', russian: 'Я вижу чёрный квадрат.' },
+    ],
+  },
+  {
+    greek: 'γωνία', russian: 'угол', transliteration: 'гони́а',
+    category: 'Город', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Στη γωνία έχει μια στάση.', transliteration: 'сти гони́а э́хи мья ста́си', russian: 'На углу есть остановка.' }],
+  },
+  {
+    greek: 'οδός', russian: 'улица (особенно в адресах)', transliteration: 'озо́с',
+    category: 'Город', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το ξενοδοχείο είναι στην οδό Ερμού.', transliteration: 'то ксэнозохи́о и́нэ стин озо́ эрму́', russian: 'Гостиница находится на улице Эрму.' }],
+  },
+  {
+    greek: 'λεωφόρος', russian: 'проспект / широкая улица', transliteration: 'лэофо́рос',
+    category: 'Город', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το λεωφορείο περνάει από τη λεωφόρο.', transliteration: 'то лэофори́о пэрна́и апо́ ти лэофо́ро', russian: 'Автобус проезжает по проспекту.' }],
+  },
+  {
+    greek: 'γρήγορα', russian: 'быстро', transliteration: 'гри́гора',
+    category: 'Полезные слова', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Μιλάς πολύ γρήγορα.', transliteration: 'мила́с поли́ гри́гора', russian: 'Ты говоришь очень быстро.' }],
+  },
+  {
+    greek: 'όμως', russian: 'однако / но', transliteration: 'о́мос',
+    category: 'Полезные слова', partOfSpeech: ['conjunction'],
+    examples: [{ greek: 'Το σπίτι είναι μικρό, έχει όμως μπαλκόνι.', transliteration: 'то спи́ти и́нэ микро́, э́хи о́мос балко́ни', russian: 'Дом маленький, но в нём есть балкон.' }],
+  },
+  {
+    greek: 'ακριβώς', russian: 'точно / именно', transliteration: 'акриво́с',
+    category: 'Полезные слова', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Η στάση είναι ακριβώς μπροστά στο μουσείο.', transliteration: 'и ста́си и́нэ акриво́с броста́ сто муси́о', russian: 'Остановка прямо перед музеем.' }],
+  },
+  {
+    greek: 'πάλι', russian: 'снова / опять', transliteration: 'па́ли',
+    category: 'Полезные слова', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Πάλι βρέχει.', transliteration: 'па́ли врэ́хи', russian: 'Опять идёт дождь.' }],
+  },
+  {
+    greek: 'ευχαριστημένος', russian: 'довольный (мужской род)', transliteration: 'эфхаристимэ́нос',
+    category: 'Прилагательные', partOfSpeech: ['adjective'],
+    examples: [{ greek: 'Είμαι ευχαριστημένη με το δωμάτιο.', transliteration: 'и́мэ эфхаристимэ́ни мэ то зома́тио', russian: 'Я довольна номером.' }],
+  },
+  {
+    greek: 'σούπερ μάρκετ', russian: 'супермаркет', transliteration: 'су́пэр ма́ркэт',
+    category: 'Город', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Αγοράζω γάλα στο σούπερ μάρκετ.', transliteration: 'агора́зо га́ла сто су́пэр ма́ркэт', russian: 'Я покупаю молоко в супермаркете.' }],
+  },
+  {
+    greek: 'ωχ', russian: 'ой / ох (междометие)', transliteration: 'ох',
+    category: 'Выражения', partOfSpeech: ['expression'],
+    examples: [{ greek: 'Ωχ, το λεωφορείο φεύγει!', transliteration: 'ох, то лэофори́о фэ́вйи!', russian: 'Ой, автобус уезжает!' }],
+  },
+  {
+    greek: 'κύριος', russian: 'господин (перед именем); мужчина', transliteration: 'ки́риос',
+    category: 'Люди', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Ο κύριος Νίκος δουλεύει εδώ.', transliteration: 'о ки́риос ни́кос зулэ́ви эзо́', russian: 'Господин Никос работает здесь.' }],
+  },
+  {
+    greek: 'πρόταση', russian: 'предложение (фраза; также идея, предложение что-то сделать)', transliteration: 'про́таси',
+    category: 'Учёба', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Γράφω μια πρόταση στα ελληνικά.', transliteration: 'гра́фо мья про́таси ста элиника́', russian: 'Я пишу предложение по-гречески.' }],
+  },
+  {
+    greek: 'πρόσωπο', russian: 'лицо; действующее лицо (в тексте)', transliteration: 'про́сопо',
+    category: 'Люди', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Βλέπω το πρόσωπό της στη φωτογραφία.', transliteration: 'влэ́по то про́сопо́ тис сти фотографи́а', russian: 'Я вижу её лицо на фотографии.' }],
+  },
+  {
+    greek: 'Ποιον θέλετε, παρακαλώ;', russian: 'Кого вы хотите видеть? (вежливо)', transliteration: 'пьон сэ́лэтэ, паракало́?',
+    category: 'Выражения', partOfSpeech: ['expression'],
+    examples: [{ greek: 'Ποιον θέλετε, παρακαλώ; — Τον κύριο Νίκο.', transliteration: 'пьон сэ́лэтэ, паракало́? — тон ки́рио ни́ко', russian: 'Кого вы хотите видеть? — Господина Никоса.' }],
+  },
+  {
+    greek: 'σακάκι', russian: 'пиджак', transliteration: 'сака́ки',
+    category: 'Одежда', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Ο Νίκος φοράει ένα μαύρο σακάκι.', transliteration: 'о ни́кос фора́и э́на ма́вро сака́ки', russian: 'На Никосе чёрный пиджак.' }],
+  },
+  {
+    greek: 'καπέλο', russian: 'шляпа / головной убор', transliteration: 'капэ́ло',
+    category: 'Одежда', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Θέλω ένα καπέλο για την παραλία.', transliteration: 'сэ́ло э́на капэ́ло я тин парали́а', russian: 'Я хочу шляпу для пляжа.' }],
+  },
+  {
+    greek: 'ροζ', russian: 'розовый (цвет, форма не меняется)', transliteration: 'роз',
+    category: 'Цвета', partOfSpeech: ['adjective'],
+    examples: [{ greek: 'Η ροζ φούστα είναι δίπλα στο ροζ καπέλο.', transliteration: 'и роз фу́ста и́нэ зи́пла сто роз капэ́ло', russian: 'Розовая юбка рядом с розовой шляпой.' }],
+  },
+  {
+    greek: 'πάπια', russian: 'утка', transliteration: 'па́пья',
+    category: 'Животные', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Η πάπια είναι στο νερό.', transliteration: 'и па́пья и́нэ сто нэро́', russian: 'Утка в воде.' }],
+  },
+  {
+    greek: 'παπί', russian: 'утёнок', transliteration: 'папи́',
+    category: 'Животные', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το παπί είναι κοντά στην πάπια.', transliteration: 'то папи́ и́нэ конда́ стин па́пья', russian: 'Утёнок рядом с уткой.' }],
+  },
+  {
+    greek: 'πέτρα', russian: 'камень', transliteration: 'пэ́тра',
+    category: 'Природа', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Κάθομαι σε μια μεγάλη πέτρα.', transliteration: 'ка́сомэ сэ мья мэга́ли пэ́тра', russian: 'Я сижу на большом камне.' }],
+  },
+  {
+    greek: 'πεινάω', russian: 'хотеть есть / быть голодным', transliteration: 'пина́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Πεινάω, θα φάω λίγο ψωμί.', transliteration: 'пина́о, са фа́о ли́го псоми́', russian: 'Я хочу есть, поем немного хлеба.' }],
+  },
+  {
+    greek: 'αγαπάω', russian: 'любить', transliteration: 'агапа́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Αγαπάω πολύ τη γιαγιά μου.', transliteration: 'агапа́о поли́ ти яйа́ му', russian: 'Я очень люблю свою бабушку.' }],
+  },
+  {
+    greek: 'μαζί', russian: 'вместе', transliteration: 'мази́',
+    category: 'Полезные слова', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Πάμε μαζί στο θέατρο;', transliteration: 'па́мэ мази́ сто сэ́атро?', russian: 'Пойдём вместе в театр?' }],
+  },
+  {
+    greek: 'πάρα πολύ', russian: 'очень сильно / очень много', transliteration: 'па́ра поли́',
+    category: 'Выражения', partOfSpeech: ['expression'],
+    examples: [{ greek: 'Μου αρέσει πάρα πολύ η θάλασσα.', transliteration: 'му арэ́си па́ра поли́ и са́ласа', russian: 'Мне очень нравится море.' }],
+  },
+  {
+    greek: 'φέτα', russian: 'фета (сыр); ломтик', transliteration: 'фэ́та',
+    category: 'Еда и напитки', partOfSpeech: ['noun'],
+    examples: [
+      { greek: 'Η σαλάτα έχει φέτα και ντομάτα.', transliteration: 'и сала́та э́хи фэ́та кэ дома́та', russian: 'В салате есть фета и помидоры.' },
+      { greek: 'Θέλω μια φέτα ψωμί.', transliteration: 'сэ́ло мья фэ́та псоми́', russian: 'Я хочу ломтик хлеба.' },
+    ],
+  },
+  {
+    greek: 'ντοματοσαλάτα', russian: 'салат из помидоров', transliteration: 'доматосала́та',
+    category: 'Еда и напитки', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Θα πάρω μια ντοματοσαλάτα.', transliteration: 'са па́ро мья доматосала́та', russian: 'Я возьму салат из помидоров.' }],
+  },
+  {
+    greek: 'λουλούδι', russian: 'цветок', transliteration: 'лулу́зи',
+    category: 'Природа', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Σου δίνω ένα λουλούδι.', transliteration: 'су зи́но э́на лулу́зи', russian: 'Я дарю тебе цветок.' }],
+  },
+  {
+    greek: 'τηγανητός', russian: 'жареный (на сковороде или во фритюре)', transliteration: 'тиганито́с',
+    category: 'Еда и напитки', partOfSpeech: ['adjective'],
+    examples: [{ greek: 'Θέλω πατάτες τηγανητές με το κοτόπουλο.', transliteration: 'сэ́ло пата́тэс тиганитэ́с мэ то кото́пуло', russian: 'Я хочу жареную картошку к курице.' }],
+  },
+  {
+    greek: 'χωριάτικος', russian: 'деревенский / сельский', transliteration: 'хорья́тикос',
+    category: 'Еда и напитки', partOfSpeech: ['adjective'],
+    examples: [{ greek: 'Παίρνουμε μια χωριάτικη σαλάτα.', transliteration: 'пэ́рнумэ мья хорья́тики сала́та', russian: 'Мы берём греческий салат.' }],
+  },
+  {
+    greek: 'αρνάκι', russian: 'ягнёнок; в меню — мясо ягнёнка', transliteration: 'арна́ки',
+    category: 'Еда и напитки', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Σήμερα έχουμε αρνάκι με πατάτες.', transliteration: 'си́мэра э́хумэ арна́ки мэ пата́тэс', russian: 'Сегодня у нас ягнятина с картофелем.' }],
+  },
+  {
+    greek: 'φρικασέ', russian: 'фрикасе (греческое блюдо из мяса с зеленью)', transliteration: 'фрикасэ́',
+    category: 'Еда и напитки', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Στην ταβέρνα έχουν αρνάκι φρικασέ.', transliteration: 'стин тавэ́рна э́хун арна́ки фрикасэ́', russian: 'В таверне есть фрикасе из ягнятины.' }],
+  },
+  {
+    greek: 'μοσχάρι', russian: 'телёнок; в меню — телятина / говядина', transliteration: 'мосха́ри',
+    category: 'Еда и напитки', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Θέλεις μοσχάρι ή κοτόπουλο;', transliteration: 'сэ́лис мосха́ри и кото́пуло?', russian: 'Хочешь говядину или курицу?' }],
+  },
+  {
+    greek: 'κοκκινιστός', russian: 'приготовленный в томатном соусе', transliteration: 'кокинисто́с',
+    category: 'Еда и напитки', partOfSpeech: ['adjective'],
+    examples: [{ greek: 'Μου αρέσει το κοκκινιστό μοσχάρι.', transliteration: 'му арэ́си то кокинисто́ мосха́ри', russian: 'Мне нравится говядина в томатном соусе.' }],
+  },
+  {
+    greek: 'λουκάνικο', russian: 'колбаска / колбаса', transliteration: 'лука́нико',
+    category: 'Еда и напитки', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Τρώω ένα λουκάνικο με ψωμί.', transliteration: 'тро́о э́на лука́нико мэ псоми́', russian: 'Я ем колбаску с хлебом.' }],
+  },
+  {
+    greek: 'διψάω', russian: 'хотеть пить / испытывать жажду', transliteration: 'зипса́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Διψάω. Έχεις λίγο νερό;', transliteration: 'зипса́о. э́хис ли́го нэро́?', russian: 'Я хочу пить. У тебя есть немного воды?' }],
+  },
+  {
+    greek: 'σταματάω', russian: 'останавливаться / останавливать', transliteration: 'стамата́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Αυτό το λεωφορείο σταματάει στο μουσείο.', transliteration: 'афто́ то лэофори́о стамата́и сто муси́о', russian: 'Этот автобус останавливается у музея.' }],
+  },
+  {
+    greek: 'τραγουδάω', russian: 'петь', transliteration: 'трагуза́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Τα παιδιά τραγουδάνε στα ελληνικά.', transliteration: 'та пэзья́ трагуза́нэ ста элиника́', russian: 'Дети поют по-гречески.' }],
+  },
+  {
+    greek: 'μετρό', russian: 'метро', transliteration: 'мэтро́',
+    category: 'Транспорт', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Πάμε στο κέντρο με το μετρό.', transliteration: 'па́мэ сто кэ́ндро мэ то мэтро́', russian: 'Мы едем в центр на метро.' }],
+  },
+  {
+    greek: 'ωραία', russian: 'хорошо / красиво (о том, как что-то делают)', transliteration: 'орэ́а',
+    category: 'Полезные слова', partOfSpeech: ['adverb'],
+    examples: [{ greek: 'Η αδελφή μου τραγουδάει πολύ ωραία.', transliteration: 'и азэлфи́ му трагуза́и поли́ орэ́а', russian: 'Моя сестра очень хорошо поёт.' }],
+  },
+  {
+    greek: 'οδηγός', russian: 'водитель; также гид / путеводитель', transliteration: 'озиго́с',
+    category: 'Транспорт', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Ο οδηγός του λεωφορείου μας περιμένει.', transliteration: 'о озиго́с ту лэофори́у мас пэримэ́ни', russian: 'Водитель автобуса ждёт нас.' }],
+  },
+  {
+    greek: 'φεύγω', russian: 'уходить / уезжать / отправляться', transliteration: 'фэ́вго',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Το τρένο φεύγει στις εννιά.', transliteration: 'то трэ́но фэ́вйи стис энья́', russian: 'Поезд отправляется в девять.' }],
+  },
+  {
+    greek: 'δεσποινίς', russian: 'мисс / барышня (традиционное обращение, часто устаревшее)', transliteration: 'зэспини́с',
+    category: 'Общение', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Δεσποινίς, το βιβλίο σας!', transliteration: 'зэспини́с, то вивли́о сас!', russian: 'Мисс, ваша книга!' }],
+  },
+  {
+    greek: 'ούτε', russian: 'ни; в «ούτε … ούτε» — «ни … ни»', transliteration: 'у́тэ',
+    category: 'Полезные слова', partOfSpeech: ['conjunction'],
+    examples: [{ greek: 'Δεν πίνω ούτε καφέ ούτε τσάι.', transliteration: 'зэн пи́но у́тэ кафэ́ у́тэ цай', russian: 'Я не пью ни кофе, ни чай.' }],
+  },
+  {
+    greek: 'έλα', russian: 'иди сюда / подойди (от έρχομαι); давай (разг.)', transliteration: 'э́ла',
+    category: 'Выражения', partOfSpeech: ['expression'],
+    examples: [{ greek: 'Έλα, Μαρία, το φαγητό είναι έτοιμο!', transliteration: 'э́ла, мари́а, то файито́ и́нэ э́тимо!', russian: 'Иди сюда, Мария, еда готова!' }],
+  },
+  {
+    greek: 'κατάστημα', russian: 'магазин / торговая точка', transliteration: 'ката́стима',
+    category: 'Покупки', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το κατάστημα πουλάει παπούτσια.', transliteration: 'то ката́стима пула́и папу́цья', russian: 'В магазине продают обувь.' }],
+  },
+  {
+    greek: 'τζιν', russian: 'джинсы / джинсовая ткань; джинсовый (несклоняемое)', transliteration: 'дзин',
+    category: 'Одежда', partOfSpeech: ['noun', 'adjective'],
+    examples: [{ greek: 'Ψάχνω ένα μαύρο τζιν παντελόνι.', transliteration: 'пса́хно э́на ма́вро дзин пандэло́ни', russian: 'Я ищу чёрные джинсы.' }],
+  },
+  {
+    greek: 'διάλογος', russian: 'диалог', transliteration: 'зья́логос',
+    category: 'Учёба', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Ο διάλογος έχει δύο ερωτήσεις.', transliteration: 'о зья́логос э́хи зи́о эроти́сис', russian: 'В диалоге два вопроса.' }],
+  },
+  {
+    greek: 'λέξη', russian: 'слово', transliteration: 'лэ́кси',
+    category: 'Учёба', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Τι σημαίνει αυτή η λέξη;', transliteration: 'ти симэ́ни афти́ и лэ́кси?', russian: 'Что значит это слово?' }],
+  },
+  {
+    greek: 'μελετάω', russian: 'изучать / заниматься (учебным материалом)', transliteration: 'мэлэта́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Μελετάω τα ελληνικά κάθε βράδυ.', transliteration: 'мэлэта́о та элиника́ ка́сэ вра́зи', russian: 'Я занимаюсь греческим каждый вечер.' }],
+  },
+  {
+    greek: 'περνάω', russian: 'проходить / проезжать', transliteration: 'пэрна́о',
+    category: 'Глаголы', partOfSpeech: ['verb'],
+    examples: [{ greek: 'Το λεωφορείο περνάει από την πλατεία.', transliteration: 'то лэофори́о пэрна́и апо́ тин плати́а', russian: 'Автобус проезжает через площадь.' }],
+  },
+  {
+    greek: 'ερώτηση', russian: 'вопрос', transliteration: 'эро́тиси',
+    category: 'Учёба', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Έχω μια ερώτηση για το μάθημα.', transliteration: 'э́хо мья эро́тиси я то ма́сима', russian: 'У меня есть вопрос об уроке.' }],
+  },
+  {
+    greek: 'απάντηση', russian: 'ответ', transliteration: 'апа́ндиси',
+    category: 'Учёба', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Γράφω την απάντηση στο τετράδιο.', transliteration: 'гра́фо тин апа́ндиси сто тэтра́зио', russian: 'Я пишу ответ в тетради.' }],
+  },
+  {
+    greek: 'εβδομάδα', russian: 'неделя', transliteration: 'эвзома́за',
+    category: 'Время', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Πάω στο μουσείο αυτή την εβδομάδα.', transliteration: 'па́о сто муси́о афти́ тин эвзома́за', russian: 'Я иду в музей на этой неделе.' }],
+  },
+  {
+    greek: 'Δευτέρα', russian: 'понедельник', transliteration: 'зэфтэ́ра',
+    category: 'Дни недели', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Τη Δευτέρα έχω μάθημα ελληνικών.', transliteration: 'ти зэфтэ́ра э́хо ма́сима элинико́н', russian: 'В понедельник у меня урок греческого.' }],
+  },
+  {
+    greek: 'Τετάρτη', russian: 'среда', transliteration: 'тэта́рти',
+    category: 'Дни недели', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Την Τετάρτη δουλεύω στο σπίτι.', transliteration: 'тин тэта́рти зулэ́во сто спи́ти', russian: 'В среду я работаю дома.' }],
+  },
+  {
+    greek: 'Πέμπτη', russian: 'четверг', transliteration: 'пэ́мпти',
+    category: 'Дни недели', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Την Πέμπτη τρώμε με τους φίλους μας.', transliteration: 'тин пэ́мпти тро́мэ мэ тус фи́лус мас', russian: 'В четверг мы едим с нашими друзьями.' }],
+  },
+  {
+    greek: 'Παρασκευή', russian: 'пятница', transliteration: 'параскэви́',
+    category: 'Дни недели', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Την Παρασκευή πάμε στο σινεμά.', transliteration: 'тин параскэви́ па́мэ сто синэма́', russian: 'В пятницу мы идём в кино.' }],
+  },
+  {
+    greek: 'μεσημέρι', russian: 'полдень / середина дня', transliteration: 'мэсимэ́ри',
+    category: 'Время', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το μεσημέρι τρώμε στο σπίτι.', transliteration: 'то мэсимэ́ри тро́мэ сто спи́ти', russian: 'В полдень мы едим дома.' }],
+  },
+  {
+    greek: 'απόγευμα', russian: 'время после полудня / вторая половина дня', transliteration: 'апо́йэвма',
+    category: 'Время', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το απόγευμα πίνω τσάι.', transliteration: 'то апо́йэвма пи́но цай', russian: 'Во второй половине дня я пью чай.' }],
+  },
+  {
+    greek: 'βράδυ', russian: 'вечер', transliteration: 'вра́зи',
+    category: 'Время', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το βράδυ διαβάζω ένα βιβλίο.', transliteration: 'то вра́зи зява́зо э́на вивли́о', russian: 'Вечером я читаю книгу.' }],
+  },
+  {
+    greek: 'δουλειά', russian: 'работа / дело', transliteration: 'зулья́',
+    category: 'Повседневная жизнь', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Μετά τη δουλειά πάω για καφέ.', transliteration: 'мэта́ ти зулья́ па́о я кафэ́', russian: 'После работы я иду выпить кофе.' }],
+  },
+  {
+    greek: 'τάβλι', russian: 'нарды', transliteration: 'та́вли',
+    category: 'Досуг', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Παίζουμε τάβλι κάθε Κυριακή.', transliteration: 'пэ́зумэ та́вли ка́сэ кирьяки́', russian: 'Мы играем в нарды каждое воскресенье.' }],
+  },
+  {
+    greek: 'έργο', russian: 'произведение; в кино — фильм', transliteration: 'э́рго',
+    category: 'Досуг', partOfSpeech: ['noun'],
+    examples: [{ greek: 'Το σινεμά παίζει ένα παλιό έργο.', transliteration: 'то синэма́ пэ́зи э́на пальо́ э́рго', russian: 'В кинотеатре показывают старый фильм.' }],
+  },
+  {
+    greek: 'σε', russian: 'в / на / к (предлог); тебя (местоимение)', transliteration: 'сэ',
+    category: 'Предлоги', partOfSpeech: ['preposition', 'pronoun'],
+    examples: [
+      { greek: 'Είμαι σε ένα μικρό ξενοδοχείο.', transliteration: 'и́мэ сэ э́на микро́ ксэнозохи́о', russian: 'Я в маленькой гостинице.' },
+      { greek: 'Πάμε σε μια ταβέρνα.', transliteration: 'па́мэ сэ мья тавэ́рна', russian: 'Мы идём в таверну.' },
+      { greek: 'Σε περιμένω έξω.', transliteration: 'сэ пэримэ́но э́ксо', russian: 'Я жду тебя снаружи.' },
+    ],
+  },
+  {
+    greek: 'για', russian: 'для / за; о / об', transliteration: 'я',
+    category: 'Предлоги', partOfSpeech: ['preposition'],
+    examples: [
+      { greek: 'Το δώρο είναι για τη μητέρα σου.', transliteration: 'то зо́ро и́нэ я ти митэ́ра су', russian: 'Подарок для твоей мамы.' },
+      { greek: 'Μιλάμε για το ταξίδι μας.', transliteration: 'мила́мэ я то такси́зи мас', russian: 'Мы говорим о нашей поездке.' },
+    ],
+  },
+]
+
 export const words: WordCard[] = wordList.map((word) => ({
   ...word,
   partOfSpeech: partOfSpeechByWord[word.greek],
   examples: examplesByWord[word.greek] ?? [],
-})).concat(internationalWords, textbookP65WorkbookP31Words)
+})).concat(internationalWords, textbookP65WorkbookP31Words, textbookP73WorkbookP34Words)
 
 export function validateVocabularyData(items: WordCard[] = words): string[] {
   const errors: string[] = []
