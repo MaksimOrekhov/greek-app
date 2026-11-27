@@ -588,6 +588,7 @@ test('P65/W31 adds the independently checked ανεβαίνω paradigm without r
 })
 
 test('P73/W34 preserves all 508 keys and adds reviewed vocabulary with examples to the dictionary and T5', () => {
+  assert.equal(words.length, 587)
   const priorKeys = words.slice(0, 508).map((word) => word.greek).sort()
   assert.equal(createHash('sha256').update(priorKeys.join('\n')).digest('hex'), '29b18e81dfac47ab204f247f3309d7b7462c21828a5d2841de7c50dc29ddb33d')
 
@@ -625,14 +626,29 @@ test('P73/W34 preserves all 508 keys and adds reviewed vocabulary with examples 
   }
   assert.deepEqual(byWord.get('σε')?.partOfSpeech, ['preposition', 'pronoun'])
   assert.ok(byWord.get('σε')?.examples.some((example) => example.greek === 'Σε περιμένω έξω.'))
-  assert.ok(byWord.get('πηγαίνω')?.examples.some((example) => example.greek.startsWith('Πάμε ')))
-  assert.ok(byWord.get('μέρα')?.examples.some((example) => example.greek.includes(' ημέρα ')))
+  const day = byWord.get('μέρα')
+  assert.equal(day?.russian, 'день (также ημέρα)')
+  assert.deepEqual(day.examples.find((example) => example.greek.includes(' ημέρα ')), {
+    greek: 'Την πρώτη ημέρα μένουμε στο ξενοδοχείο.',
+    transliteration: 'тин про́ти имэ́ра мэ́нумэ сто ксэнозохи́о',
+    russian: 'В первый день мы остаёмся в гостинице.',
+  })
+
+  const go = byWord.get('πηγαίνω')
+  assert.equal(go?.russian, 'идти / ехать (в настоящем также πάω)')
+  assert.deepEqual(go.examples.find((example) => example.greek.startsWith('Πάμε ')), {
+    greek: 'Πάμε με το λεωφορείο στο κέντρο.',
+    transliteration: 'па́мэ мэ то лэофори́о сто кэ́ндро',
+    russian: 'Мы едем на автобусе в центр.',
+  })
+
   for (const alternative of ['πάω', 'ημέρα', 'πάνω', 'σούπερ-μάρκετ', 'τηγανητή', ...Object.values(p73PresentAlternatives).map(([lemma]) => lemma)]) {
     assert.ok(!byWord.has(alternative), alternative)
   }
 })
 
 test('P73/W34 preserves the 34 previous verb keys and matches reviewed paradigms in all four rows', () => {
+  assert.equal(verbs.length, 47)
   const priorLemmas = verbs.slice(0, 34).map((verb) => verb.lemma).sort()
   assert.equal(createHash('sha256').update(priorLemmas.join('\n')).digest('hex'), '05f63a3de109904e7bf051ed2b87761a863362b67a32b54e423d1b72c5c00e7d')
   assert.deepEqual(validateVerbData(), [])
